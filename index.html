@@ -1,0 +1,5003 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>肯德基自助点餐系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- LeanCloud SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/leancloud-storage@4.13.2/dist/av-min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background-color: #f8f8f8;
+            color: #333;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #e31837 0%, #c8102e 100%);
+            color: white;
+            padding: 25px 0;
+            text-align: center;
+            border-radius: 0 0 15px 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .logo i {
+            color: #ffcc00;
+        }
+        
+        .header-info {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.1rem;
+        }
+        
+        .info-item i {
+            color: #ffcc00;
+        }
+        
+        .header-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 15px;
+        }
+        
+        .header-btn {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+        
+        .header-btn:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+        
+        .nav-menu {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        
+        .nav-title {
+            font-size: 1.6rem;
+            color: #e31837;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .meal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .meal-card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+            border-left: 5px solid #ffcc00;
+            display: block;
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        .meal-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .meal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .meal-name {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #e31837;
+        }
+        
+        .meal-price {
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: #e31837;
+        }
+        
+        .meal-description {
+            color: #666;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+        }
+        
+        .meal-tag {
+            display: inline-block;
+            background-color: #ffcc00;
+            color: #333;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-right: 8px;
+            margin-bottom: 5px;
+        }
+        
+        .back-btn {
+            background-color: #e31837;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+            text-decoration: none;
+            width: fit-content;
+        }
+        
+        .back-btn:hover {
+            background-color: #c8102e;
+            transform: scale(1.03);
+        }
+        
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+        }
+        
+        .menu-section {
+            flex: 3;
+            min-width: 300px;
+        }
+        
+        .cart-section {
+            flex: 1;
+            min-width: 300px;
+            background-color: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+        
+        .section-title {
+            font-size: 1.8rem;
+            color: #e31837;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #ffcc00;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-title i {
+            color: #ffcc00;
+        }
+        
+        .meal-options {
+            margin-bottom: 30px;
+        }
+        
+        .option-group {
+            margin-bottom: 15px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            border-left: 4px solid #e31837;
+        }
+        
+        .option-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #444;
+            font-size: 1.1rem;
+        }
+        
+        .option-rules {
+            font-size: 0.9rem;
+            color: #e31837;
+            margin-bottom: 10px;
+            padding: 5px 10px;
+            background-color: #ffe6e6;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        
+        .option-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .option-item {
+            background-color: #f5f5f5;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-width: 180px;
+            position: relative;
+        }
+        
+        .option-item:hover {
+            background-color: #e9e9e9;
+        }
+        
+        .option-item.selected {
+            background-color: #e31837;
+            color: white;
+            border-color: #e31837;
+        }
+        
+        .selection-counter {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: 10px;
+        }
+        
+        .counter-btn {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: none;
+            background-color: white;
+            color: #e31837;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .counter-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .counter-value {
+            font-weight: bold;
+            min-width: 20px;
+            text-align: center;
+        }
+        
+        .add-to-cart {
+            background-color: #e31837;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .add-to-cart:hover {
+            background-color: #c8102e;
+            transform: scale(1.03);
+        }
+        
+        .add-to-cart:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .cart-items {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+        
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px dashed #ddd;
+        }
+        
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+        
+        .cart-item-name {
+            flex: 2;
+            font-weight: 500;
+        }
+        
+        .cart-item-price {
+            flex: 1;
+            text-align: right;
+            font-weight: bold;
+            color: #e31837;
+        }
+        
+        .cart-item-remove {
+            background: none;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            font-size: 1.2rem;
+            margin-left: 10px;
+        }
+        
+        .cart-total {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 2px solid #eee;
+        }
+        
+        .total-price {
+            color: #e31837;
+        }
+        
+        .checkout-btn {
+            background-color: #ffcc00;
+            color: #333;
+            border: none;
+            padding: 15px;
+            border-radius: 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+        
+        .checkout-btn:hover {
+            background-color: #e6b800;
+            transform: scale(1.03);
+        }
+        
+        .checkout-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .delivery-form {
+            background-color: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .required {
+            color: #e31837;
+        }
+        
+        .form-input, .form-select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #e31837;
+            box-shadow: 0 0 0 2px rgba(227, 24, 55, 0.2);
+        }
+        
+        .order-type {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .order-type label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+            transition: all 0.3s;
+        }
+        
+        .order-type label:hover {
+            border-color: #e31837;
+        }
+        
+        .order-type input:checked + span {
+            font-weight: bold;
+            color: #e31837;
+        }
+        
+        .delivery-fields, .pickup-fields {
+            transition: all 0.3s;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .store-selection {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .store-selection .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .info-method-selector {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .method-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .method-option:hover {
+            border-color: #e31837;
+            background-color: #fff5f5;
+        }
+        
+        .method-option input:checked + span {
+            font-weight: bold;
+            color: #e31837;
+        }
+        
+        .method-option input:checked {
+            accent-color: #e31837;
+        }
+        
+        .screenshot-upload-area {
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background-color: #f9f9f9;
+        }
+        
+        .screenshot-upload-area:hover {
+            border-color: #e31837;
+            background-color: #fff5f5;
+        }
+        
+        .screenshot-upload-area i {
+            font-size: 48px;
+            color: #e31837;
+            margin-bottom: 10px;
+        }
+        
+        .upload-hint {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .screenshot-preview {
+            position: relative;
+            margin-top: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            max-width: 300px;
+        }
+        
+        .screenshot-preview img {
+            width: 100%;
+            border-radius: 5px;
+            display: block;
+            max-height: 200px;
+            object-fit: contain;
+        }
+        
+        .remove-screenshot {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #e31837;
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .form-hint {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .form-hint i {
+            color: #ffcc00;
+        }
+        
+        .instructions {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            border-left: 4px solid #ffcc00;
+        }
+        
+        .instructions li {
+            margin-bottom: 5px;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #666;
+            border-top: 1px solid #eee;
+        }
+        
+        .highlight {
+            color: #e31837;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background-color: #fff5f5;
+            padding: 10px;
+            border-radius: 8px;
+            border-left: 4px solid #ffcc00;
+        }
+        
+        .highlight i {
+            color: #ffcc00;
+        }
+        
+        .selection-status {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 10px;
+            padding: 5px 10px;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        
+        .selection-status.valid {
+            background-color: #e6f7e6;
+            color: #2e7d32;
+        }
+        
+        .selection-status.invalid {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+        
+        .fixed-combo-items {
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            border-left: 4px solid #4CAF50;
+        }
+        
+        .fixed-combo-item {
+            padding: 8px 0;
+            border-bottom: 1px dashed #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .fixed-combo-item:last-child {
+            border-bottom: none;
+        }
+        
+        .fixed-combo-item-name {
+            font-weight: 500;
+        }
+        
+        .fixed-combo-item-qty {
+            color: #e31837;
+            font-weight: bold;
+        }
+        
+        .my-orders-section {
+            background-color: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        
+        .orders-search {
+            margin-bottom: 20px;
+        }
+        
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        
+        .search-btn {
+            background-color: #e31837;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .search-btn:hover {
+            background-color: #c8102e;
+        }
+        
+        .order-filter-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .order-filter-tab {
+            padding: 8px 16px;
+            background-color: #f0f0f0;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .order-filter-tab:hover {
+            background-color: #e0e0e0;
+        }
+        
+        .order-filter-tab.active {
+            background-color: #e31837;
+            color: white;
+        }
+        
+        .user-order-item {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            border-left: 5px solid #ffcc00;
+        }
+        
+        .user-order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .user-order-id {
+            font-weight: bold;
+            color: #333;
+            font-size: 1.2rem;
+        }
+        
+        .user-order-time {
+            color: #666;
+            font-size: 0.95rem;
+        }
+        
+        .user-order-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        
+        .user-status-new {
+            background-color: #ffebee;
+            color: #e31837;
+        }
+        
+        .user-status-processing {
+            background-color: #fff3e0;
+            color: #f57c00;
+        }
+        
+        .user-status-completed {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .user-order-items {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .user-order-item-detail {
+            padding: 8px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px dashed #eee;
+        }
+        
+        .user-order-item-detail:last-child {
+            border-bottom: none;
+        }
+        
+        .user-order-item-name {
+            flex: 2;
+        }
+        
+        .user-order-item-price {
+            flex: 1;
+            text-align: right;
+            font-weight: bold;
+            color: #e31837;
+        }
+        
+        .user-order-info {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        
+        .user-order-info p {
+            margin-bottom: 5px;
+        }
+        
+        .user-order-total {
+            font-weight: bold;
+            color: #e31837;
+            font-size: 1.2rem;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid #eee;
+            text-align: right;
+        }
+        
+        .no-user-orders {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+        
+        .no-user-orders i {
+            font-size: 4rem;
+            color: #ddd;
+            margin-bottom: 15px;
+        }
+        
+        .user-id-info {
+            background-color: #f0f0f0;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .user-id-label {
+            font-weight: bold;
+            color: #666;
+        }
+        
+        .user-id-value {
+            font-family: monospace;
+            background-color: #fff;
+            padding: 5px 10px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        
+        .admin-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 100%;
+            max-width: 1200px;
+            height: 100vh;
+            background-color: white;
+            z-index: 2000;
+            box-shadow: -5px 0 20px rgba(0, 0, 0, 0.2);
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+            display: none;
+        }
+        
+        .admin-panel.active {
+            transform: translateX(0);
+            display: block;
+        }
+        
+        .panel-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1999;
+            display: none;
+        }
+        
+        .panel-overlay.active {
+            display: block;
+        }
+        
+        .panel-header {
+            background: linear-gradient(135deg, #e31837 0%, #c8102e 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .panel-header h2 {
+            font-size: 1.8rem;
+            margin: 0;
+        }
+        
+        .close-panel {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.3s;
+        }
+        
+        .close-panel:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .panel-content {
+            padding: 20px;
+        }
+        
+        .admin-tabs {
+            display: flex;
+            border-bottom: 2px solid #eee;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .admin-tab {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            font-size: 1.1rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .admin-tab:hover {
+            color: #e31837;
+            background-color: #fff5f5;
+        }
+        
+        .admin-tab.active {
+            color: #e31837;
+            border-bottom-color: #e31837;
+            font-weight: bold;
+        }
+        
+        .admin-tab-content {
+            display: none;
+        }
+        
+        .admin-tab-content.active {
+            display: block;
+        }
+        
+        .order-filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            padding: 8px 16px;
+            background-color: #f0f0f0;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .filter-btn:hover {
+            background-color: #e0e0e0;
+        }
+        
+        .filter-btn.active {
+            background-color: #e31837;
+            color: white;
+        }
+        
+        .orders-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            min-height: 300px;
+        }
+        
+        .admin-order-item {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            border-left: 5px solid #ffcc00;
+            transition: all 0.3s;
+        }
+        
+        .admin-order-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .order-id {
+            font-weight: bold;
+            color: #333;
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+        
+        .order-time {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+        
+        .order-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        
+        .status-new {
+            background-color: #ffebee;
+            color: #e31837;
+        }
+        
+        .status-processing {
+            background-color: #fff3e0;
+            color: #f57c00;
+        }
+        
+        .status-completed {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .order-details {
+            margin-bottom: 15px;
+        }
+        
+        .order-items {
+            margin-bottom: 10px;
+        }
+        
+        .order-item-detail {
+            padding: 5px 0;
+            border-bottom: 1px dashed #eee;
+        }
+        
+        .order-total {
+            font-weight: bold;
+            color: #e31837;
+            font-size: 1.2rem;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 2px solid #eee;
+        }
+        
+        .customer-info {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        
+        .customer-info p {
+            margin-bottom: 5px;
+        }
+        
+        .screenshot-container {
+            margin-top: 15px;
+        }
+        
+        .screenshot-container img {
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        
+        .screenshot-container img:hover {
+            transform: scale(1.02);
+        }
+        
+        .no-orders {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+            grid-column: 1 / -1;
+            width: 100%;
+        }
+        
+        .no-orders i {
+            font-size: 4rem;
+            color: #ddd;
+            margin-bottom: 15px;
+        }
+        
+        .admin-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #333;
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 30px;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        
+        .admin-btn:hover {
+            background-color: #555;
+            transform: scale(1.05);
+        }
+        
+        .new-order-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: #e31837;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .image-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 3000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .image-modal.active {
+            display: flex;
+        }
+        
+        .modal-image {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 8px;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 3rem;
+            cursor: pointer;
+        }
+        
+        .password-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 3000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .password-modal.active {
+            display: flex;
+        }
+        
+        .password-box {
+            background-color: white;
+            border-radius: 15px;
+            padding: 40px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+        
+        .password-box h3 {
+            color: #e31837;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .password-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2rem;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            letter-spacing: 3px;
+        }
+        
+        .password-input:focus {
+            outline: none;
+            border-color: #e31837;
+            box-shadow: 0 0 0 3px rgba(227, 24, 55, 0.2);
+        }
+        
+        .password-btn {
+            background-color: #e31837;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+        }
+        
+        .password-btn:hover {
+            background-color: #c8102e;
+            transform: scale(1.03);
+        }
+        
+        .password-error {
+            color: #e31837;
+            margin-top: 15px;
+            font-weight: bold;
+            display: none;
+        }
+        
+        .meal-page-container {
+            display: none;
+        }
+        
+        .meal-page-container.active {
+            display: block;
+        }
+        
+        .meal-management {
+            margin-top: 20px;
+        }
+        
+        .meal-list {
+            margin-bottom: 30px;
+        }
+        
+        .meal-list-item {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid #e31837;
+        }
+        
+        .meal-list-item-info {
+            flex: 1;
+        }
+        
+        .meal-list-item-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .action-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .edit-btn {
+            background-color: #ffcc00;
+            color: #333;
+        }
+        
+        .edit-btn:hover {
+            background-color: #e6b800;
+        }
+        
+        .delete-btn {
+            background-color: #e31837;
+            color: white;
+        }
+        
+        .delete-btn:hover {
+            background-color: #c8102e;
+        }
+        
+        .add-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .add-btn:hover {
+            background-color: #3d8b40;
+        }
+        
+        .meal-form {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .option-groups-management {
+            margin-top: 30px;
+        }
+        
+        .option-group-item {
+            background-color: #f0f0f0;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #4CAF50;
+        }
+        
+        .option-group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .option-group-title {
+            font-weight: bold;
+            color: #333;
+            font-size: 1.1rem;
+        }
+        
+        .option-items-list {
+            margin-top: 10px;
+            padding-left: 20px;
+        }
+        
+        .option-item-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px dashed #ddd;
+        }
+        
+        .option-item-list-item:last-child {
+            border-bottom: none;
+        }
+        
+        .no-meals-message {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            border: 2px dashed #ddd;
+        }
+        
+        .no-meals-message i {
+            font-size: 3rem;
+            color: #ddd;
+            margin-bottom: 15px;
+        }
+        
+        .fixed-items-management {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f0f0f0;
+            border-radius: 8px;
+            border-left: 4px solid #4CAF50;
+        }
+        
+        .fixed-item-list {
+            margin-top: 10px;
+        }
+        
+        .fixed-item-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px dashed #ddd;
+        }
+        
+        .fixed-item-list-item:last-child {
+            border-bottom: none;
+        }
+        
+        .status-toggle {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+        
+        .status-toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .status-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .status-slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .status-slider {
+            background-color: #4CAF50;
+        }
+        
+        input:checked + .status-slider:before {
+            transform: translateX(30px);
+        }
+        
+        .status-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-right: 15px;
+        }
+        
+        .status-active {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        
+        .status-inactive {
+            color: #f44336;
+            font-weight: bold;
+        }
+        
+        .meal-card.inactive {
+            opacity: 0.6;
+            border-left: 5px solid #ccc;
+            position: relative;
+        }
+        
+        .meal-card.inactive:after {
+            content: "已下架";
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #f44336;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .meal-card.inactive:hover {
+            transform: none;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+            cursor: not-allowed;
+        }
+        
+        .meal-filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .meal-filter-btn {
+            padding: 8px 16px;
+            background-color: #f0f0f0;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .meal-filter-btn:hover {
+            background-color: #e0e0e0;
+        }
+        
+        .meal-filter-btn.active {
+            background-color: #e31837;
+            color: white;
+        }
+        
+        /* 新增：排序样式 */
+        .sort-order-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .sort-order-input {
+            width: 80px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+        }
+        
+        .sort-order-buttons {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .sort-order-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 1px solid #ddd;
+            background-color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        
+        .sort-order-btn:hover {
+            background-color: #f0f0f0;
+            border-color: #e31837;
+            color: #e31837;
+        }
+        
+        .sort-order-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .sort-order-btn:disabled:hover {
+            background-color: white;
+            border-color: #ddd;
+            color: inherit;
+        }
+        
+        .order-display {
+            font-size: 0.9rem;
+            color: #666;
+            background-color: #f0f0f0;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-left: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .cart-section {
+                position: static;
+            }
+            
+            .logo {
+                font-size: 2rem;
+            }
+            
+            .meal-card {
+                padding: 15px;
+            }
+            
+            .store-selection {
+                flex-direction: column;
+            }
+            
+            .store-selection .form-group {
+                min-width: 100%;
+            }
+            
+            .info-method-selector {
+                flex-direction: column;
+            }
+            
+            .admin-panel {
+                width: 100%;
+            }
+            
+            .orders-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .admin-btn span {
+                display: none;
+            }
+            
+            .admin-btn {
+                padding: 15px;
+                border-radius: 50%;
+                width: 60px;
+                height: 60px;
+                justify-content: center;
+            }
+            
+            .option-items {
+                flex-direction: column;
+            }
+            
+            .option-item {
+                min-width: 100%;
+                justify-content: space-between;
+            }
+            
+            .password-box {
+                padding: 25px;
+                width: 95%;
+            }
+            
+            .meal-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-row {
+                flex-direction: column;
+            }
+            
+            .form-row .form-group {
+                min-width: 100%;
+            }
+            
+            .meal-list-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .meal-list-item-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .option-group-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .header-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .header-btn {
+                width: 200px;
+                justify-content: center;
+            }
+            
+            .sort-order-container {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <i class="fas fa-utensils"></i>
+                <h1>肯德基自助点餐系统</h1>
+                <i class="fas fa-hamburger"></i>
+            </div>
+            <p>宅急送免配送费 | 多人餐团餐优惠 | 外送到家</p>
+            <div class="header-info">
+                <div class="info-item">
+                    <i class="fas fa-shipping-fast"></i>
+                    <span>宅急送免配送费</span>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-users"></i>
+                    <span>多人餐团餐优惠</span>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-store"></i>
+                    <span>到店自提</span>
+                </div>
+            </div>
+
+            <div class="header-buttons">
+                <button class="header-btn" id="viewOrdersBtn">
+                    <i class="fas fa-clipboard-list"></i>
+                    查看我的订单
+                </button>
+                <button class="header-btn" id="viewHomeBtn" style="display: none;">
+                    <i class="fas fa-home"></i>
+                    返回首页
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div id="homePage" class="meal-page-container active">
+            <div class="nav-menu">
+                <h2 class="nav-title">
+                    <i class="fas fa-utensils"></i>
+                    选择您想要的套餐
+                </h2>
+                <div class="instructions">
+                    <p><strong>下单步骤：</strong></p>
+                    <ol>
+                        <li>选择您想要的套餐</li>
+                        <li>在套餐中选择具体的汉堡、小吃和饮品（点击选项，使用+/-按钮调整数量）</li>
+                        <li>确保每个选项组的选择数量符合要求（会有提示）</li>
+                        <li>点击"加入购物车"按钮</li>
+                        <li>在右侧购物车确认订单并选择配送方式</li>
+                        <li>提交订单完成购买</li>
+                        <li>提交后可以点击上方"查看我的订单"查看订单状态</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="meal-grid" id="mealGrid">
+            </div>
+
+            <div class="no-meals-message" id="noMealsMessage" style="display: none;">
+                <i class="fas fa-utensils"></i>
+                <h3>暂无套餐</h3>
+                <p>请联系管理员添加套餐</p>
+            </div>
+        </div>
+
+        <div id="mealDetailPage" class="meal-page-container">
+        </div>
+
+        <div id="myOrdersPage" class="meal-page-container">
+            <a href="#" class="back-btn" onclick="showPage('homePage')">
+                <i class="fas fa-arrow-left"></i>
+                返回套餐列表
+            </a>
+
+            <div class="my-orders-section">
+                <h2 class="section-title">
+                    <i class="fas fa-clipboard-list"></i>
+                    我的订单
+                </h2>
+
+                <div class="user-id-info">
+                    <div class="user-id-label">您的用户标识符：</div>
+                    <div class="user-id-value" id="currentUserIdDisplay"></div>
+                </div>
+
+                <div class="orders-search">
+                    <div class="search-box">
+                        <input type="text" class="search-input" id="orderSearchInput" placeholder="输入订单号搜索...">
+                        <button class="search-btn" id="orderSearchBtn">搜索</button>
+                    </div>
+
+                    <div class="order-filter-tabs">
+                        <button class="order-filter-tab active" data-order-filter="all">全部订单</button>
+                        <button class="order-filter-tab" data-order-filter="new">新订单</button>
+                        <button class="order-filter-tab" data-order-filter="processing">处理中</button>
+                        <button class="order-filter-tab" data-order-filter="completed">已完成</button>
+                    </div>
+                </div>
+
+                <div id="myOrdersContainer">
+                </div>
+
+                <div class="no-user-orders" id="noUserOrdersMessage">
+                    <i class="fas fa-box-open"></i>
+                    <h3>暂无订单</h3>
+                    <p>您还没有提交过订单，快去下单吧！</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 肯德基自助点餐系统 | 宅急送免配送费 | 商品特殊售出不退不换</p>
+            <p>#春日出游必备 #吃鸡神器</p>
+        </div>
+    </div>
+
+    <button class="admin-btn" id="adminBtn">
+        <i class="fas fa-user-shield"></i>
+        <span>后台管理</span>
+        <div class="new-order-badge" id="newOrderBadge" style="display: none;">0</div>
+    </button>
+
+    <div class="password-modal" id="passwordModal">
+        <div class="password-box">
+            <h3><i class="fas fa-lock"></i> 管理员登录</h3>
+            <input type="password" class="password-input" id="adminPassword" placeholder="请输入管理员密码" maxlength="6">
+            <div class="password-error" id="passwordError">密码错误，请重新输入！</div>
+            <button class="password-btn" id="submitPassword">确认</button>
+        </div>
+    </div>
+
+    <div class="panel-overlay" id="panelOverlay"></div>
+    <div class="admin-panel" id="adminPanel">
+        <div class="panel-header">
+            <h2><i class="fas fa-clipboard-list"></i> 系统管理后台</h2>
+            <button class="close-panel" id="closePanel">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="panel-content">
+            <div class="admin-tabs">
+                <button class="admin-tab active" data-tab="orders">订单管理</button>
+                <button class="admin-tab" data-tab="meals">套餐管理</button>
+                <button class="admin-tab" data-tab="addMeal">添加套餐</button>
+            </div>
+
+            <div id="ordersTab" class="admin-tab-content active">
+                <div class="order-filters">
+                    <button class="filter-btn active" data-filter="all">全部订单</button>
+                    <button class="filter-btn" data-filter="new">新订单</button>
+                    <button class="filter-btn" data-filter="processing">处理中</button>
+                    <button class="filter-btn" data-filter="completed">已完成</button>
+                    <button class="filter-btn" id="clearAllOrders">清空所有订单</button>
+                    <button class="filter-btn" id="syncDataBtn">同步数据</button>
+                </div>
+
+                <div class="orders-container" id="ordersContainer">
+                    <div class="no-orders" id="noOrdersMessage">
+                        <i class="fas fa-box-open"></i>
+                        <h3>暂无订单</h3>
+                        <p>当顾客提交订单后，订单将显示在这里</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="mealsTab" class="admin-tab-content">
+                <div class="meal-filters">
+                    <button class="meal-filter-btn active" data-meal-filter="all">全部套餐</button>
+                    <button class="meal-filter-btn" data-meal-filter="active">已上架</button>
+                    <button class="meal-filter-btn" data-meal-filter="inactive">已下架</button>
+                </div>
+
+                <div class="meal-list" id="mealList">
+                </div>
+                <div class="no-meals-message" id="noMealsAdminMessage">
+                    <i class="fas fa-utensils"></i>
+                    <h3>暂无套餐</h3>
+                    <p>点击"添加套餐"标签创建新套餐</p>
+                </div>
+            </div>
+
+            <div id="addMealTab" class="admin-tab-content">
+                <h3 class="section-title" id="addMealTitle">
+                    <i class="fas fa-plus-circle"></i>
+                    添加新套餐
+                </h3>
+
+                <div class="meal-form">
+                    <input type="hidden" id="currentMealId" value="">
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">套餐名称 <span class="required">*</span></label>
+                            <input type="text" class="form-input" id="mealName" placeholder="例如：【12-8】自提/宅急送12件套89.9元" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">套餐价格 <span class="required">*</span></label>
+                            <input type="number" class="form-input" id="mealPrice" placeholder="例如：89.9" min="0" step="0.01" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">排序顺序 <span class="required">*</span></label>
+                            <input type="number" class="form-input" id="mealOrder" placeholder="数字越小越靠前，例如：1" min="0" step="1" value="9999">
+                            <div class="form-hint">
+                                <i class="fas fa-lightbulb"></i> 数字越小显示越靠前，默认9999（最后）
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">套餐标签 <span class="required">*</span></label>
+                            <input type="text" class="form-input" id="mealTags" placeholder="用逗号分隔，例如：自提/宅急送,3人餐,12件套" required>
+                            <div class="form-hint">
+                                <i class="fas fa-lightbulb"></i> 标签将显示在套餐卡片上，用逗号分隔多个标签
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">套餐描述 <span class="required">*</span></label>
+                            <input type="text" class="form-input" id="mealDescription" placeholder="例如：适合3人享用，自提/宅急送都可用" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">套餐状态</label>
+                            <div class="status-label">
+                                <label class="status-toggle">
+                                    <input type="checkbox" id="mealActive" checked>
+                                    <span class="status-slider"></span>
+                                </label>
+                                <span id="statusText" class="status-active">上架</span>
+                            </div>
+                            <div class="form-hint">
+                                <i class="fas fa-lightbulb"></i> 上架的套餐会在用户端显示，下架的套餐不会显示
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4 class="section-title" style="margin-top: 30px; font-size: 1.4rem;">
+                        <i class="fas fa-list"></i>
+                        选项组管理
+                    </h4>
+
+                    <div class="option-groups-management" id="optionGroupsManagement">
+                    </div>
+
+                    <button class="add-btn action-btn" id="addOptionGroupBtn">
+                        <i class="fas fa-plus"></i> 添加选项组
+                    </button>
+
+                    <h4 class="section-title" style="margin-top: 30px; font-size: 1.4rem;">
+                        <i class="fas fa-th-list"></i>
+                        固定搭配管理（可选）
+                    </h4>
+
+                    <div class="fixed-items-management" id="fixedItemsManagement">
+                    </div>
+
+                    <button class="add-btn action-btn" id="addFixedItemBtn">
+                        <i class="fas fa-plus"></i> 添加固定搭配项
+                    </button>
+
+                    <div style="margin-top: 30px; display: flex; gap: 15px;">
+                        <button class="add-btn action-btn" id="saveMealBtn" style="padding: 12px 30px;">
+                            <i class="fas fa-save"></i> 保存套餐
+                        </button>
+                        <button class="filter-btn" id="cancelEditBtn" style="padding: 12px 30px; display: none;">
+                            <i class="fas fa-times"></i> 取消编辑
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="image-modal" id="imageModal">
+        <button class="close-modal" id="closeModal">
+            <i class="fas fa-times"></i>
+        </button>
+        <img class="modal-image" id="modalImage" src="" alt="预览图片">
+    </div>
+
+    <script>
+        // ==================== LeanCloud 配置 ====================
+        const APP_ID = 'Tu8MLJ2PHUY0z4Kgol3hockE-gzGzoHsz';
+        const APP_KEY = '7sdmY7swmMFU9ppvBGheW4oz';
+        const SERVER_URL = 'https://tu8mlj2p.lc-cn-n1-shared.com';
+
+        // 初始化 LeanCloud
+        AV.init({
+            appId: APP_ID,
+            appKey: APP_KEY,
+            serverURLs: SERVER_URL || 'https://tu8mlj2p.lc-cn-n1-shared.com'
+        });
+
+        // ==================== 数据结构 ====================
+        let meals = [];
+        let cart = [];
+        let orders = [];
+        let newOrdersCount = 0;
+        const ADMIN_PASSWORD = "200104";
+
+        // 用户标识符
+        let currentUserId = localStorage.getItem('kfcUserId');
+
+        if (!currentUserId) {
+            currentUserId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('kfcUserId', currentUserId);
+        }
+
+        // ==================== LeanCloud 数据操作类 ====================
+        class LeanCloudData {
+            // 套餐数据操作
+            static async loadMeals() {
+                try {
+                    const query = new AV.Query('Meals');
+                    query.descending('createdAt');
+                    const results = await query.find();
+                    return results.map(item => {
+                        const data = item.toJSON();
+                        const createdAt = item.createdAt ? item.createdAt.getTime() : Date.now();
+                        const updatedAt = item.updatedAt ? item.updatedAt.getTime() : Date.now();
+                        return {
+                            id: data.id || item.id,
+                            name: data.name,
+                            price: data.price,
+                            tags: data.tags || [],
+                            description: data.description,
+                            order: data.order || 9999,
+                            active: data.active !== false,
+                            optionGroups: data.optionGroups || [],
+                            fixedItems: data.fixedItems || [],
+                            createdAt: createdAt,
+                            updatedAt: updatedAt,
+                            objectId: item.id
+                        };
+                    });
+                } catch (error) {
+                    console.error('加载套餐数据失败:', error);
+                    return [];
+                }
+            }
+
+            static async saveMeal(meal) {
+                try {
+                    const Meal = AV.Object.extend('Meals');
+                    let mealObj;
+
+                    if (meal.objectId) {
+                        mealObj = AV.Object.createWithoutData('Meals', meal.objectId);
+                    } else {
+                        mealObj = new Meal();
+                    }
+
+                    mealObj.set('id', meal.id);
+                    mealObj.set('name', meal.name);
+                    mealObj.set('price', meal.price);
+                    mealObj.set('tags', meal.tags);
+                    mealObj.set('description', meal.description);
+                    mealObj.set('order', meal.order || 9999);
+                    mealObj.set('active', meal.active !== false);
+                    mealObj.set('optionGroups', meal.optionGroups || []);
+                    mealObj.set('fixedItems', meal.fixedItems || []);
+
+                    const result = await mealObj.save();
+
+                    const createdAt = result.createdAt ? result.createdAt.getTime() : Date.now();
+                    const updatedAt = result.updatedAt ? result.updatedAt.getTime() : Date.now();
+
+                    return {
+                        id: meal.id,
+                        name: meal.name,
+                        price: meal.price,
+                        tags: meal.tags,
+                        description: meal.description,
+                        order: meal.order || 9999,
+                        active: meal.active !== false,
+                        optionGroups: meal.optionGroups || [],
+                        fixedItems: meal.fixedItems || [],
+                        createdAt: createdAt,
+                        updatedAt: updatedAt,
+                        objectId: result.id
+                    };
+                } catch (error) {
+                    console.error('保存套餐失败:', error);
+                    throw error;
+                }
+            }
+
+            static async deleteMeal(mealId) {
+                try {
+                    const query = new AV.Query('Meals');
+                    query.equalTo('id', mealId);
+                    const result = await query.first();
+
+                    if (result) {
+                        await result.destroy();
+                        return true;
+                    }
+                    return false;
+                } catch (error) {
+                    console.error('删除套餐失败:', error);
+                    throw error;
+                }
+            }
+
+            // 订单数据操作
+            static async loadOrders() {
+                try {
+                    const query = new AV.Query('Orders');
+                    query.descending('createdAt');
+                    const results = await query.find();
+                    return results.map(item => {
+                        const data = item.toJSON();
+                        const createdAt = item.createdAt ? item.createdAt.getTime() : Date.now();
+                        const updatedAt = item.updatedAt ? item.updatedAt.getTime() : Date.now();
+                        return {
+                            id: data.id,
+                            timestamp: data.timestamp,
+                            status: data.status || 'new',
+                            cart: data.cart || [],
+                            deliveryInfo: data.deliveryInfo,
+                            orderNote: data.orderNote || '',
+                            deliveryType: data.deliveryType,
+                            totalPrice: data.totalPrice,
+                            hasScreenshot: data.hasScreenshot || false,
+                            screenshotData: data.screenshotData,
+                            userId: data.userId,
+                            createdAt: createdAt,
+                            updatedAt: updatedAt,
+                            objectId: item.id
+                        };
+                    });
+                } catch (error) {
+                    console.error('加载订单数据失败:', error);
+                    return [];
+                }
+            }
+
+            static async saveOrder(order) {
+                try {
+                    const Order = AV.Object.extend('Orders');
+                    let orderObj;
+
+                    if (order.objectId) {
+                        orderObj = AV.Object.createWithoutData('Orders', order.objectId);
+                    } else {
+                        orderObj = new Order();
+                    }
+
+                    orderObj.set('id', order.id);
+                    orderObj.set('timestamp', order.timestamp);
+                    orderObj.set('status', order.status || 'new');
+                    orderObj.set('cart', order.cart);
+                    orderObj.set('deliveryInfo', order.deliveryInfo);
+                    orderObj.set('orderNote', order.orderNote || '');
+                    orderObj.set('deliveryType', order.deliveryType);
+                    orderObj.set('totalPrice', order.totalPrice);
+                    orderObj.set('hasScreenshot', order.hasScreenshot || false);
+                    orderObj.set('screenshotData', order.screenshotData || '');
+                    orderObj.set('userId', order.userId);
+
+                    const result = await orderObj.save();
+
+                    const createdAt = result.createdAt ? result.createdAt.getTime() : Date.now();
+                    const updatedAt = result.updatedAt ? result.updatedAt.getTime() : Date.now();
+
+                    return {
+                        id: order.id,
+                        timestamp: order.timestamp,
+                        status: order.status || 'new',
+                        cart: order.cart,
+                        deliveryInfo: order.deliveryInfo,
+                        orderNote: order.orderNote || '',
+                        deliveryType: order.deliveryType,
+                        totalPrice: order.totalPrice,
+                        hasScreenshot: order.hasScreenshot || false,
+                        screenshotData: order.screenshotData,
+                        userId: order.userId,
+                        createdAt: createdAt,
+                        updatedAt: updatedAt,
+                        objectId: result.id
+                    };
+                } catch (error) {
+                    console.error('保存订单失败:', error);
+                    throw error;
+                }
+            }
+
+            static async deleteOrder(orderId) {
+                try {
+                    const query = new AV.Query('Orders');
+                    query.equalTo('id', orderId);
+                    const result = await query.first();
+
+                    if (result) {
+                        await result.destroy();
+                        return true;
+                    }
+                    return false;
+                } catch (error) {
+                    console.error('删除订单失败:', error);
+                    throw error;
+                }
+            }
+
+            // 新订单计数操作
+            static async loadNewOrdersCount() {
+                try {
+                    const query = new AV.Query('Counter');
+                    query.equalTo('type', 'newOrdersCount');
+                    const result = await query.first();
+
+                    if (result) {
+                        return result.get('count') || 0;
+                    } else {
+                        const Counter = AV.Object.extend('Counter');
+                        const counter = new Counter();
+                        counter.set('type', 'newOrdersCount');
+                        counter.set('count', 0);
+                        await counter.save();
+                        return 0;
+                    }
+                } catch (error) {
+                    console.error('加载新订单计数失败:', error);
+                    return 0;
+                }
+            }
+
+            static async updateNewOrdersCount(count) {
+                try {
+                    const Counter = AV.Object.extend('Counter');
+                    const query = new AV.Query('Counter');
+                    query.equalTo('type', 'newOrdersCount');
+                    const result = await query.first();
+
+                    let counter;
+                    if (result) {
+                        counter = result;
+                    } else {
+                        counter = new Counter();
+                        counter.set('type', 'newOrdersCount');
+                    }
+
+                    counter.set('count', count);
+                    await counter.save();
+                    console.log('新订单计数更新成功:', count);
+                    return true;
+                } catch (error) {
+                    console.error('更新新订单计数失败:', error);
+                    throw error;
+                }
+            }
+
+            // 初始化数据库表
+            static async initializeTables() {
+                try {
+                    const mealsQuery = new AV.Query('Meals');
+                    const mealsCount = await mealsQuery.count();
+                    console.log('Meals表记录数:', mealsCount);
+
+                    const ordersQuery = new AV.Query('Orders');
+                    const ordersCount = await ordersQuery.count();
+                    console.log('Orders表记录数:', ordersCount);
+
+                    return true;
+                } catch (error) {
+                    console.log('初始化表（LeanCloud会自动创建不存在的表）');
+                    return true;
+                }
+            }
+        }
+
+        // ==================== 页面初始化 ====================
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                showNotification('正在加载数据...', 'info');
+                await LeanCloudData.initializeTables();
+                await loadAllDataFromLeanCloud();
+                initHomePage();
+                initAdminPanel();
+                initMealManagement();
+                updateCartDisplay();
+                updateOrderBadge();
+                initImagePreview();
+                initPasswordVerification();
+                initStatusToggle();
+                initMyOrdersPage();
+                initHeaderButtons();
+
+                document.getElementById('currentUserIdDisplay').textContent = currentUserId.substring(0, 12) + '...';
+                checkUrlParams();
+                showNotification('页面加载完成', 'success');
+                console.log('页面初始化完成，数据已从LeanCloud加载');
+            } catch (error) {
+                console.error('页面初始化失败:', error);
+                showNotification('数据加载失败，使用本地缓存数据', 'error');
+                loadFromLocalCache();
+                initHomePage();
+                initAdminPanel();
+                initMealManagement();
+                updateCartDisplay();
+                updateOrderBadge();
+                initImagePreview();
+                initPasswordVerification();
+                initStatusToggle();
+                initMyOrdersPage();
+                initHeaderButtons();
+            }
+        });
+
+        // ==================== 数据加载函数 ====================
+        async function loadAllDataFromLeanCloud() {
+            try {
+                const [mealsData, ordersData, countData] = await Promise.all([
+                    LeanCloudData.loadMeals(),
+                    LeanCloudData.loadOrders(),
+                    LeanCloudData.loadNewOrdersCount()
+                ]);
+
+                meals = mealsData;
+                orders = ordersData;
+                newOrdersCount = countData;
+
+                localStorage.setItem('kfcMealsCache', JSON.stringify(meals));
+                localStorage.setItem('kfcOrdersCache', JSON.stringify(orders));
+                localStorage.setItem('newOrdersCountCache', newOrdersCount.toString());
+
+                console.log('数据加载完成:', {
+                    套餐数: meals.length,
+                    订单数: orders.length,
+                    新订单计数: newOrdersCount
+                });
+            } catch (error) {
+                console.error('加载数据失败:', error);
+                throw error;
+            }
+        }
+
+        function loadFromLocalCache() {
+            const mealsCache = localStorage.getItem('kfcMealsCache');
+            const ordersCache = localStorage.getItem('kfcOrdersCache');
+            const countCache = localStorage.getItem('newOrdersCountCache');
+
+            if (mealsCache) {
+                try {
+                    meals = JSON.parse(mealsCache);
+                } catch (e) {
+                    meals = [];
+                }
+            }
+
+            if (ordersCache) {
+                try {
+                    orders = JSON.parse(ordersCache);
+                } catch (e) {
+                    orders = [];
+                }
+            }
+
+            if (countCache) {
+                try {
+                    newOrdersCount = parseInt(countCache) || 0;
+                } catch (e) {
+                    newOrdersCount = 0;
+                }
+            }
+        }
+
+        // ==================== 首页功能 ====================
+        function initHomePage() {
+            updateHomePage();
+        }
+
+        function updateHomePage() {
+            const mealGrid = document.getElementById('mealGrid');
+            const noMealsMessage = document.getElementById('noMealsMessage');
+
+            mealGrid.innerHTML = '';
+
+            const activeMeals = meals
+                .filter(meal => meal.active !== false)
+                .sort((a, b) => {
+                    const orderDiff = (a.order || 9999) - (b.order || 9999);
+                    if (orderDiff !== 0) return orderDiff;
+                    return (b.createdAt || 0) - (a.createdAt || 0);
+                });
+
+            if (activeMeals.length === 0) {
+                noMealsMessage.style.display = 'block';
+                return;
+            }
+
+            noMealsMessage.style.display = 'none';
+
+            activeMeals.forEach(meal => {
+                const mealCard = document.createElement('a');
+                mealCard.href = '#';
+                mealCard.className = 'meal-card';
+                if (meal.active === false) {
+                    mealCard.classList.add('inactive');
+                }
+                mealCard.onclick = function(e) {
+                    e.preventDefault();
+                    if (meal.active === false) return;
+                    showMealDetail(meal.id);
+                };
+
+                mealCard.innerHTML =
+                    `
+                <div class="meal-header">
+                    <h4 class="meal-name">${meal.name}</h4>
+                    <div class="meal-price">¥${meal.price}</div>
+                </div>
+                <div class="meal-description">
+                    ${meal.tags.map(tag => `<span class="meal-tag">${tag}</span>`).join('')}
+                    <p style="margin-top: 10px;">${meal.description}</p>
+                </div>
+            `;
+
+                mealGrid.appendChild(mealCard);
+            });
+        }
+
+        // ==================== 套餐详情页 ====================
+        function showMealDetail(mealId) {
+            const meal = meals.find(m => m.id === mealId);
+            if (!meal) return;
+
+            const mealDetailPage = document.getElementById('mealDetailPage');
+
+            mealDetailPage.innerHTML =
+                `
+            <a href="#" class="back-btn" onclick="showPage('homePage')">
+                <i class="fas fa-arrow-left"></i>
+                返回套餐列表
+            </a>
+            
+            <div class="main-content">
+                <div class="menu-section">
+                    <h2 class="section-title">
+                        <i class="fas fa-hamburger"></i>
+                        ${meal.name}
+                    </h2>
+                    
+                    <div class="instructions">
+                        <p><strong>套餐详情：</strong></p>
+                        <ul>
+                            <li>${meal.description}</li>
+                            <li>请按照要求选择选项</li>
+                            <li>提交订单后可在右上角"查看我的订单"查看订单状态</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="meal-options" id="mealOptions">
+                        ${generateOptionsHTML(meal)}
+                    </div>
+                    <button class="add-to-cart" data-meal-id="${meal.id}" data-meal-name="${meal.name}" data-meal-price="${meal.price}" disabled>
+                        <i class="fas fa-cart-plus"></i>
+                        加入购物车
+                    </button>
+                </div>
+                
+                <div class="cart-section">
+                    <h2 class="section-title">
+                        <i class="fas fa-shopping-cart"></i>
+                        购物车
+                    </h2>
+                    
+                    <div class="cart-items" id="cartItems">
+                        <div class="empty-cart-message">购物车是空的，请选择套餐</div>
+                    </div>
+                    
+                    <div class="cart-total">
+                        <span>总计：</span>
+                        <span class="total-price" id="totalPrice">¥0.00</span>
+                    </div>
+                    
+                    <button class="checkout-btn" id="checkoutBtn" disabled>
+                        <i class="fas fa-credit-card"></i>
+                        提交订单
+                    </button>
+                    
+                    <div class="delivery-form">
+                        <h3 class="section-title">
+                            <i class="fas fa-truck"></i>
+                            配送信息
+                        </h3>
+                        
+                        <div class="order-type">
+                            <label>
+                                <input type="radio" name="deliveryType" value="delivery" checked>
+                                <span>宅急送（免配送费）</span>
+                            </label>
+                            <label>
+                                <input type="radio" name="deliveryType" value="pickup">
+                                <span>到店自提</span>
+                            </label>
+                        </div>
+                        
+                        <div class="delivery-fields" id="deliveryFields">
+                            <div class="form-group">
+                                <label class="form-label">收货人姓名 <span class="required">*</span></label>
+                                <input type="text" class="form-input" id="customerName" placeholder="请输入姓名" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">联系电话 <span class="required">*</span></label>
+                                <input type="tel" class="form-input" id="customerPhone" placeholder="请输入手机号码" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">配送地址 <span class="required">*</span></label>
+                                <input type="text" class="form-input" id="deliveryAddress" placeholder="请输入详细地址" required>
+                            </div>
+                        </div>
+                        
+                        <div class="pickup-fields hidden" id="pickupFields">
+                            <div class="form-group">
+                                <label class="form-label">门店信息提供方式 <span class="required">*</span></label>
+                                <div class="info-method-selector">
+                                    <label class="method-option">
+                                        <input type="radio" name="pickupMethod" value="text" checked>
+                                        <span>手动填写</span>
+                                    </label>
+                                    <label class="method-option">
+                                        <input type="radio" name="pickupMethod" value="screenshot">
+                                        <span>上传截图</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="text-method-fields" id="textMethodFields">
+                                <div class="store-selection">
+                                    <div class="form-group">
+                                        <label class="form-label">自提城市 <span class="required">*</span></label>
+                                        <input type="text" class="form-input" id="pickupCityInput" placeholder="例如：北京市" required>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label">自提门店 <span class="required">*</span></label>
+                                        <input type="text" class="form-input" id="pickupStoreInput" placeholder="例如：肯德基王府井店" required>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="screenshot-method-fields hidden" id="screenshotMethodFields">
+                                <div class="form-group">
+                                    <label class="form-label">上传门店截图 <span class="required">*</span></label>
+                                    <div class="screenshot-upload-area" id="screenshotUploadArea">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <p>点击或拖拽上传截图</p>
+                                        <p class="upload-hint">支持 JPG、PNG 格式，大小不超过 5MB</p>
+                                        <input type="file" id="storeScreenshot" accept="image/*" style="display: none;">
+                                    </div>
+                                    <div class="screenshot-preview hidden" id="screenshotPreview">
+                                        <img id="previewImage" src="" alt="截图预览">
+                                        <button type="button" class="remove-screenshot" id="removeScreenshot">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    <div class="form-hint">
+                                        <i class="fas fa-lightbulb"></i> 您可以截图包含门店地址的聊天记录、地图或订单页面
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">订单备注</label>
+                            <textarea class="form-input" id="orderNote" rows="3" placeholder="如有特殊要求请在此备注（例如：不吃辣，多要番茄酱等）"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+            initOptionSelection(mealDetailPage);
+            initDeliveryTypeToggle(mealDetailPage);
+            initPickupMethod(mealDetailPage);
+            initCart(mealDetailPage);
+            initCheckout(mealDetailPage);
+
+            if (!meal.optionGroups || meal.optionGroups.length === 0) {
+                const addToCartBtn = mealDetailPage.querySelector('.add-to-cart');
+                if (addToCartBtn) {
+                    addToCartBtn.disabled = false;
+                    addToCartBtn.style.opacity = '1';
+                    addToCartBtn.style.cursor = 'pointer';
+                }
+            }
+
+            showPage('mealDetailPage');
+
+            document.getElementById('viewOrdersBtn').style.display = 'none';
+            document.getElementById('viewHomeBtn').style.display = 'flex';
+        }
+
+        function generateOptionsHTML(meal) {
+            let html = '';
+
+            if (meal.optionGroups && meal.optionGroups.length > 0) {
+                meal.optionGroups.forEach((group, groupIndex) => {
+                    const groupId = `group-${meal.id}-${groupIndex}`;
+                    const repeat = group.repeat ? 'true' : 'false';
+                    const maxPerItem = group.maxPerItem || (group.repeat ? 999 : 1);
+
+                    html +=
+                        `
+                    <div class="option-group" data-group-id="${groupId}" data-min-select="${group.minSelect}" data-max-select="${group.maxSelect}" data-repeat="${repeat}" data-max-per-item="${maxPerItem}">
+                        <div class="option-title">${group.title}</div>
+                        <div class="option-rules">${group.rules}</div>
+                        <div class="option-items">
+                `;
+
+                    if (group.items && group.items.length > 0) {
+                        group.items.forEach((item, itemIndex) => {
+                            const itemId = `${groupId}-${itemIndex}`;
+                            const addPrice = item.addPrice || 0;
+                            const addPriceText = addPrice > 0 ? ` (+¥${addPrice})` : '';
+
+                            html +=
+                                `
+                            <div class="option-item" data-item-id="${itemId}" data-name="${item.name}" data-add-price="${addPrice}">
+                                <span>${item.name}${addPriceText}</span>
+                                <div class="selection-counter">
+                                    <button class="counter-btn decrement" disabled>-</button>
+                                    <span class="counter-value">0</span>
+                                    <button class="counter-btn increment">+</button>
+                                </div>
+                            </div>
+                        `;
+                        });
+                    }
+
+                    html +=
+                        `
+                        </div>
+                        <div class="selection-status invalid">已选择 0 份，还需选择 ${group.minSelect} 份</div>
+                    </div>
+                `;
+                });
+            }
+
+            if (meal.fixedItems && meal.fixedItems.length > 0) {
+                html +=
+                    `
+                <div class="fixed-combo-items">
+                    <div class="option-title">固定搭配：</div>
+                    <div class="option-rules">套餐包含固定搭配，无需选择</div>
+                    <div class="fixed-combo-list">
+            `;
+
+                meal.fixedItems.forEach(item => {
+                    html +=
+                        `
+                    <div class="fixed-combo-item">
+                        <div class="fixed-combo-item-name">${item.name}</div>
+                        <div class="fixed-combo-item-qty">×${item.quantity}</div>
+                    </div>
+                `;
+                });
+
+                html += `
+                    </div>
+                </div>
+            `;
+            }
+
+            return html;
+        }
+
+        // ==================== 页面切换 ====================
+        function showPage(pageId) {
+            document.querySelectorAll('.meal-page-container').forEach(page => {
+                page.classList.remove('active');
+            });
+
+            document.getElementById(pageId).classList.add('active');
+            window.scrollTo(0, 0);
+
+            if (pageId === 'homePage') {
+                document.getElementById('viewOrdersBtn').style.display = 'flex';
+                document.getElementById('viewHomeBtn').style.display = 'none';
+            }
+        }
+
+        // ==================== 选项选择功能 ====================
+        function initOptionSelection(container) {
+            container.querySelectorAll('.counter-btn.increment').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const optionItem = this.closest('.option-item');
+                    const counterValue = optionItem.querySelector('.counter-value');
+                    const decrementBtn = optionItem.querySelector('.decrement');
+                    const group = optionItem.closest('.option-group');
+
+                    const maxSelect = parseInt(group.dataset.maxSelect) || Infinity;
+                    const repeat = group.dataset.repeat === 'true';
+                    const maxPerItem = parseInt(group.dataset.maxPerItem) || (repeat ? Infinity : 1);
+
+                    let totalSelected = 0;
+                    group.querySelectorAll('.counter-value').forEach(value => {
+                        totalSelected += parseInt(value.textContent);
+                    });
+
+                    let currentSelected = parseInt(counterValue.textContent);
+
+                    if (totalSelected >= maxSelect) {
+                        showNotification(`该选项组最多只能选择${maxSelect}份`);
+                        return;
+                    }
+
+                    if (currentSelected >= maxPerItem) {
+                        showNotification(`该选项最多只能选择${maxPerItem}份`);
+                        return;
+                    }
+
+                    currentSelected++;
+                    counterValue.textContent = currentSelected;
+
+                    decrementBtn.disabled = false;
+                    optionItem.classList.add('selected');
+
+                    updateGroupSelectionStatus(group);
+                });
+            });
+
+            container.querySelectorAll('.counter-btn.decrement').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const optionItem = this.closest('.option-item');
+                    const counterValue = optionItem.querySelector('.counter-value');
+
+                    let currentSelected = parseInt(counterValue.textContent);
+
+                    if (currentSelected > 0) {
+                        currentSelected--;
+                        counterValue.textContent = currentSelected;
+
+                        this.disabled = currentSelected === 0;
+
+                        if (currentSelected === 0) {
+                            optionItem.classList.remove('selected');
+                        }
+
+                        const group = optionItem.closest('.option-group');
+                        updateGroupSelectionStatus(group);
+                    }
+                });
+            });
+
+            container.querySelectorAll('.option-item').forEach(item => {
+                if (!item.classList.contains('selected')) {
+                    item.addEventListener('click', function() {
+                        const incrementBtn = this.querySelector('.increment');
+                        if (incrementBtn) {
+                            incrementBtn.click();
+                        }
+                    });
+                }
+            });
+        }
+
+        function updateGroupSelectionStatus(group) {
+            if (!group.dataset.minSelect) return;
+
+            const minSelect = parseInt(group.dataset.minSelect);
+            const maxSelect = parseInt(group.dataset.maxSelect);
+
+            let totalSelected = 0;
+            group.querySelectorAll('.counter-value').forEach(value => {
+                totalSelected += parseInt(value.textContent);
+            });
+
+            const statusElement = group.querySelector('.selection-status');
+            if (statusElement) {
+                if (totalSelected >= minSelect && totalSelected <= maxSelect) {
+                    statusElement.textContent = `已选择 ${totalSelected} 份，符合要求`;
+                    statusElement.className = 'selection-status valid';
+                } else if (totalSelected < minSelect) {
+                    statusElement.textContent = `已选择 ${totalSelected} 份，还需选择 ${minSelect - totalSelected} 份`;
+                    statusElement.className = 'selection-status invalid';
+                } else {
+                    statusElement.textContent = `已选择 ${totalSelected} 份，已超过最大 ${maxSelect} 份`;
+                    statusElement.className = 'selection-status invalid';
+                }
+            }
+
+            const mealContainer = group.closest('.meal-page-container');
+            updateAddToCartButton(mealContainer);
+        }
+
+        function updateAddToCartButton(mealContainer) {
+            const addToCartBtn = mealContainer.querySelector('.add-to-cart');
+            if (!addToCartBtn) return;
+
+            const optionGroups = mealContainer.querySelectorAll('.option-group');
+            if (optionGroups.length === 0) {
+                addToCartBtn.disabled = false;
+                addToCartBtn.style.opacity = '1';
+                addToCartBtn.style.cursor = 'pointer';
+                return;
+            }
+
+            let isValid = true;
+
+            optionGroups.forEach(group => {
+                if (!group.dataset.minSelect) return;
+
+                const minSelect = parseInt(group.dataset.minSelect);
+                const maxSelect = parseInt(group.dataset.maxSelect);
+
+                let totalSelected = 0;
+                group.querySelectorAll('.counter-value').forEach(value => {
+                    totalSelected += parseInt(value.textContent);
+                });
+
+                if (totalSelected < minSelect || totalSelected > maxSelect) {
+                    isValid = false;
+                }
+            });
+
+            if (isValid) {
+                addToCartBtn.disabled = false;
+                addToCartBtn.style.opacity = '1';
+                addToCartBtn.style.cursor = 'pointer';
+            } else {
+                addToCartBtn.disabled = true;
+                addToCartBtn.style.opacity = '0.6';
+                addToCartBtn.style.cursor = 'not-allowed';
+            }
+        }
+
+        // ==================== 配送方式切换 ====================
+        function initDeliveryTypeToggle(container) {
+            container.querySelectorAll('input[name="deliveryType"]').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    const deliveryFields = container.querySelector('.delivery-fields');
+                    const pickupFields = container.querySelector('.pickup-fields');
+
+                    if (this.value === 'delivery') {
+                        deliveryFields.classList.remove('hidden');
+                        pickupFields.classList.add('hidden');
+                    } else {
+                        pickupFields.classList.remove('hidden');
+                        deliveryFields.classList.add('hidden');
+                    }
+                });
+            });
+        }
+
+        // ==================== 自提方式处理 ====================
+        function initPickupMethod(container) {
+            container.querySelectorAll('input[name="pickupMethod"]').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    const textFields = container.querySelector('.text-method-fields');
+                    const screenshotFields = container.querySelector('.screenshot-method-fields');
+
+                    if (this.value === 'text') {
+                        textFields.classList.remove('hidden');
+                        screenshotFields.classList.add('hidden');
+                    } else {
+                        screenshotFields.classList.remove('hidden');
+                        textFields.classList.add('hidden');
+                    }
+                });
+            });
+
+            const uploadArea = container.querySelector('.screenshot-upload-area');
+            if (uploadArea) {
+                const fileInput = uploadArea.querySelector('input[type="file"]');
+                const previewContainer = uploadArea.parentElement.querySelector('.screenshot-preview');
+                const previewImage = previewContainer ? previewContainer.querySelector('img') : null;
+                const removeBtn = previewContainer ? previewContainer.querySelector('.remove-screenshot') : null;
+
+                if (uploadArea && fileInput && previewContainer && previewImage && removeBtn) {
+                    uploadArea.addEventListener('click', function() {
+                        fileInput.click();
+                    });
+
+                    uploadArea.addEventListener('dragover', function(e) {
+                        e.preventDefault();
+                        this.style.borderColor = '#e31837';
+                        this.style.backgroundColor = '#fff5f5';
+                    });
+
+                    uploadArea.addEventListener('dragleave', function(e) {
+                        e.preventDefault();
+                        this.style.borderColor = '#ddd';
+                        this.style.backgroundColor = '#f9f9f9';
+                    });
+
+                    uploadArea.addEventListener('drop', function(e) {
+                        e.preventDefault();
+                        this.style.borderColor = '#ddd';
+                        this.style.backgroundColor = '#f9f9f9';
+
+                        if (e.dataTransfer.files.length) {
+                            handleFileSelect(e.dataTransfer.files[0], fileInput, previewContainer, previewImage, uploadArea);
+                        }
+                    });
+
+                    fileInput.addEventListener('change', function(e) {
+                        if (e.target.files.length) {
+                            handleFileSelect(e.target.files[0], fileInput, previewContainer, previewImage, uploadArea);
+                        }
+                    });
+
+                    removeBtn.addEventListener('click', function() {
+                        fileInput.value = '';
+                        previewContainer.classList.add('hidden');
+                        uploadArea.style.display = 'block';
+                    });
+                }
+            }
+
+            function handleFileSelect(file, fileInput, previewContainer, previewImage, uploadArea) {
+                if (!file.type.match('image.*')) {
+                    showNotification('请选择图片文件', 'error');
+                    return;
+                }
+
+                if (file.size > 5 * 1024 * 1024) {
+                    showNotification('图片大小不能超过5MB', 'error');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImage.src = e.target.result;
+                    previewContainer.classList.remove('hidden');
+                    uploadArea.style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // ==================== 购物车功能 ====================
+        function initCart(container) {
+            const addToCartBtn = container.querySelector('.add-to-cart');
+            if (addToCartBtn) {
+                addToCartBtn.addEventListener('click', function() {
+                    const optionGroups = container.querySelectorAll('.option-group');
+
+                    if (this.disabled && optionGroups.length > 0) {
+                        showNotification('请先完成选项选择，确保每个选项组的选择数量符合要求');
+                        return;
+                    }
+
+                    const mealId = this.dataset.mealId;
+                    const mealName = this.dataset.mealName;
+                    const mealPrice = parseFloat(this.dataset.mealPrice);
+
+                    const meal = meals.find(m => m.id === mealId);
+                    if (!meal) return;
+
+                    const selectedOptions = [];
+                    let additionalPrice = 0;
+
+                    container.querySelectorAll('.option-group').forEach(group => {
+                        group.querySelectorAll('.option-item').forEach(item => {
+                            const counterValue = item.querySelector('.counter-value');
+                            const count = parseInt(counterValue.textContent);
+
+                            if (count > 0) {
+                                const itemName = item.dataset.name || item.textContent;
+                                const itemAddPrice = parseFloat(item.dataset.addPrice) || 0;
+
+                                for (let i = 0; i < count; i++) {
+                                    selectedOptions.push(itemName);
+                                    additionalPrice += itemAddPrice;
+                                }
+                            }
+                        });
+                    });
+
+                    if (meal.fixedItems && meal.fixedItems.length > 0) {
+                        meal.fixedItems.forEach(item => {
+                            for (let i = 0; i < item.quantity; i++) {
+                                selectedOptions.push(item.name);
+                            }
+                        });
+                    }
+
+                    if (selectedOptions.length === 0) {
+                        showNotification('该套餐没有任何项目，无法加入购物车');
+                        return;
+                    }
+
+                    const totalPrice = mealPrice + additionalPrice;
+
+                    const mealItem = {
+                        id: mealId,
+                        name: mealName,
+                        basePrice: mealPrice,
+                        additionalPrice: additionalPrice,
+                        totalPrice: totalPrice,
+                        options: [...selectedOptions]
+                    };
+
+                    cart.push(mealItem);
+                    updateCartDisplay();
+                    showNotification(`已添加 "${mealName}" 到购物车`, 'success');
+                    resetOptions(container);
+                });
+            }
+        }
+
+        function resetOptions(container) {
+            container.querySelectorAll('.option-group').forEach(group => {
+                group.querySelectorAll('.option-item').forEach(item => {
+                    const counterValue = item.querySelector('.counter-value');
+                    const decrementBtn = item.querySelector('.decrement');
+
+                    counterValue.textContent = '0';
+                    if (decrementBtn) {
+                        decrementBtn.disabled = true;
+                    }
+                    item.classList.remove('selected');
+                });
+
+                updateGroupSelectionStatus(group);
+            });
+        }
+
+        function updateCartDisplay() {
+            document.querySelectorAll('.cart-items').forEach(container => {
+                container.innerHTML = '';
+
+                let totalPrice = 0;
+
+                if (cart.length === 0) {
+                    container.innerHTML = '<div class="empty-cart-message">购物车是空的，请选择套餐</div>';
+                } else {
+                    cart.forEach((item, index) => {
+                        const cartItemElement = document.createElement('div');
+                        cartItemElement.className = 'cart-item';
+
+                        const optionsHtml = item.options.map(option => `<div>• ${option}</div>`).join('');
+
+                        cartItemElement.innerHTML =
+                            `
+                        <div class="cart-item-name">
+                            <div><strong>${item.name}</strong></div>
+                            <div style="font-size:0.9rem; color:#666; margin-top:5px;">
+                                ${optionsHtml}
+                            </div>
+                        </div>
+                        <div class="cart-item-price">¥${item.totalPrice.toFixed(2)}</div>
+                        <button class="cart-item-remove" data-index="${index}">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+
+                        container.appendChild(cartItemElement);
+                        totalPrice += item.totalPrice;
+
+                        cartItemElement.querySelector('.cart-item-remove').addEventListener('click', function() {
+                            const indexToRemove = parseInt(this.dataset.index);
+                            cart.splice(indexToRemove, 1);
+                            updateCartDisplay();
+                            showNotification('已从购物车中移除商品');
+                        });
+                    });
+                }
+
+                const totalPriceElement = container.closest('.cart-section').querySelector('.total-price');
+                const checkoutBtn = container.closest('.cart-section').querySelector('.checkout-btn');
+
+                if (totalPriceElement) {
+                    totalPriceElement.textContent = `¥${totalPrice.toFixed(2)}`;
+                }
+
+                if (checkoutBtn) {
+                    checkoutBtn.disabled = cart.length === 0;
+                }
+            });
+        }
+
+        // ==================== 订单提交功能 ====================
+        function initCheckout(container) {
+            const checkoutBtn = container.querySelector('.checkout-btn');
+            if (checkoutBtn) {
+                checkoutBtn.addEventListener('click', async function() {
+                    const deliveryType = container.querySelector('input[name="deliveryType"]:checked').value;
+                    const orderNote = container.querySelector('#orderNote') ? container.querySelector('#orderNote').value.trim() : '';
+
+                    let deliveryInfo = '';
+                    let hasScreenshot = false;
+                    let screenshotData = null;
+
+                    if (deliveryType === 'delivery') {
+                        const customerName = container.querySelector('#customerName') ? container.querySelector('#customerName').value.trim() : '';
+                        const customerPhone = container.querySelector('#customerPhone') ? container.querySelector('#customerPhone').value.trim() : '';
+                        const deliveryAddress = container.querySelector('#deliveryAddress') ? container.querySelector('#deliveryAddress').value.trim() : '';
+
+                        if (!customerName) {
+                            showNotification('请输入收货人姓名', 'error');
+                            const nameInput = container.querySelector('#customerName');
+                            if (nameInput) nameInput.focus();
+                            return;
+                        }
+
+                        if (!customerPhone) {
+                            showNotification('请输入联系电话', 'error');
+                            const phoneInput = container.querySelector('#customerPhone');
+                            if (phoneInput) phoneInput.focus();
+                            return;
+                        }
+
+                        if (!deliveryAddress) {
+                            showNotification('请输入配送地址', 'error');
+                            const addressInput = container.querySelector('#deliveryAddress');
+                            if (addressInput) addressInput.focus();
+                            return;
+                        }
+
+                        deliveryInfo = `配送方式：宅急送\n收货人：${customerName}\n联系电话：${customerPhone}\n配送地址：${deliveryAddress}`;
+                    } else {
+                        const pickupMethod = container.querySelector('input[name="pickupMethod"]:checked').value;
+
+                        if (pickupMethod === 'text') {
+                            const pickupCity = container.querySelector('#pickupCityInput') ? container.querySelector('#pickupCityInput').value.trim() : '';
+                            const pickupStore = container.querySelector('#pickupStoreInput') ? container.querySelector('#pickupStoreInput').value.trim() : '';
+
+                            if (!pickupCity) {
+                                showNotification('请输入自提城市', 'error');
+                                const cityInput = container.querySelector('#pickupCityInput');
+                                if (cityInput) cityInput.focus();
+                                return;
+                            }
+
+                            if (!pickupStore) {
+                                showNotification('请输入自提门店', 'error');
+                                const storeInput = container.querySelector('#pickupStoreInput');
+                                if (storeInput) storeInput.focus();
+                                return;
+                            }
+
+                            deliveryInfo = `配送方式：到店自提\n信息提供：手动填写\n自提城市：${pickupCity}\n自提门店：${pickupStore}`;
+                        } else {
+                            const screenshotInput = container.querySelector('#storeScreenshot');
+
+                            if (!screenshotInput.files || !screenshotInput.files.length) {
+                                showNotification('请上传门店截图', 'error');
+                                return;
+                            }
+
+                            const file = screenshotInput.files[0];
+                            const reader = new FileReader();
+
+                            reader.onload = function(e) {
+                                screenshotData = e.target.result;
+                                hasScreenshot = true;
+                                deliveryInfo = `配送方式：到店自提\n信息提供：截图上传`;
+                                completeCheckout(deliveryType, orderNote, deliveryInfo, hasScreenshot, screenshotData, container);
+                            };
+
+                            reader.readAsDataURL(file);
+                            return;
+                        }
+                    }
+
+                    await completeCheckout(deliveryType, orderNote, deliveryInfo, hasScreenshot, screenshotData, container);
+                });
+            }
+        }
+
+        async function completeCheckout(deliveryType, orderNote, deliveryInfo, hasScreenshot, screenshotData, container) {
+            let totalPrice = 0;
+            cart.forEach(item => {
+                totalPrice += item.totalPrice;
+            });
+
+            let orderSummary = "订单详情：\n\n";
+            cart.forEach((item, index) => {
+                orderSummary += `${index + 1}. ${item.name} - ¥${item.totalPrice.toFixed(2)}\n`;
+
+                const optionCount = {};
+                item.options.forEach(option => {
+                    optionCount[option] = (optionCount[option] || 0) + 1;
+                });
+
+                Object.keys(optionCount).forEach(option => {
+                    const count = optionCount[option];
+                    orderSummary += `   ${option}${count > 1 ? ` ×${count}` : ''}\n`;
+                });
+                orderSummary += "\n";
+            });
+
+            orderSummary += `\n总计：¥${totalPrice.toFixed(2)}\n`;
+            orderSummary += `\n${deliveryInfo}\n`;
+            if (orderNote) {
+                orderSummary += `备注：${orderNote}\n`;
+            }
+
+            const confirmed = confirm(`请确认订单信息：\n\n${orderSummary}\n\n确认提交订单吗？`);
+
+            if (confirmed) {
+                const orderId = 'KFC' + Date.now().toString().slice(-6) + Math.floor(Math.random() * 100);
+                const timestamp = new Date().toLocaleString('zh-CN');
+
+                const orderData = {
+                    id: orderId,
+                    timestamp: timestamp,
+                    status: 'new',
+                    cart: JSON.parse(JSON.stringify(cart)),
+                    deliveryInfo: deliveryInfo,
+                    orderNote: orderNote,
+                    deliveryType: deliveryType,
+                    totalPrice: totalPrice,
+                    hasScreenshot: hasScreenshot,
+                    screenshotData: screenshotData,
+                    userId: currentUserId
+                };
+
+                try {
+                    showNotification('正在提交订单...', 'info');
+                    const savedOrder = await LeanCloudData.saveOrder(orderData);
+                    console.log('订单保存成功:', savedOrder);
+
+                    savedOrder.objectId = savedOrder.objectId;
+                    orders.unshift(savedOrder);
+
+                    newOrdersCount++;
+                    try {
+                        await LeanCloudData.updateNewOrdersCount(newOrdersCount);
+                        console.log('新订单计数更新成功');
+                    } catch (countError) {
+                        console.warn('更新新订单计数失败，但不影响订单提交:', countError);
+                    }
+
+                    localStorage.setItem('kfcOrdersCache', JSON.stringify(orders));
+                    localStorage.setItem('newOrdersCountCache', newOrdersCount.toString());
+
+                    cart = [];
+                    updateCartDisplay();
+                    resetForm(container);
+                    updateOrderBadge();
+                    showNotification('订单提交成功！', 'success');
+
+                    const orderSubmitted = confirm(`订单提交成功！\n订单号：${orderId}\n\n点击"确定"查看您的订单详情，或点击"取消"返回首页。`);
+
+                    if (orderSubmitted) {
+                        showMyOrdersPage();
+
+                        const url = new URL(window.location);
+                        url.searchParams.set('order', orderId);
+                        window.history.pushState({}, '', url);
+
+                        setTimeout(() => {
+                            document.getElementById('orderSearchInput').value = orderId;
+                            searchUserOrder(orderId);
+
+                            const orderElements = document.querySelectorAll('.user-order-item');
+                            orderElements.forEach(el => {
+                                const orderIdElement = el.querySelector('.user-order-id');
+                                if (orderIdElement && orderIdElement.textContent.includes(orderId)) {
+                                    el.style.animation = 'highlightOrder 2s';
+                                    el.scrollIntoView({
+                                        behavior: 'smooth',
+                                        block: 'center'
+                                    });
+                                }
+                            });
+                        }, 100);
+                    } else {
+                        showPage('homePage');
+                    }
+
+                    if (document.getElementById('adminPanel').classList.contains('active')) {
+                        renderOrders('all');
+                    }
+                } catch (error) {
+                    console.error('提交订单失败:', error);
+                    showNotification('订单提交失败：' + (error.message || '请检查网络连接'), 'error');
+                    return;
+                }
+            }
+        }
+
+        const highlightStyle = document.createElement('style');
+        highlightStyle.textContent =
+            `
+        @keyframes highlightOrder {
+            0% { box-shadow: 0 0 0 0 rgba(227, 24, 55, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(227, 24, 55, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(227, 24, 55, 0); }
+        }
+    `;
+        document.head.appendChild(highlightStyle);
+
+        function resetForm(container) {
+            container.querySelectorAll('input[type="text"], input[type="tel"], textarea').forEach(input => {
+                input.value = '';
+            });
+
+            const deliveryRadio = container.querySelector('input[name="deliveryType"][value="delivery"]');
+            if (deliveryRadio) {
+                deliveryRadio.checked = true;
+                const deliveryFields = container.querySelector('.delivery-fields');
+                const pickupFields = container.querySelector('.pickup-fields');
+                if (deliveryFields) deliveryFields.classList.remove('hidden');
+                if (pickupFields) pickupFields.classList.add('hidden');
+            }
+
+            const textMethodRadio = container.querySelector('input[name="pickupMethod"][value="text"]');
+            if (textMethodRadio) {
+                textMethodRadio.checked = true;
+                const textFields = container.querySelector('.text-method-fields');
+                const screenshotFields = container.querySelector('.screenshot-method-fields');
+                if (textFields) textFields.classList.remove('hidden');
+                if (screenshotFields) screenshotFields.classList.add('hidden');
+            }
+
+            const screenshotInput = container.querySelector('#storeScreenshot');
+            const previewContainer = container.querySelector('.screenshot-preview');
+            const uploadArea = container.querySelector('.screenshot-upload-area');
+            if (screenshotInput) {
+                screenshotInput.value = '';
+                if (previewContainer) previewContainer.classList.add('hidden');
+                if (uploadArea) uploadArea.style.display = 'block';
+            }
+        }
+
+        // ==================== 我的订单页面 ====================
+        function initHeaderButtons() {
+            const viewOrdersBtn = document.getElementById('viewOrdersBtn');
+            const viewHomeBtn = document.getElementById('viewHomeBtn');
+
+            viewOrdersBtn.addEventListener('click', function() {
+                showMyOrdersPage();
+            });
+
+            viewHomeBtn.addEventListener('click', function() {
+                showPage('homePage');
+                this.style.display = 'none';
+                viewOrdersBtn.style.display = 'flex';
+            });
+        }
+
+        function checkUrlParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderId = urlParams.get('order');
+
+            if (orderId) {
+                showMyOrdersPage();
+
+                setTimeout(() => {
+                    document.getElementById('orderSearchInput').value = orderId;
+                    searchUserOrder(orderId);
+                }, 100);
+            }
+        }
+
+        function initMyOrdersPage() {
+            const orderSearchBtn = document.getElementById('orderSearchBtn');
+            const orderSearchInput = document.getElementById('orderSearchInput');
+
+            orderSearchBtn.addEventListener('click', function() {
+                const searchTerm = orderSearchInput.value.trim();
+                if (searchTerm) {
+                    searchUserOrder(searchTerm);
+                } else {
+                    renderUserOrders('all');
+                }
+            });
+
+            orderSearchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    orderSearchBtn.click();
+                }
+            });
+
+            document.querySelectorAll('.order-filter-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    document.querySelectorAll('.order-filter-tab').forEach(t => {
+                        t.classList.remove('active');
+                    });
+
+                    this.classList.add('active');
+
+                    const filter = this.dataset.orderFilter;
+                    renderUserOrders(filter);
+                });
+            });
+        }
+
+        function showMyOrdersPage() {
+            showPage('myOrdersPage');
+            renderUserOrders('all');
+
+            document.getElementById('viewOrdersBtn').style.display = 'none';
+            document.getElementById('viewHomeBtn').style.display = 'flex';
+        }
+
+        function renderUserOrders(filter = 'all') {
+            const myOrdersContainer = document.getElementById('myOrdersContainer');
+            const noUserOrdersMessage = document.getElementById('noUserOrdersMessage');
+
+            myOrdersContainer.innerHTML = '';
+
+            let userOrders = orders.filter(order => order.userId === currentUserId);
+
+            if (filter !== 'all') {
+                userOrders = userOrders.filter(order => order.status === filter);
+            }
+
+            userOrders.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            if (userOrders.length === 0) {
+                noUserOrdersMessage.style.display = 'block';
+                return;
+            }
+
+            noUserOrdersMessage.style.display = 'none';
+
+            userOrders.forEach(order => {
+                const orderElement = createUserOrderElement(order);
+                myOrdersContainer.appendChild(orderElement);
+            });
+        }
+
+        function createUserOrderElement(order) {
+            const orderElement = document.createElement('div');
+            orderElement.className = 'user-order-item';
+
+            let statusText, statusClass;
+            switch (order.status) {
+                case 'new':
+                    statusText = '新订单';
+                    statusClass = 'user-status-new';
+                    break;
+                case 'processing':
+                    statusText = '处理中';
+                    statusClass = 'user-status-processing';
+                    break;
+                case 'completed':
+                    statusText = '已完成';
+                    statusClass = 'user-status-completed';
+                    break;
+                default:
+                    statusText = '新订单';
+                    statusClass = 'user-status-new';
+            }
+
+            const deliveryTypeText = order.deliveryType === 'delivery' ? '宅急送' : '到店自提';
+
+            let itemsHTML = '';
+            order.cart.forEach((item, index) => {
+                const optionCount = {};
+                item.options.forEach(option => {
+                    optionCount[option] = (optionCount[option] || 0) + 1;
+                });
+
+                const optionText = Object.keys(optionCount).map(option => {
+                    const count = optionCount[option];
+                    return `${option}${count > 1 ? ` ×${count}` : ''}`;
+                }).join(', ');
+
+                itemsHTML +=
+                    `<div class="user-order-item-detail">
+                <div class="user-order-item-name">
+                    <div><strong>${item.name}</strong></div>
+                    <div style="font-size:0.9rem; color:#666;">${optionText}</div>
+                </div>
+                <div class="user-order-item-price">¥${item.totalPrice.toFixed(2)}</div>
+            </div>`;
+            });
+
+            const infoLines = order.deliveryInfo.split('\n');
+            let deliveryHTML = '';
+            infoLines.forEach(line => {
+                if (line.trim()) {
+                    deliveryHTML += `<p>${line}</p>`;
+                }
+            });
+
+            let screenshotHTML = '';
+            if (order.hasScreenshot && order.screenshotData) {
+                screenshotHTML =
+                    `
+                <div class="screenshot-container">
+                    <p><strong>门店截图：</strong></p>
+                    <img src="${order.screenshotData}" alt="门店截图" class="screenshot-thumbnail" data-order-id="${order.id}">
+                </div>
+            `;
+            }
+
+            orderElement.innerHTML =
+                `
+            <div class="user-order-header">
+                <div>
+                    <div class="user-order-id">订单号：${order.id}</div>
+                    <div class="user-order-time">${order.timestamp} | ${deliveryTypeText}</div>
+                </div>
+                <div class="user-order-status ${statusClass}">${statusText}</div>
+            </div>
+            
+            <div class="user-order-items">
+                ${itemsHTML}
+            </div>
+            
+            <div class="user-order-total">
+                总计：¥${order.totalPrice.toFixed(2)}
+            </div>
+            
+            <div class="user-order-info">
+                ${deliveryHTML}
+                ${order.orderNote ? `<p><strong>备注：</strong>${order.orderNote}</p>` : ''}
+                ${screenshotHTML}
+            </div>
+        `;
+
+            if (order.hasScreenshot && order.screenshotData) {
+                const screenshotImg = orderElement.querySelector('.screenshot-thumbnail');
+                if (screenshotImg) {
+                    screenshotImg.addEventListener('click', function() {
+                        showFullImage(order.screenshotData);
+                    });
+                }
+            }
+
+            return orderElement;
+        }
+
+        function searchUserOrder(searchTerm) {
+            const myOrdersContainer = document.getElementById('myOrdersContainer');
+            const noUserOrdersMessage = document.getElementById('noUserOrdersMessage');
+
+            myOrdersContainer.innerHTML = '';
+
+            const searchResults = orders.filter(order =>
+                order.userId === currentUserId &&
+                order.id.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+
+            searchResults.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            if (searchResults.length === 0) {
+                noUserOrdersMessage.style.display = 'block';
+                noUserOrdersMessage.innerHTML =
+                    `
+                <i class="fas fa-search"></i>
+                <h3>未找到相关订单</h3>
+                <p>没有找到订单号包含"${searchTerm}"的订单</p>
+            `;
+                return;
+            }
+
+            noUserOrdersMessage.style.display = 'none';
+
+            searchResults.forEach(order => {
+                const orderElement = createUserOrderElement(order);
+                myOrdersContainer.appendChild(orderElement);
+            });
+        }
+
+        // ==================== 后台管理 ====================
+        function initPasswordVerification() {
+            const passwordModal = document.getElementById('passwordModal');
+            const adminPasswordInput = document.getElementById('adminPassword');
+            const submitPasswordBtn = document.getElementById('submitPassword');
+            const passwordError = document.getElementById('passwordError');
+
+            submitPasswordBtn.addEventListener('click', function() {
+                const enteredPassword = adminPasswordInput.value.trim();
+
+                if (enteredPassword === ADMIN_PASSWORD) {
+                    passwordModal.classList.remove('active');
+                    adminPasswordInput.value = '';
+                    passwordError.style.display = 'none';
+                    openAdminPanel();
+                } else {
+                    passwordError.style.display = 'block';
+                    adminPasswordInput.value = '';
+                    adminPasswordInput.focus();
+
+                    adminPasswordInput.style.animation = 'none';
+                    setTimeout(() => {
+                        adminPasswordInput.style.animation = 'shake 0.5s';
+                    }, 10);
+                }
+            });
+
+            adminPasswordInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    submitPasswordBtn.click();
+                }
+            });
+
+            const style = document.createElement('style');
+            style.textContent =
+                `
+            @keyframes shake {
+                0%, 100% {transform: translateX(0);}
+                10%, 30%, 50%, 70%, 90% {transform: translateX(-5px);}
+                20%, 40%, 60%, 80% {transform: translateX(5px);}
+            }
+        `;
+            document.head.appendChild(style);
+        }
+
+        function openAdminPanel() {
+            const adminPanel = document.getElementById('adminPanel');
+            const panelOverlay = document.getElementById('panelOverlay');
+
+            adminPanel.classList.add('active');
+            panelOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+
+            newOrdersCount = 0;
+            localStorage.setItem('newOrdersCountCache', '0');
+            LeanCloudData.updateNewOrdersCount(0).catch(console.error);
+            updateOrderBadge();
+            renderOrders('all');
+            updateMealList('all');
+        }
+
+        function initAdminPanel() {
+            const adminBtn = document.getElementById('adminBtn');
+            const closePanel = document.getElementById('closePanel');
+            const panelOverlay = document.getElementById('panelOverlay');
+            const adminPanel = document.getElementById('adminPanel');
+            const clearAllOrders = document.getElementById('clearAllOrders');
+            const syncDataBtn = document.getElementById('syncDataBtn');
+            const adminTabs = document.querySelectorAll('.admin-tab');
+
+            adminBtn.addEventListener('click', function() {
+                const passwordModal = document.getElementById('passwordModal');
+                const adminPasswordInput = document.getElementById('adminPassword');
+
+                passwordModal.classList.add('active');
+                adminPasswordInput.focus();
+            });
+
+            closePanel.addEventListener('click', function() {
+                adminPanel.classList.remove('active');
+                panelOverlay.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            });
+
+            panelOverlay.addEventListener('click', function() {
+                adminPanel.classList.remove('active');
+                panelOverlay.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            });
+
+            clearAllOrders.addEventListener('click', async function() {
+                if (orders.length > 0 && confirm('确定要清空所有订单吗？此操作不可恢复！')) {
+                    try {
+                        showNotification('正在清空订单...', 'info');
+                        const deletePromises = orders.map(order => LeanCloudData.deleteOrder(order.id));
+                        await Promise.all(deletePromises);
+
+                        orders = [];
+                        newOrdersCount = 0;
+                        await LeanCloudData.updateNewOrdersCount(0);
+                        localStorage.setItem('newOrdersCountCache', '0');
+                        localStorage.setItem('kfcOrdersCache', JSON.stringify(orders));
+
+                        updateOrderBadge();
+                        renderOrders('all');
+                        showNotification('已清空所有订单', 'success');
+                    } catch (error) {
+                        console.error('清空订单失败:', error);
+                        showNotification('清空失败，请检查网络连接', 'error');
+                    }
+                }
+            });
+
+            syncDataBtn.addEventListener('click', async function() {
+                showNotification('正在同步数据...', 'info');
+                await forceSyncAllData();
+            });
+
+            adminTabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.dataset.tab;
+
+                    adminTabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+
+                    document.querySelectorAll('.admin-tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+
+                    document.getElementById(`${tabId}Tab`).classList.add('active');
+
+                    if (tabId === 'meals') {
+                        updateMealList('all');
+                    } else if (tabId === 'addMeal') {
+                        resetMealForm();
+                    }
+                });
+            });
+
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                if (btn.id !== 'clearAllOrders' && btn.id !== 'syncDataBtn') {
+                    btn.addEventListener('click', function() {
+                        document.querySelectorAll('.filter-btn').forEach(b => {
+                            if (b.id !== 'clearAllOrders' && b.id !== 'syncDataBtn') {
+                                b.classList.remove('active');
+                            }
+                        });
+
+                        this.classList.add('active');
+                        const filter = this.dataset.filter;
+                        renderOrders(filter);
+                    });
+                }
+            });
+        }
+
+        function renderOrders(filter = 'all') {
+            const ordersContainer = document.getElementById('ordersContainer');
+            const noOrdersMessage = document.getElementById('noOrdersMessage');
+
+            const orderElements = ordersContainer.querySelectorAll('.admin-order-item');
+            orderElements.forEach(el => el.remove());
+
+            let filteredOrders = orders;
+            if (filter !== 'all') {
+                filteredOrders = orders.filter(order => order.status === filter);
+            }
+
+            if (filteredOrders.length === 0) {
+                noOrdersMessage.style.display = 'block';
+                return;
+            }
+
+            noOrdersMessage.style.display = 'none';
+
+            filteredOrders.forEach(order => {
+                const orderElement = createOrderElement(order);
+                ordersContainer.appendChild(orderElement);
+            });
+        }
+
+        function createOrderElement(order) {
+            const orderElement = document.createElement('div');
+            orderElement.className = 'admin-order-item';
+
+            let statusText, statusClass;
+            switch (order.status) {
+                case 'new':
+                    statusText = '新订单';
+                    statusClass = 'status-new';
+                    break;
+                case 'processing':
+                    statusText = '处理中';
+                    statusClass = 'status-processing';
+                    break;
+                case 'completed':
+                    statusText = '已完成';
+                    statusClass = 'status-completed';
+                    break;
+                default:
+                    statusText = '新订单';
+                    statusClass = 'status-new';
+            }
+
+            const deliveryTypeText = order.deliveryType === 'delivery' ? '宅急送' : '到店自提';
+
+            let itemsHTML = '';
+            order.cart.forEach(item => {
+                const optionCount = {};
+                item.options.forEach(option => {
+                    optionCount[option] = (optionCount[option] || 0) + 1;
+                });
+
+                const optionText = Object.keys(optionCount).map(option => {
+                    const count = optionCount[option];
+                    return `${option}${count > 1 ? ` ×${count}` : ''}`;
+                }).join(', ');
+
+                itemsHTML +=
+                    `<div class="order-item-detail">
+                <div><strong>${item.name}</strong> - ¥${item.totalPrice.toFixed(2)}</div>
+                <div style="font-size:0.9rem; color:#666;">${optionText}</div>
+            </div>`;
+            });
+
+            const infoLines = order.deliveryInfo.split('\n');
+            let deliveryHTML = '';
+            infoLines.forEach(line => {
+                if (line.trim()) {
+                    deliveryHTML += `<p>${line}</p>`;
+                }
+            });
+
+            let screenshotHTML = '';
+            if (order.hasScreenshot && order.screenshotData) {
+                screenshotHTML =
+                    `
+                <div class="screenshot-container">
+                    <p><strong>门店截图：</strong></p>
+                    <img src="${order.screenshotData}" alt="门店截图" class="screenshot-thumbnail" data-order-id="${order.id}">
+                </div>
+            `;
+            }
+
+            const userInfo = order.userId ? `<p><strong>用户ID：</strong>${order.userId.substring(0, 12)}...</p>` : '';
+
+            orderElement.innerHTML =
+                `
+            <div class="order-id">订单号：${order.id}</div>
+            <div class="order-time">${order.timestamp} | ${deliveryTypeText}</div>
+            <div class="order-status ${statusClass}">${statusText}</div>
+            
+            <div class="order-details">
+                <div class="order-items">
+                    ${itemsHTML}
+                </div>
+                
+                <div class="order-total">
+                    总计：¥${order.totalPrice.toFixed(2)}
+                </div>
+            </div>
+            
+            <div class="customer-info">
+                ${deliveryHTML}
+                ${userInfo}
+                ${order.orderNote ? `<p><strong>备注：</strong>${order.orderNote}</p>` : ''}
+                ${screenshotHTML}
+            </div>
+            
+            <div style="margin-top: 15px; display: flex; gap: 10px;">
+                ${order.status === 'new' ? `<button class="filter-btn" style="padding: 6px 12px; font-size: 0.9rem;" data-action="process" data-order-id="${order.id}">标记为处理中</button>` : ''}
+                ${order.status === 'processing' ? `<button class="filter-btn" style="padding: 6px 12px; font-size: 0.9rem;" data-action="complete" data-order-id="${order.id}">标记为已完成</button>` : ''}
+                <button class="filter-btn" style="padding: 6px 12px; font-size: 0.9rem; background-color: #f44336; color: white;" data-action="delete" data-order-id="${order.id}">删除订单</button>
+            </div>
+        `;
+
+            orderElement.querySelectorAll('button[data-action]').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const action = this.dataset.action;
+                    const orderId = this.dataset.orderId;
+                    handleOrderAction(action, orderId);
+                });
+            });
+
+            if (order.hasScreenshot && order.screenshotData) {
+                const screenshotImg = orderElement.querySelector('.screenshot-thumbnail');
+                if (screenshotImg) {
+                    screenshotImg.addEventListener('click', function() {
+                        showFullImage(order.screenshotData);
+                    });
+                }
+            }
+
+            return orderElement;
+        }
+
+        async function handleOrderAction(action, orderId) {
+            const orderIndex = orders.findIndex(o => o.id === orderId);
+            if (orderIndex === -1) return;
+
+            let confirmMessage = '';
+
+            switch (action) {
+                case 'process':
+                    confirmMessage = `确认将订单 ${orderId} 标记为处理中吗？`;
+                    break;
+                case 'complete':
+                    confirmMessage = `确认将订单 ${orderId} 标记为已完成吗？`;
+                    break;
+                case 'delete':
+                    confirmMessage = `确认删除订单 ${orderId} 吗？`;
+                    break;
+            }
+
+            if (confirm(confirmMessage)) {
+                try {
+                    const order = orders[orderIndex];
+
+                    switch (action) {
+                        case 'process':
+                            order.status = 'processing';
+                            break;
+                        case 'complete':
+                            order.status = 'completed';
+                            break;
+                        case 'delete':
+                            await LeanCloudData.deleteOrder(orderId);
+                            orders.splice(orderIndex, 1);
+                            break;
+                    }
+
+                    if (action !== 'delete') {
+                        const updatedOrder = await LeanCloudData.saveOrder(order);
+                        orders[orderIndex] = updatedOrder;
+                    }
+
+                    localStorage.setItem('kfcOrdersCache', JSON.stringify(orders));
+
+                    const activeFilterBtn = document.querySelector('.filter-btn.active');
+                    const activeFilter = activeFilterBtn ? activeFilterBtn.dataset.filter : 'all';
+                    renderOrders(activeFilter);
+
+                    showNotification(`订单 ${orderId} 操作成功`, 'success');
+                } catch (error) {
+                    console.error('订单操作失败:', error);
+                    showNotification('操作失败，请检查网络连接', 'error');
+                }
+            }
+        }
+
+        // ==================== 套餐管理 ====================
+        function initStatusToggle() {
+            const statusToggle = document.getElementById('mealActive');
+            const statusText = document.getElementById('statusText');
+
+            if (statusToggle && statusText) {
+                statusToggle.addEventListener('change', function() {
+                    if (this.checked) {
+                        statusText.textContent = '上架';
+                        statusText.className = 'status-active';
+                    } else {
+                        statusText.textContent = '下架';
+                        statusText.className = 'status-inactive';
+                    }
+                });
+            }
+        }
+
+        function initMealManagement() {
+            updateMealList('all');
+
+            document.querySelectorAll('.meal-filter-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.meal-filter-btn').forEach(b => {
+                        b.classList.remove('active');
+                    });
+
+                    this.classList.add('active');
+                    const filter = this.dataset.mealFilter;
+                    updateMealList(filter);
+                });
+            });
+
+            document.getElementById('addOptionGroupBtn').addEventListener('click', function() {
+                addOptionGroup();
+            });
+
+            document.getElementById('addFixedItemBtn').addEventListener('click', function() {
+                addFixedItem();
+            });
+
+            document.getElementById('saveMealBtn').addEventListener('click', async function() {
+                await saveMeal();
+            });
+
+            document.getElementById('cancelEditBtn').addEventListener('click', function() {
+                cancelEdit();
+            });
+
+            document.querySelectorAll('.admin-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.dataset.tab;
+                    if (tabId === 'addMeal') {
+                        resetMealForm();
+                    }
+                });
+            });
+
+            document.addEventListener('keydown', function(e) {
+                if ((e.ctrlKey || e.metaKey) && e.key === 's' &&
+                    document.getElementById('addMealTab').classList.contains('active')) {
+                    e.preventDefault();
+                    saveMeal();
+                }
+
+                if (e.key === 'Escape' && document.getElementById('cancelEditBtn').style.display !== 'none') {
+                    cancelEdit();
+                }
+            });
+
+            const statusToggle = document.getElementById('mealActive');
+            if (statusToggle) {
+                statusToggle.addEventListener('change', function() {
+                    const statusText = document.getElementById('statusText');
+                    if (this.checked) {
+                        statusText.textContent = '上架';
+                        statusText.className = 'status-active';
+                    } else {
+                        statusText.textContent = '下架';
+                        statusText.className = 'status-inactive';
+                    }
+                });
+            }
+
+            if (document.querySelectorAll('.option-group-item').length === 0) {
+                addOptionGroup();
+            }
+        }
+
+        function updateMealList(filter = 'all') {
+            const mealList = document.getElementById('mealList');
+            const noMealsAdminMessage = document.getElementById('noMealsAdminMessage');
+
+            mealList.innerHTML = '';
+
+            let filteredMeals = meals;
+            if (filter === 'active') {
+                filteredMeals = meals.filter(meal => meal.active !== false);
+            } else if (filter === 'inactive') {
+                filteredMeals = meals.filter(meal => meal.active === false);
+            }
+
+            filteredMeals.sort((a, b) => {
+                const orderDiff = (a.order || 9999) - (b.order || 9999);
+                if (orderDiff !== 0) return orderDiff;
+                const aTime = a.createdAt || 0;
+                const bTime = b.createdAt || 0;
+                return bTime - aTime;
+            });
+
+            if (filteredMeals.length === 0) {
+                noMealsAdminMessage.style.display = 'block';
+                return;
+            }
+
+            noMealsAdminMessage.style.display = 'none';
+
+            filteredMeals.forEach(meal => {
+                const mealItem = document.createElement('div');
+                mealItem.className = 'meal-list-item';
+
+                let totalOptions = 0;
+                if (meal.optionGroups && meal.optionGroups.length > 0) {
+                    meal.optionGroups.forEach(group => {
+                        if (group.items) {
+                            totalOptions += group.items.length;
+                        }
+                    });
+                }
+
+                let totalFixed = 0;
+                if (meal.fixedItems && meal.fixedItems.length > 0) {
+                    meal.fixedItems.forEach(item => {
+                        totalFixed += item.quantity || 1;
+                    });
+                }
+
+                const createdAt = meal.createdAt ? new Date(meal.createdAt).toLocaleString('zh-CN') : '未知时间';
+
+                const sortControls = `
+                    <div class="sort-order-container">
+                        <label>排序:</label>
+                        <input type="number" class="sort-order-input" data-meal-id="${meal.id}" value="${meal.order || 9999}" min="0" step="1">
+                        <div class="sort-order-buttons">
+                            <button class="sort-order-btn" data-action="move-up" data-meal-id="${meal.id}" title="上移"><i class="fas fa-arrow-up"></i></button>
+                            <button class="sort-order-btn" data-action="move-down" data-meal-id="${meal.id}" title="下移"><i class="fas fa-arrow-down"></i></button>
+                            <button class="sort-order-btn" data-action="apply-order" data-meal-id="${meal.id}" title="应用排序"><i class="fas fa-check"></i></button>
+                        </div>
+                    </div>
+                `;
+
+                mealItem.innerHTML =
+                    `
+                <div class="meal-list-item-info">
+                    <h4>${meal.name} ${meal.active === false ? '<span class="status-inactive">(已下架)</span>' : '<span class="status-active">(已上架)</span>'}</h4>
+                    <p><strong>价格:</strong> ¥${meal.price} | <strong>标签:</strong> ${meal.tags.join(', ')}</p>
+                    <p><strong>描述:</strong> ${meal.description}</p>
+                    <p><strong>创建时间:</strong> ${createdAt} | <strong>排序值:</strong> <span class="order-display">${meal.order || 9999}</span></p>
+                    <p><strong>选项组:</strong> ${meal.optionGroups ? meal.optionGroups.length : 0} 个 | 
+                       <strong>选项项:</strong> ${totalOptions} 个 | 
+                       <strong>固定搭配:</strong> ${totalFixed} 项</p>
+                </div>
+                <div class="meal-list-item-actions">
+                    <div class="status-label">
+                        <label class="status-toggle">
+                            <input type="checkbox" class="status-toggle-input" data-meal-id="${meal.id}" ${meal.active !== false ? 'checked' : ''}>
+                            <span class="status-slider"></span>
+                        </label>
+                        <span class="${meal.active !== false ? 'status-active' : 'status-inactive'}">${meal.active !== false ? '上架' : '下架'}</span>
+                    </div>
+                    ${sortControls}
+                    <div style="display: flex; gap: 10px;">
+                        <button class="action-btn edit-btn" data-meal-id="${meal.id}">
+                            <i class="fas fa-edit"></i> 编辑
+                        </button>
+                        <button class="action-btn delete-btn" data-meal-id="${meal.id}">
+                            <i class="fas fa-trash"></i> 删除
+                        </button>
+                    </div>
+                </div>
+            `;
+
+                mealList.appendChild(mealItem);
+            });
+
+            document.querySelectorAll('.status-toggle-input').forEach(toggle => {
+                toggle.addEventListener('change', async function() {
+                    const mealId = this.dataset.mealId;
+                    const isActive = this.checked;
+                    await toggleMealStatus(mealId, isActive);
+                });
+            });
+
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const mealId = this.dataset.mealId;
+                    editMeal(mealId);
+                });
+            });
+
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', async function() {
+                    const mealId = this.dataset.mealId;
+                    await deleteMeal(mealId);
+                });
+            });
+
+            document.querySelectorAll('.sort-order-btn').forEach(btn => {
+                btn.addEventListener('click', async function() {
+                    const mealId = this.dataset.mealId;
+                    const action = this.dataset.action;
+                    await handleSortAction(action, mealId);
+                });
+            });
+
+            document.querySelectorAll('.sort-order-input').forEach(input => {
+                input.addEventListener('change', async function() {
+                    const mealId = this.dataset.mealId;
+                    const newOrder = parseInt(this.value) || 9999;
+                    await updateMealOrder(mealId, newOrder);
+                });
+            });
+        }
+
+        async function handleSortAction(action, mealId) {
+            const mealIndex = meals.findIndex(m => m.id === mealId);
+            if (mealIndex === -1) return;
+
+            const meal = meals[mealIndex];
+            
+            switch (action) {
+                case 'move-up':
+                    const newOrderUp = (meal.order || 9999) - 1;
+                    await updateMealOrder(mealId, Math.max(0, newOrderUp));
+                    break;
+                    
+                case 'move-down':
+                    const newOrderDown = (meal.order || 9999) + 1;
+                    await updateMealOrder(mealId, newOrderDown);
+                    break;
+                    
+                case 'apply-order':
+                    const input = document.querySelector(`.sort-order-input[data-meal-id="${mealId}"]`);
+                    if (input) {
+                        const newOrder = parseInt(input.value) || 9999;
+                        await updateMealOrder(mealId, newOrder);
+                    }
+                    break;
+            }
+        }
+
+        async function updateMealOrder(mealId, newOrder) {
+            const mealIndex = meals.findIndex(m => m.id === mealId);
+            if (mealIndex === -1) return;
+
+            const meal = meals[mealIndex];
+            const oldOrder = meal.order || 9999;
+            
+            if (newOrder === oldOrder) return;
+
+            try {
+                meals[mealIndex].order = newOrder;
+                meals[mealIndex].updatedAt = Date.now();
+
+                const updatedMeal = await LeanCloudData.saveMeal(meals[mealIndex]);
+                meals[mealIndex] = updatedMeal;
+
+                localStorage.setItem('kfcMealsCache', JSON.stringify(meals));
+                updateHomePage();
+
+                const activeFilter = document.querySelector('.meal-filter-btn.active').dataset.mealFilter;
+                updateMealList(activeFilter);
+
+                showNotification(`套餐"${meal.name}"排序已更新为 ${newOrder}`, 'success');
+            } catch (error) {
+                console.error('更新套餐排序失败:', error);
+                showNotification('更新排序失败，请检查网络连接', 'error');
+            }
+        }
+
+        async function toggleMealStatus(mealId, isActive) {
+            const mealIndex = meals.findIndex(m => m.id === mealId);
+            if (mealIndex === -1) return;
+
+            const meal = meals[mealIndex];
+            const action = isActive ? '上架' : '下架';
+
+            if (confirm(`确定要将套餐 "${meal.name}" ${action} 吗？${isActive ? '' : '下架后用户将无法看到此套餐。'}`)) {
+                try {
+                    meals[mealIndex].active = isActive;
+                    meals[mealIndex].updatedAt = Date.now();
+
+                    const updatedMeal = await LeanCloudData.saveMeal(meals[mealIndex]);
+                    meals[mealIndex] = updatedMeal;
+
+                    localStorage.setItem('kfcMealsCache', JSON.stringify(meals));
+                    updateHomePage();
+
+                    const activeFilter = document.querySelector('.meal-filter-btn.active').dataset.mealFilter;
+                    updateMealList(activeFilter);
+
+                    showNotification(`套餐"${meal.name}"已${action}`, 'success');
+                } catch (error) {
+                    console.error('更新套餐状态失败:', error);
+                    showNotification('操作失败，请检查网络连接', 'error');
+
+                    const toggle = document.querySelector(`.status-toggle-input[data-meal-id="${mealId}"]`);
+                    if (toggle) {
+                        toggle.checked = !isActive;
+                    }
+                }
+            } else {
+                const toggle = document.querySelector(`.status-toggle-input[data-meal-id="${mealId}"]`);
+                if (toggle) {
+                    toggle.checked = !isActive;
+                }
+            }
+        }
+
+        function editMeal(mealId) {
+            const meal = meals.find(m => m.id === mealId);
+            if (!meal) {
+                showNotification('套餐不存在或已被删除', 'error');
+                return;
+            }
+
+            document.getElementById('currentMealId').value = meal.id;
+            document.getElementById('mealName').value = meal.name;
+            document.getElementById('mealPrice').value = meal.price;
+            document.getElementById('mealOrder').value = meal.order || 9999;
+            document.getElementById('mealTags').value = meal.tags.join(', ');
+            document.getElementById('mealDescription').value = meal.description;
+            document.getElementById('mealActive').checked = meal.active !== false;
+
+            const statusText = document.getElementById('statusText');
+            if (meal.active !== false) {
+                statusText.textContent = '上架';
+                statusText.className = 'status-active';
+            } else {
+                statusText.textContent = '下架';
+                statusText.className = 'status-inactive';
+            }
+
+            document.getElementById('addMealTitle').innerHTML =
+                `<i class="fas fa-edit"></i> 编辑套餐：${meal.name.substring(0, 20)}${meal.name.length > 20 ? '...' : ''}`;
+
+            document.getElementById('cancelEditBtn').style.display = 'block';
+            document.getElementById('optionGroupsManagement').innerHTML = '';
+            document.getElementById('fixedItemsManagement').innerHTML = '';
+
+            if (meal.optionGroups && meal.optionGroups.length > 0) {
+                meal.optionGroups.forEach((group, index) => {
+                    const groupId = 'edit-group-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+
+                    const optionGroup = document.createElement('div');
+                    optionGroup.className = 'option-group-item';
+                    optionGroup.innerHTML =
+                        `
+                    <div class="option-group-header">
+                        <div class="option-group-title">选项组 ${index + 1}</div>
+                        <div>
+                            <button class="action-btn add-btn add-option-item-btn" data-group-id="${groupId}">
+                                <i class="fas fa-plus"></i> 添加选项
+                            </button>
+                            <button class="action-btn delete-btn delete-option-group-btn" data-group-id="${groupId}">
+                                <i class="fas fa-trash"></i> 删除组
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">组标题 <span class="required">*</span></label>
+                            <input type="text" class="form-input option-group-title-input" data-group-id="${groupId}" placeholder="例如：① 任选3份（可以重复选）" value="${group.title || '选项组' + (index + 1)}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">规则描述 <span class="required">*</span></label>
+                            <input type="text" class="form-input option-group-rules-input" data-group-id="${groupId}" placeholder="例如：需要选择3份，可以重复选择相同选项" value="${group.rules || '请选择选项'}">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">最少选择数量 <span class="required">*</span></label>
+                            <input type="number" class="form-input option-group-min-input" data-group-id="${groupId}" placeholder="例如：3" min="0" value="${group.minSelect || 1}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">最多选择数量 <span class="required">*</span></label>
+                            <input type="number" class="form-input option-group-max-input" data-group-id="${groupId}" placeholder="例如：3" min="1" value="${group.maxSelect || 1}">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">是否可以重复选择</label>
+                            <div style="margin-top: 8px;">
+                                <label style="display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" class="option-group-repeat-input" data-group-id="${groupId}" ${group.repeat ? 'checked' : ''}>
+                                    <span>可以重复选择相同选项</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">每个选项最多选择几份</label>
+                            <input type="number" class="form-input option-group-max-per-item-input" data-group-id="${groupId}" placeholder="例如：2" min="1" value="${group.maxPerItem || (group.repeat ? 999 : 1)}">
+                        </div>
+                    </div>
+                    <div class="option-items-list" id="option-items-${groupId}">
+                    </div>
+                `;
+
+                    document.getElementById('optionGroupsManagement').appendChild(optionGroup);
+
+                    optionGroup.querySelector('.add-option-item-btn').addEventListener('click', function() {
+                        const itemId = 'item-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+                        addOptionItemToGroup(groupId, '新选项', 0, itemId);
+                    });
+
+                    optionGroup.querySelector('.delete-option-group-btn').addEventListener('click', function() {
+                        if (confirm('确定要删除这个选项组吗？')) {
+                            optionGroup.remove();
+                        }
+                    });
+
+                    if (group.items && group.items.length > 0) {
+                        group.items.forEach((item, itemIndex) => {
+                            const itemId = 'item-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+                            addOptionItemToGroup(groupId, item.name, item.addPrice || 0, itemId);
+                        });
+                    } else {
+                        const itemId = 'item-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+                        addOptionItemToGroup(groupId, '选项1', 0, itemId);
+                    }
+                });
+            } else {
+                addOptionGroup();
+            }
+
+            if (meal.fixedItems && meal.fixedItems.length > 0) {
+                meal.fixedItems.forEach((item, index) => {
+                    addFixedItemWithData(item.name, item.quantity || 1);
+                });
+            }
+
+            document.querySelector('.admin-tab[data-tab="addMeal"]').click();
+            document.getElementById('addMealTab').scrollIntoView({
+                behavior: 'smooth'
+            });
+        }
+
+        function addOptionGroup() {
+            const optionGroupsManagement = document.getElementById('optionGroupsManagement');
+            const groupId = 'group-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+
+            const optionGroup = document.createElement('div');
+            optionGroup.className = 'option-group-item';
+            optionGroup.innerHTML =
+                `
+            <div class="option-group-header">
+                <div class="option-group-title">选项组 ${optionGroupsManagement.children.length + 1}</div>
+                <div>
+                    <button class="action-btn add-btn add-option-item-btn" data-group-id="${groupId}">
+                        <i class="fas fa-plus"></i> 添加选项
+                    </button>
+                    <button class="action-btn delete-btn delete-option-group-btn" data-group-id="${groupId}">
+                        <i class="fas fa-trash"></i> 删除组
+                    </button>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">组标题 <span class="required">*</span></label>
+                    <input type="text" class="form-input option-group-title-input" data-group-id="${groupId}" placeholder="例如：① 任选3份（可以重复选）" value="选项组 ${optionGroupsManagement.children.length + 1}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">规则描述 <span class="required">*</span></label>
+                    <input type="text" class="form-input option-group-rules-input" data-group-id="${groupId}" placeholder="例如：需要选择3份，可以重复选择相同选项" value="请选择选项">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">最少选择数量 <span class="required">*</span></label>
+                    <input type="number" class="form-input option-group-min-input" data-group-id="${groupId}" placeholder="例如：3" min="0" value="1">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">最多选择数量 <span class="required">*</span></label>
+                    <input type="number" class="form-input option-group-max-input" data-group-id="${groupId}" placeholder="例如：3" min="1" value="1">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">是否可以重复选择</label>
+                    <div style="margin-top: 8px;">
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" class="option-group-repeat-input" data-group-id="${groupId}" checked>
+                            <span>可以重复选择相同选项</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">每个选项最多选择几份</label>
+                    <input type="number" class="form-input option-group-max-per-item-input" data-group-id="${groupId}" placeholder="例如：2" min="1" value="999">
+                </div>
+            </div>
+            <div class="option-items-list" id="option-items-${groupId}">
+            </div>
+        `;
+
+            optionGroupsManagement.appendChild(optionGroup);
+
+            optionGroup.querySelector('.add-option-item-btn').addEventListener('click', function() {
+                const itemId = 'item-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+                addOptionItemToGroup(groupId, '新选项', 0, itemId);
+            });
+
+            optionGroup.querySelector('.delete-option-group-btn').addEventListener('click', function() {
+                if (confirm('确定要删除这个选项组吗？')) {
+                    optionGroup.remove();
+                }
+            });
+
+            const itemId = 'item-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+            addOptionItemToGroup(groupId, '选项1', 0, itemId);
+        }
+
+        function addOptionItem(groupId) {
+            const itemId = 'item-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+            addOptionItemToGroup(groupId, '新选项', 0, itemId);
+        }
+
+        function addOptionItemToGroup(groupId, name, price, itemId) {
+            const optionItemsList = document.getElementById(`option-items-${groupId}`);
+            if (!optionItemsList) return;
+
+            if (!itemId) {
+                itemId = 'item-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+            }
+
+            const optionItem = document.createElement('div');
+            optionItem.className = 'option-item-list-item';
+            optionItem.innerHTML =
+                `
+            <div style="display: flex; gap: 10px; width: 100%;">
+                <input type="text" class="form-input option-item-name-input" style="flex: 3;" placeholder="选项名称，例如：香辣鸡腿堡" value="${name || '选项'}">
+                <input type="number" class="form-input option-item-price-input" style="flex: 1;" placeholder="附加价格" min="0" step="0.01" value="${price || 0}">
+            </div>
+            <button class="action-btn delete-btn delete-option-item-btn" data-item-id="${itemId}">
+                <i class="fas fa-trash"></i>
+            </button>
+        `;
+
+            optionItemsList.appendChild(optionItem);
+
+            optionItem.querySelector('.delete-option-item-btn').addEventListener('click', function() {
+                if (confirm('确定要删除这个选项吗？')) {
+                    optionItem.remove();
+                }
+            });
+        }
+
+        function addFixedItem() {
+            addFixedItemWithData('固定搭配项', 1);
+        }
+
+        function addFixedItemWithData(name, quantity) {
+            const fixedItemsManagement = document.getElementById('fixedItemsManagement');
+            if (!fixedItemsManagement) return;
+
+            const fixedItem = document.createElement('div');
+            fixedItem.className = 'fixed-item-list-item';
+            fixedItem.innerHTML =
+                `
+            <div style="display: flex; gap: 10px; width: 100%;">
+                <input type="text" class="form-input fixed-item-name-input" style="flex: 3;" placeholder="固定搭配项名称，例如：可乐" value="${name || '固定搭配项'}">
+                <input type="number" class="form-input fixed-item-quantity-input" style="flex: 1;" placeholder="数量" min="1" value="${quantity || 1}">
+            </div>
+            <button class="action-btn delete-btn delete-fixed-item-btn">
+                <i class="fas fa-trash"></i>
+            </button>
+        `;
+
+            fixedItemsManagement.appendChild(fixedItem);
+
+            fixedItem.querySelector('.delete-fixed-item-btn').addEventListener('click', function() {
+                if (confirm('确定要删除这个固定搭配项吗？')) {
+                    fixedItem.remove();
+                }
+            });
+        }
+
+        async function deleteMeal(mealId) {
+            const mealIndex = meals.findIndex(m => m.id === mealId);
+            if (mealIndex === -1) return;
+
+            const meal = meals[mealIndex];
+
+            if (!confirm(`确定要删除套餐 "${meal.name}" 吗？\n\n价格：¥${meal.price}\n标签：${meal.tags.join(', ')}\n\n此操作不可恢复！`)) {
+                return;
+            }
+
+            let hasOrders = false;
+            orders.forEach(order => {
+                order.cart.forEach(item => {
+                    if (item.id === mealId) {
+                        hasOrders = true;
+                    }
+                });
+            });
+
+            if (hasOrders) {
+                if (!confirm('警告：有订单包含此套餐。删除套餐不会删除相关订单，但会影响订单详情显示。\n\n确定要继续删除吗？')) {
+                    return;
+                }
+            }
+
+            try {
+                await LeanCloudData.deleteMeal(mealId);
+                meals.splice(mealIndex, 1);
+                localStorage.setItem('kfcMealsCache', JSON.stringify(meals));
+                updateHomePage();
+
+                const activeFilter = document.querySelector('.meal-filter-btn.active').dataset.mealFilter;
+                updateMealList(activeFilter);
+
+                showNotification(`套餐"${meal.name}"已删除`, 'success');
+            } catch (error) {
+                console.error('删除套餐失败:', error);
+                showNotification('删除失败，请检查网络连接', 'error');
+            }
+        }
+
+        async function saveMeal() {
+            const mealId = document.getElementById('currentMealId').value;
+            const mealName = document.getElementById('mealName').value.trim();
+            const mealPrice = parseFloat(document.getElementById('mealPrice').value);
+            const mealOrder = parseInt(document.getElementById('mealOrder').value) || 9999;
+            const mealTags = document.getElementById('mealTags').value.split(',').map(tag => tag.trim()).filter(tag => tag);
+            const mealDescription = document.getElementById('mealDescription').value.trim();
+            const mealActive = document.getElementById('mealActive').checked;
+
+            if (!mealName) {
+                showNotification('请填写套餐名称', 'error');
+                document.getElementById('mealName').focus();
+                return;
+            }
+
+            if (isNaN(mealPrice) || mealPrice <= 0) {
+                showNotification('请填写有效的套餐价格', 'error');
+                document.getElementById('mealPrice').focus();
+                return;
+            }
+
+            if (mealTags.length === 0) {
+                showNotification('请至少填写一个套餐标签', 'error');
+                document.getElementById('mealTags').focus();
+                return;
+            }
+
+            if (!mealDescription) {
+                showNotification('请填写套餐描述', 'error');
+                document.getElementById('mealDescription').focus();
+                return;
+            }
+
+            const optionGroups = [];
+            const groupElements = document.querySelectorAll('.option-group-item');
+            
+            if (groupElements.length === 0) {
+                if (!confirm('当前没有添加任何选项组，用户将无法选择具体项目。确定要继续吗？')) {
+                    return;
+                }
+            }
+            
+            for (let i = 0; i < groupElements.length; i++) {
+                const groupElement = groupElements[i];
+                
+                const title = groupElement.querySelector('.option-group-title-input').value.trim();
+                const rules = groupElement.querySelector('.option-group-rules-input').value.trim();
+                const minSelect = parseInt(groupElement.querySelector('.option-group-min-input').value) || 1;
+                const maxSelect = parseInt(groupElement.querySelector('.option-group-max-input').value) || 1;
+                const repeat = groupElement.querySelector('.option-group-repeat-input').checked;
+                const maxPerItem = parseInt(groupElement.querySelector('.option-group-max-per-item-input').value) || (repeat ? 999 : 1);
+
+                if (!title) {
+                    showNotification(`选项组 ${i + 1} 的标题不能为空`, 'error');
+                    groupElement.querySelector('.option-group-title-input').focus();
+                    return;
+                }
+
+                if (!rules) {
+                    showNotification(`选项组 ${i + 1} 的规则描述不能为空`, 'error');
+                    groupElement.querySelector('.option-group-rules-input').focus();
+                    return;
+                }
+
+                if (minSelect < 0) {
+                    showNotification(`选项组 ${i + 1} 的最少选择数量不能小于0`, 'error');
+                    groupElement.querySelector('.option-group-min-input').focus();
+                    return;
+                }
+
+                if (maxSelect < minSelect) {
+                    showNotification(`选项组 ${i + 1} 的最多选择数量不能小于最少选择数量`, 'error');
+                    groupElement.querySelector('.option-group-max-input').focus();
+                    return;
+                }
+
+                const items = [];
+                const itemElements = groupElement.querySelectorAll('.option-item-list-item');
+                
+                if (itemElements.length === 0) {
+                    showNotification(`选项组 "${title}" 至少需要一个选项项`, 'error');
+                    return;
+                }
+                
+                itemElements.forEach(itemElement => {
+                    const nameInput = itemElement.querySelector('.option-item-name-input');
+                    const priceInput = itemElement.querySelector('.option-item-price-input');
+                    
+                    if (nameInput && priceInput) {
+                        const name = nameInput.value.trim();
+                        const addPrice = parseFloat(priceInput.value) || 0;
+
+                        if (name) {
+                            items.push({
+                                name,
+                                addPrice
+                            });
+                        }
+                    }
+                });
+
+                if (items.length === 0) {
+                    showNotification(`选项组 "${title}" 至少需要一个有效的选项项`, 'error');
+                    return;
+                }
+
+                optionGroups.push({
+                    title,
+                    rules,
+                    minSelect,
+                    maxSelect,
+                    repeat,
+                    maxPerItem,
+                    items
+                });
+            }
+
+            const fixedItems = [];
+            document.querySelectorAll('.fixed-item-list-item').forEach((itemElement, index) => {
+                const nameInput = itemElement.querySelector('.fixed-item-name-input');
+                const quantityInput = itemElement.querySelector('.fixed-item-quantity-input');
+                
+                if (nameInput && quantityInput) {
+                    const name = nameInput.value.trim();
+                    const quantity = parseInt(quantityInput.value) || 1;
+
+                    if (name) {
+                        fixedItems.push({
+                            name,
+                            quantity
+                        });
+                    }
+                }
+            });
+
+            try {
+                let meal;
+                
+                if (mealId) {
+                    const mealIndex = meals.findIndex(m => m.id === mealId);
+                    if (mealIndex === -1) {
+                        showNotification('要编辑的套餐不存在', 'error');
+                        return;
+                    }
+                    
+                    meal = meals[mealIndex];
+                    meal.name = mealName;
+                    meal.price = mealPrice;
+                    meal.order = mealOrder;
+                    meal.tags = mealTags;
+                    meal.description = mealDescription;
+                    meal.active = mealActive;
+                    meal.optionGroups = optionGroups;
+                    meal.fixedItems = fixedItems;
+
+                    const savedMeal = await LeanCloudData.saveMeal(meal);
+                    meals[mealIndex] = savedMeal;
+                    
+                    showNotification('套餐已更新', 'success');
+                } else {
+                    meal = {
+                        id: 'meal-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
+                        name: mealName,
+                        price: mealPrice,
+                        order: mealOrder,
+                        tags: mealTags,
+                        description: mealDescription,
+                        active: mealActive,
+                        optionGroups: optionGroups,
+                        fixedItems: fixedItems
+                    };
+
+                    const savedMeal = await LeanCloudData.saveMeal(meal);
+                    meals.push(savedMeal);
+                    
+                    showNotification('套餐已添加', 'success');
+                }
+
+                localStorage.setItem('kfcMealsCache', JSON.stringify(meals));
+                updateHomePage();
+
+                const activeFilter = document.querySelector('.meal-filter-btn.active').dataset.mealFilter;
+                updateMealList(activeFilter);
+
+                resetMealForm();
+                document.querySelector('.admin-tab[data-tab="meals"]').click();
+
+            } catch (error) {
+                console.error('保存套餐失败:', error);
+                showNotification('保存失败，请检查网络连接', 'error');
+            }
+        }
+
+        function cancelEdit() {
+            resetMealForm();
+            document.querySelector('.admin-tab[data-tab="meals"]').click();
+        }
+
+        function resetMealForm() {
+            document.getElementById('currentMealId').value = '';
+            document.getElementById('mealName').value = '';
+            document.getElementById('mealPrice').value = '';
+            document.getElementById('mealOrder').value = '9999';
+            document.getElementById('mealTags').value = '';
+            document.getElementById('mealDescription').value = '';
+            document.getElementById('mealActive').checked = true;
+
+            const statusText = document.getElementById('statusText');
+            statusText.textContent = '上架';
+            statusText.className = 'status-active';
+
+            document.getElementById('optionGroupsManagement').innerHTML = '';
+            document.getElementById('fixedItemsManagement').innerHTML = '';
+            document.getElementById('addMealTitle').innerHTML = `<i class="fas fa-plus-circle"></i> 添加新套餐`;
+            document.getElementById('cancelEditBtn').style.display = 'none';
+
+            addOptionGroup();
+        }
+
+        // ==================== 图片预览功能 ====================
+        function initImagePreview() {
+            const imageModal = document.getElementById('imageModal');
+            const modalImage = document.getElementById('modalImage');
+            const closeModal = document.getElementById('closeModal');
+
+            closeModal.addEventListener('click', function() {
+                imageModal.classList.remove('active');
+            });
+
+            imageModal.addEventListener('click', function(e) {
+                if (e.target === imageModal) {
+                    imageModal.classList.remove('active');
+                }
+            });
+        }
+
+        function showFullImage(imageSrc) {
+            const modalImage = document.getElementById('modalImage');
+            const imageModal = document.getElementById('imageModal');
+
+            modalImage.src = imageSrc;
+            imageModal.classList.add('active');
+        }
+
+        // ==================== 新订单徽章 ====================
+        function updateOrderBadge() {
+            const badge = document.getElementById('newOrderBadge');
+            if (newOrdersCount > 0) {
+                badge.textContent = newOrdersCount > 9 ? '9+' : newOrdersCount;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        // ==================== 数据同步功能 ====================
+        async function syncDataFromLeanCloud() {
+            try {
+                showNotification('正在同步数据...', 'info');
+
+                const [newMeals, newOrders, newCount] = await Promise.all([
+                    LeanCloudData.loadMeals(),
+                    LeanCloudData.loadOrders(),
+                    LeanCloudData.loadNewOrdersCount()
+                ]);
+
+                meals = newMeals;
+                orders = newOrders;
+                newOrdersCount = newCount;
+
+                localStorage.setItem('kfcMealsCache', JSON.stringify(meals));
+                localStorage.setItem('kfcOrdersCache', JSON.stringify(orders));
+                localStorage.setItem('newOrdersCountCache', newOrdersCount.toString());
+
+                return true;
+            } catch (error) {
+                console.error('数据同步失败:', error);
+                return false;
+            }
+        }
+
+        async function forceSyncAllData() {
+            try {
+                const success = await syncDataFromLeanCloud();
+
+                if (success) {
+                    if (document.getElementById('homePage').classList.contains('active')) {
+                        updateHomePage();
+                    }
+
+                    if (document.getElementById('myOrdersPage').classList.contains('active')) {
+                        renderUserOrders('all');
+                    }
+
+                    if (document.getElementById('adminPanel').classList.contains('active')) {
+                        const activeFilterBtn = document.querySelector('.filter-btn.active');
+                        const activeFilter = activeFilterBtn ? activeFilterBtn.dataset.filter : 'all';
+                        renderOrders(activeFilter);
+
+                        const activeMealFilterBtn = document.querySelector('.meal-filter-btn.active');
+                        const activeMealFilter = activeMealFilterBtn ? activeMealFilterBtn.dataset.mealFilter : 'all';
+                        updateMealList(activeMealFilter);
+                    }
+
+                    showNotification('数据同步完成', 'success');
+                } else {
+                    showNotification('同步失败，请检查网络连接', 'error');
+                }
+            } catch (error) {
+                console.error('强制同步失败:', error);
+                showNotification('同步失败，请检查网络连接', 'error');
+            }
+        }
+
+        // ==================== 通知功能 ====================
+        function showNotification(message, type = 'info') {
+            const existingNotification = document.querySelector('.custom-notification');
+            if (existingNotification) {
+                existingNotification.remove();
+            }
+
+            const notification = document.createElement('div');
+            notification.textContent = message;
+            notification.className = 'custom-notification';
+            notification.style.cssText =
+                `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: ${type === 'success' ? '#4CAF50' : type === 'error' ? '#e31837' : '#e31837'};
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+            font-weight: bold;
+            animation: slideIn 0.3s ease;
+            max-width: 400px;
+            font-size: 14px;
+        `;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.remove();
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        const notificationStyle = document.createElement('style');
+        notificationStyle.textContent =
+            `
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+    `;
+        document.head.appendChild(notificationStyle);
+
+        // ==================== 定期数据同步 ====================
+        setInterval(async () => {
+            if (document.getElementById('adminPanel').classList.contains('active')) {
+                await syncDataFromLeanCloud();
+                const activeFilterBtn = document.querySelector('.filter-btn.active');
+                const activeFilter = activeFilterBtn ? activeFilterBtn.dataset.filter : 'all';
+                renderOrders(activeFilter);
+            }
+        }, 60000);
+    </script>
+</body>
+</html>
