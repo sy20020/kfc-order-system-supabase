@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -5253,77 +5254,77 @@ function recognizeWithSmartSplit(text) {
                                 </label>
                             </div>
                             
-                            ${meal.supportDelivery !== false ? `
-                            <div class="delivery-fields" id="deliveryFields" ${meal.supportDelivery === false ? 'style="display:none;"' : ''}>
-                                <div class="form-group">
-                                    <label class="form-label">信息提供方式 <span class="required">*</span></label>
-                                    <div class="info-method-selector">
-                                        <label class="method-option">
-                                            <input type="radio" name="deliveryMethod" value="manual" checked>
-                                            <span>手动填写</span>
-                                        </label>
-                                        <label class="method-option">
-                                            <input type="radio" name="deliveryMethod" value="screenshot">
-                                            <span>上传截图</span>
-                                        </label>
-                                    </div>
-                                </div>
-                                
-                                <div class="manual-fields" id="manualFields">
-                                    <!-- 粘贴识别区域 -->
-                               <div class="delivery-paste-area" id="deliveryPasteArea">
-                                   <textarea id="pasteTextarea" placeholder="请在这里粘贴您的配送信息"></textarea>
-                                   <button class="recognize-btn" id="recognizeBtn">
-                                       <i class="fas fa-magic"></i>
-                                       智能识别
-                                   </button>
+                           ${meal.supportDelivery !== false ? `
+                           <div class="delivery-fields" id="deliveryFields" ${meal.supportDelivery === false ? 'style="display:none;"' : ''}>
+                               <div class="form-group">
+                                   <label class="form-label">信息提供方式 <span class="required">*</span></label>
+                                   <div class="info-method-selector">
+                                       <label class="method-option">
+                                           <input type="radio" name="deliveryMethod" value="manual">
+                                           <span>手动填写</span>
+                                       </label>
+                                       <label class="method-option">
+                                           <input type="radio" name="deliveryMethod" value="screenshot" checked>
+                                           <span>上传截图</span>
+                                       </label>
+                                   </div>
                                </div>
-                                    <div id="recognizeResult" style="display:none;"></div>
-                                    
-                                    <div class="form-group">
-                                        <label class="form-label">收货人姓名 <span class="required">*</span></label>
-                                        <input type="text" class="form-input" id="customerName" placeholder="请输入姓名" required>
-                                    </div>
-                                    
-                                    <div class="form-group">
-                                        <label class="form-label">联系电话 <span class="required">*</span></label>
-                                        <input type="tel" class="form-input" id="customerPhone" placeholder="请输入手机号码" required>
-                                    </div>
-                                    
-                                    <div class="form-group">
-                                        <label class="form-label">配送地址 <span class="required">*</span></label>
-                                        <input type="text" class="form-input" id="deliveryAddress" placeholder="请输入详细地址" required>
-                                    </div>
-                                </div>
-                                
-                                <div class="screenshot-fields hidden" id="screenshotFields">
-                                    <div class="form-group">
-                                        <label class="form-label">上传配送信息截图 <span class="required">*</span></label>
-                                        <div class="screenshot-upload-area" id="screenshotUploadArea">
-                                            <i class="fas fa-cloud-upload-alt"></i>
-                                            <p>点击或拖拽上传截图</p>
-                                            <p class="upload-hint">支持 JPG、PNG 格式，大小不超过 2MB，建议压缩后上传</p>
-                                            <input type="file" id="storeScreenshot" accept="image/*" style="display: none;">
-                                        </div>
-                                        <div class="screenshot-preview hidden" id="screenshotPreview">
-                                            <div class="screenshot-preview-container">
-                                                <img id="previewImage" src="" alt="截图预览">
-                                                <div class="image-info" id="imageInfo"></div>
-                                            </div>
-                                            <button type="button" class="remove-screenshot" id="removeScreenshot">
-                                                <i class="fas fa-times"></i>
-                                            </button>
-                                        </div>
-                                        <div class="compress-progress" id="compressProgress">
-                                            <i class="fas fa-compress-alt"></i> 正在压缩图片... <span id="compressPercent">0%</span>
-                                        </div>
-                                        <div class="form-hint">
-                                            <i class="fas fa-lightbulb"></i> 系统会自动压缩图片到合适大小，确保上传速度
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            ` : ''}
+                               
+                               <div class="manual-fields hidden" id="manualFields">
+                                   <!-- 粘贴识别区域 -->
+                                   <div class="delivery-paste-area" id="deliveryPasteArea">
+                                       <textarea id="pasteTextarea" placeholder="请在这里粘贴您的配送信息"></textarea>
+                                       <button class="recognize-btn" id="recognizeBtn">
+                                           <i class="fas fa-magic"></i>
+                                           智能识别
+                                       </button>
+                                   </div>
+                                   <div id="recognizeResult" style="display:none;"></div>
+                                   
+                                   <div class="form-group">
+                                       <label class="form-label">收货人姓名 <span class="required">*</span></label>
+                                       <input type="text" class="form-input" id="customerName" placeholder="请输入姓名" required>
+                                   </div>
+                                   
+                                   <div class="form-group">
+                                       <label class="form-label">联系电话 <span class="required">*</span></label>
+                                       <input type="tel" class="form-input" id="customerPhone" placeholder="请输入手机号码" required>
+                                   </div>
+                                   
+                                   <div class="form-group">
+                                       <label class="form-label">配送地址 <span class="required">*</span></label>
+                                       <input type="text" class="form-input" id="deliveryAddress" placeholder="请输入详细地址" required>
+                                   </div>
+                               </div>
+                               
+                               <div class="screenshot-fields" id="screenshotFields">
+                                   <div class="form-group">
+                                       <label class="form-label">上传配送信息截图 <span class="required">*</span></label>
+                                       <div class="screenshot-upload-area" id="screenshotUploadArea">
+                                           <i class="fas fa-cloud-upload-alt"></i>
+                                           <p>点击或拖拽上传截图</p>
+                                           <p class="upload-hint">支持 JPG、PNG 格式，大小不超过 2MB，建议压缩后上传</p>
+                                           <input type="file" id="storeScreenshot" accept="image/*" style="display: none;">
+                                       </div>
+                                       <div class="screenshot-preview hidden" id="screenshotPreview">
+                                           <div class="screenshot-preview-container">
+                                               <img id="previewImage" src="" alt="截图预览">
+                                               <div class="image-info" id="imageInfo"></div>
+                                           </div>
+                                           <button type="button" class="remove-screenshot" id="removeScreenshot">
+                                               <i class="fas fa-times"></i>
+                                           </button>
+                                       </div>
+                                       <div class="compress-progress" id="compressProgress">
+                                           <i class="fas fa-compress-alt"></i> 正在压缩图片... <span id="compressPercent">0%</span>
+                                       </div>
+                                       <div class="form-hint">
+                                           <i class="fas fa-lightbulb"></i> 系统会自动压缩图片到合适大小，确保上传速度
+                                       </div>
+                                   </div>
+                               </div>
+                           </div>
+                           ` : ''}
                             
                             <div class="pickup-fields ${meal.supportDelivery !== false ? 'hidden' : ''}" id="pickupFields" ${meal.supportDelivery === false ? 'style="display:block;"' : ''}>
                                 <div class="form-group">
@@ -8761,6 +8762,7 @@ function recognizeWithSmartSplit(text) {
                     SupabaseData.loadOrders(),
                     SupabaseData.loadNewOrdersCount()
                 ]);
+
 
                 meals = newMeals;
                 orders = newOrders;
