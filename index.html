@@ -2429,8 +2429,168 @@
             box-shadow: 0 6px 15px rgba(0,0,0,0.2);
         }
         
-        /* 其他样式保持不变... */
+     
+      /* 紧凑版宅急送粘贴识别区域 */
+      .delivery-paste-area {
+          border: 2px dashed #4CAF50;
+          border-radius: 10px;
+          padding: 15px;
+          margin-bottom: 15px;
+          background-color: #f9f9f9;
+          cursor: pointer;
+          transition: all 0.3s;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+      }
+      
+      .delivery-paste-area:hover {
+          border-color: #2e7d32;
+          background-color: #f1f8e9;
+      }
+      
+      #pasteTextarea {
+          width: 100%;
+          min-height: 80px;
+          padding: 10px;
+          border: 1px solid #ddd;
+          border-radius: 6px;
+          font-size: 0.9rem;
+          resize: vertical;
+          transition: all 0.3s;
+          background-color: white;
+          font-family: inherit;
+      }
+      
+      #pasteTextarea:focus {
+          outline: none;
+          border-color: #4CAF50;
+          box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+      }
+      
+      #pasteTextarea::placeholder {
+          color: #999;
+      }
+      
+      .recognize-btn {
+          background-color: #4CAF50;
+          color: white;
+          border: none;
+          padding: 8px 16px;
+          border-radius: 20px;
+          cursor: pointer;
+          font-size: 0.9rem;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          transition: all 0.3s;
+          align-self: flex-start;
+      }
+      
+      .recognize-btn:hover {
+          background-color: #3d8b40;
+          transform: scale(1.05);
+      }
+       
+/* 简化识别结果样式 */
+.recognize-result {
+    margin-top: 10px;
+    padding: 12px;
+    background-color: #e8f5e9;
+    border-radius: 6px;
+    border-left: 3px solid #4CAF50;
+    font-size: 0.9rem;
+}
+
+.recognize-result p {
+    margin-bottom: 6px;
+    line-height: 1.4;
+}
+
+.recognize-result strong {
+    color: #2e7d32;
+    display: inline-block;
+    min-width: 50px;
+}
+   
+       @keyframes slideIn {
+           from {
+               opacity: 0;
+               transform: translateY(10px);
+           }
+           to {
+               opacity: 1;
+               transform: translateY(0);
+           }
+       }
+       
+       .recognize-result p {
+           margin-bottom: 8px;
+           line-height: 1.5;
+       }
+       
+       .recognize-result strong {
+           color: #2e7d32;
+           display: inline-block;
+           min-width: 60px;
+       }
         
+        /* 新增：编辑套餐中的插入按钮样式 */
+        .insert-buttons {
+            display: flex;
+            gap: 8px;
+            margin-left: 8px;
+        }
+        
+        .insert-btn {
+            padding: 4px 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: white;
+            cursor: pointer;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.3s;
+        }
+        
+        .insert-btn:hover {
+            border-color: #e31837;
+            background-color: #fff5f5;
+            color: #e31837;
+        }
+        
+        .insert-btn.up {
+            border-color: #4CAF50;
+            color: #4CAF50;
+        }
+        
+        .insert-btn.down {
+            border-color: #2196F3;
+            color: #2196F3;
+        }
+        
+        /* 其他样式保持不变... */
+        @media (max-width: 768px) {
+            .delivery-paste-area {
+                padding: 12px;
+                margin-bottom: 12px;
+            }
+            
+            #pasteTextarea {
+                min-height: 70px;
+                font-size: 0.85rem;
+            }
+            
+            .recognize-btn {
+                padding: 8px 14px;
+                font-size: 0.85rem;
+                width: 100%;
+                justify-content: center;
+            }
+        }
         @media (max-width: 768px) {
             .main-content {
                 flex-direction: row;
@@ -2641,8 +2801,37 @@
             .user-order-feedback-container {
                 padding: 12px;
             }
+            
+            /* 移动端优化宅急送识别区域 */
+            .delivery-paste-area {
+                padding: 10px;
+            }
+            
+            .insert-buttons {
+                flex-direction: column;
+                gap: 4px;
+            }
+        }
+        /* 让整个配送表单更紧凑 */
+        .manual-fields {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
         
+        .form-group {
+            margin-bottom: 12px;
+        }
+        
+        .form-input, textarea {
+            padding: 8px 12px;
+            font-size: 0.9rem;
+        }
+        
+        .form-label {
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+        }
         /* 确保在桌面端保持左右布局 */
         @media (min-width: 769px) {
             .main-content {
@@ -2664,6 +2853,7 @@
             .delivery-form {
                 order: 1;
             }
+			
         }
     </style>
 </head>
@@ -3839,6 +4029,519 @@
             });
         }
 
+// ==================== 地址信息自动识别函数 ====================
+// ==================== 综合地址信息自动识别函数 ====================
+function recognizeDeliveryInfo(text) {
+    // 初始化结果
+    const result = {
+        name: '',
+        phone: '',
+        address: '',
+        success: false
+    };
+
+    console.log('原始输入:', text); // 调试用
+    
+    // 1. 标准化文本
+    let processedText = text
+        .replace(/：/g, ':') // 全角冒号转半角
+        .replace(/\r\n/g, '\n') // 统一换行符
+        .replace(/\r/g, '\n')
+        .trim();
+    
+    console.log('标准化后:', processedText);
+    
+    // 2. 判断是否为带标签的格式化文本
+    const hasLabels = /(收件人|姓名|手机|电话|所在地区|详细地址)[:\s]/.test(processedText);
+    const hasMultipleLines = processedText.includes('\n') && processedText.split('\n').length >= 2;
+    
+    // 策略1：如果有多行且有标签，使用标签识别法
+    if (hasMultipleLines && hasLabels) {
+        console.log('使用标签识别法');
+        return recognizeWithLabels(processedText);
+    }
+    
+    // 策略2：如果是单行或没有标签，使用智能分割法
+    console.log('使用智能分割法');
+    return recognizeWithSmartSplit(processedText);
+}
+
+// ==================== 标签识别法（针对格式化文本） ====================
+function recognizeWithLabels(text) {
+    const result = {
+        name: '',
+        phone: '',
+        address: '',
+        success: false
+    };
+    
+    const lines = text.split('\n').map(line => line.trim()).filter(line => line);
+    
+    console.log('标签识别 - 分割行:', lines);
+    
+    // 定义一个临时变量来存储地区信息
+    let areaPart = '';
+    let addressPart = '';
+    
+    // 逐行处理
+    lines.forEach(line => {
+        const lowerLine = line.toLowerCase();
+        
+        // 姓名行
+        if (/收件人[:\s]|姓名[:\s]|收货人[:\s]/.test(lowerLine) && !result.name) {
+            const nameMatch = line.match(/(?:收件人[:：\s]?|姓名[:：\s]?|收货人[:：\s]?)?([\u4e00-\u9fa5]+)/);
+            if (nameMatch && nameMatch[1]) {
+                result.name = nameMatch[1];
+                console.log('标签识别 - 找到姓名:', result.name);
+            }
+        }
+        
+        // 手机号行
+        if (/手机[:\s]|电话[:\s]|联系方式[:\s]/.test(lowerLine) && !result.phone) {
+            const phoneMatch = line.match(/(1[3-9]\d{9})/);
+            if (phoneMatch) {
+                result.phone = phoneMatch[0];
+                console.log('标签识别 - 找到手机:', result.phone);
+            }
+        }
+        
+        // 所在地区行
+        if (/所在地区[:\s]|地区[:\s]/.test(lowerLine)) {
+            const areaMatch = line.match(/(?:所在地区[:：\s]?|地区[:：\s]?)?(.+)/);
+            if (areaMatch && areaMatch[1]) {
+                areaPart = areaMatch[1].trim();
+                console.log('标签识别 - 找到地区:', areaPart);
+            }
+        }
+        
+        // 详细地址行
+        if (/详细地址[:\s]|地址[:\s]/.test(lowerLine)) {
+            const addressMatch = line.match(/(?:详细地址[:：\s]?|地址[:：\s]?)?(.+)/);
+            if (addressMatch && addressMatch[1]) {
+                addressPart = addressMatch[1].trim();
+                console.log('标签识别 - 找到地址:', addressPart);
+            }
+        }
+    });
+    
+    // 合并地区信息
+    if (areaPart && addressPart) {
+        result.address = areaPart + addressPart;
+    } else if (areaPart) {
+        result.address = areaPart;
+    } else if (addressPart) {
+        result.address = addressPart;
+    }
+    
+    // 如果标签法没找到姓名，尝试其他方法
+    if (!result.name) {
+        // 尝试找2-4个汉字的行作为姓名
+        for (let line of lines) {
+            const simpleNameMatch = line.match(/^([\u4e00-\u9fa5]{2,4})$/);
+            if (simpleNameMatch && !line.includes('手机') && !line.includes('电话') && !line.includes('地址')) {
+                result.name = simpleNameMatch[1];
+                console.log('标签识别 - 补充姓名:', result.name);
+                break;
+            }
+        }
+    }
+    
+    // 如果标签法没找到手机号，搜索所有行
+    if (!result.phone) {
+        for (let line of lines) {
+            const phoneMatch = line.match(/(1[3-9]\d{9})/);
+            if (phoneMatch) {
+                result.phone = phoneMatch[0];
+                console.log('标签识别 - 补充手机:', result.phone);
+                break;
+            }
+        }
+    }
+    
+    // 如果地址为空，组合所有不包含姓名和电话的行
+    if (!result.address || result.address.length < 5) {
+        let addressParts = [];
+        for (let line of lines) {
+            // 排除姓名、电话行和标签行
+            if (!line.includes(result.name) && !line.match(/(1[3-9]\d{9})/) &&
+                !line.includes('收件人') && !line.includes('姓名') && 
+                !line.includes('手机') && !line.includes('电话') &&
+                !line.includes('所在地区') && !line.includes('详细地址')) {
+                addressParts.push(line);
+            }
+        }
+        if (addressParts.length > 0) {
+            result.address = addressParts.join('');
+            console.log('标签识别 - 补充地址:', result.address);
+        }
+    }
+    
+    // 清理地址
+    if (result.address) {
+        result.address = result.address
+            .replace(/^[，。,.、;；\s]+|[，。,.、;；\s]+$/g, '')
+            .replace(/\s+/g, '');
+    }
+    
+    // 判断成功条件
+    result.success = result.phone && result.address && result.name;
+    
+    console.log('标签识别 - 最终结果:', result);
+    return result;
+}
+
+// ==================== 智能分割法（针对连续文本） ====================
+// ==================== 综合地址信息自动识别函数 ====================
+function recognizeDeliveryInfo(text) {
+    // 初始化结果
+    const result = {
+        name: '',
+        phone: '',
+        address: '',
+        success: false
+    };
+
+    console.log('原始输入:', text); // 调试用
+    
+    // 1. 标准化文本
+    let processedText = text
+        .replace(/：/g, ':') // 全角冒号转半角
+        .replace(/\r\n/g, '\n') // 统一换行符
+        .replace(/\r/g, '\n')
+        .trim();
+    
+    console.log('标准化后:', processedText);
+    
+    // 2. 判断是否为带标签的格式化文本
+    const hasLabels = /(收件人|姓名|手机|电话|所在地区|详细地址)[:\s]/.test(processedText);
+    const hasMultipleLines = processedText.includes('\n') && processedText.split('\n').length >= 2;
+    
+    // 策略1：如果有多行且有标签，使用标签识别法
+    if (hasMultipleLines && hasLabels) {
+        console.log('使用标签识别法');
+        return recognizeWithLabels(processedText);
+    }
+    
+    // 策略2：如果是单行或没有标签，使用智能分割法
+    console.log('使用智能分割法');
+    return recognizeWithSmartSplit(processedText);
+}
+
+// ==================== 标签识别法（针对格式化文本） ====================
+function recognizeWithLabels(text) {
+    const result = {
+        name: '',
+        phone: '',
+        address: '',
+        success: false
+    };
+    
+    const lines = text.split('\n').map(line => line.trim()).filter(line => line);
+    
+    console.log('标签识别 - 分割行:', lines);
+    
+    // 定义标签关键词（用于排除）
+    const labelKeywords = ['收件人', '姓名', '收货人', '手机', '电话', '联系方式', '所在地区', '详细地址', '地址'];
+    
+    // 定义一个临时变量来存储地区信息
+    let areaPart = '';
+    let addressPart = '';
+    
+    // 逐行处理
+    lines.forEach(line => {
+        const lowerLine = line.toLowerCase();
+        
+        // 姓名行 - 优化：确保不会将标签本身识别为姓名
+        if (/收件人[:\s]|姓名[:\s]|收货人[:\s]/.test(lowerLine) && !result.name) {
+            // 使用更精确的正则，匹配标签后的内容
+            const nameMatch = line.match(/(?:收件人[:：\s]+|姓名[:：\s]+|收货人[:：\s]+)([\u4e00-\u9fa5]{2,4})/);
+            if (nameMatch && nameMatch[1]) {
+                // 检查提取的内容是否包含标签关键词
+                const extractedName = nameMatch[1];
+                const isLabel = labelKeywords.some(keyword => extractedName.includes(keyword));
+                
+                if (!isLabel) {
+                    result.name = extractedName;
+                    console.log('标签识别 - 找到姓名:', result.name);
+                } else {
+                    console.log('标签识别 - 忽略标签作为姓名:', extractedName);
+                }
+            }
+        }
+        
+        // 手机号行
+        if (/手机[:\s]|电话[:\s]|联系方式[:\s]/.test(lowerLine) && !result.phone) {
+            const phoneMatch = line.match(/(1[3-9]\d{9})/);
+            if (phoneMatch) {
+                result.phone = phoneMatch[0];
+                console.log('标签识别 - 找到手机:', result.phone);
+            }
+        }
+        
+        // 所在地区行
+        if (/所在地区[:\s]|地区[:\s]/.test(lowerLine)) {
+            const areaMatch = line.match(/(?:所在地区[:：\s]+|地区[:：\s]+)(.+)/);
+            if (areaMatch && areaMatch[1]) {
+                areaPart = areaMatch[1].trim();
+                console.log('标签识别 - 找到地区:', areaPart);
+            }
+        }
+        
+        // 详细地址行
+        if (/详细地址[:\s]|地址[:\s]/.test(lowerLine)) {
+            const addressMatch = line.match(/(?:详细地址[:：\s]+|地址[:：\s]+)(.+)/);
+            if (addressMatch && addressMatch[1]) {
+                addressPart = addressMatch[1].trim();
+                console.log('标签识别 - 找到地址:', addressPart);
+            }
+        }
+    });
+    
+    // 合并地区信息
+    if (areaPart && addressPart) {
+        result.address = areaPart + addressPart;
+    } else if (areaPart) {
+        result.address = areaPart;
+    } else if (addressPart) {
+        result.address = addressPart;
+    }
+    
+    // 如果标签法没找到姓名，尝试其他方法
+    if (!result.name) {
+        // 尝试找2-4个汉字的行作为姓名
+        for (let line of lines) {
+            // 排除包含标签关键词的行
+            const hasLabelInLine = labelKeywords.some(keyword => line.includes(keyword));
+            if (hasLabelInLine) continue;
+            
+            const simpleNameMatch = line.match(/^([\u4e00-\u9fa5]{2,4})$/);
+            if (simpleNameMatch) {
+                result.name = simpleNameMatch[1];
+                console.log('标签识别 - 补充姓名:', result.name);
+                break;
+            }
+        }
+    }
+    
+    // 如果标签法没找到手机号，搜索所有行
+    if (!result.phone) {
+        for (let line of lines) {
+            const phoneMatch = line.match(/(1[3-9]\d{9})/);
+            if (phoneMatch) {
+                result.phone = phoneMatch[0];
+                console.log('标签识别 - 补充手机:', result.phone);
+                break;
+            }
+        }
+    }
+    
+    // 如果地址为空，组合所有不包含姓名和电话的行
+    if (!result.address || result.address.length < 5) {
+        let addressParts = [];
+        for (let line of lines) {
+            // 排除姓名、电话行和标签行
+            const hasLabelInLine = labelKeywords.some(keyword => line.includes(keyword));
+            const hasPhoneInLine = /1[3-9]\d{9}/.test(line);
+            const hasNameInLine = result.name && line.includes(result.name);
+            
+            if (!hasLabelInLine && !hasPhoneInLine && !hasNameInLine) {
+                addressParts.push(line);
+            }
+        }
+        if (addressParts.length > 0) {
+            result.address = addressParts.join('');
+            console.log('标签识别 - 补充地址:', result.address);
+        }
+    }
+    
+    // 清理地址
+    if (result.address) {
+        result.address = result.address
+            .replace(/^[，。,.、;；\s]+|[，。,.、;；\s]+$/g, '')
+            .replace(/\s+/g, '');
+    }
+    
+    // 判断成功条件
+    result.success = result.phone && result.address && result.name;
+    
+    console.log('标签识别 - 最终结果:', result);
+    return result;
+}
+
+// ==================== 智能分割法（针对连续文本） ====================
+function recognizeWithSmartSplit(text) {
+    const result = {
+        name: '',
+        phone: '',
+        address: '',
+        success: false
+    };
+    
+    console.log('智能分割 - 输入文本:', text);
+    
+    // 定义标签关键词（用于排除）
+    const labelKeywords = ['收件人', '姓名', '收货人', '手机', '电话', '联系方式', '所在地区', '详细地址', '地址'];
+    
+    // 1. 先提取手机号（最明确的）
+    const phoneRegex = /1[3-9]\d{9}/g;
+    const phoneMatches = text.match(phoneRegex);
+    if (phoneMatches && phoneMatches.length > 0) {
+        result.phone = phoneMatches[0];
+        // 从文本中移除手机号
+        text = text.replace(result.phone, '');
+        console.log('智能分割 - 提取手机:', result.phone, '剩余文本:', text);
+    }
+    
+    // 2. 按常见分隔符分割
+    const separators = /[,，、;；\n]/;
+    const parts = text.split(separators).map(part => part.trim()).filter(part => part);
+    
+    console.log('智能分割 - 分割后部分:', parts);
+    
+    // 3. 分析每个部分
+    for (let part of parts) {
+        if (!part) continue;
+        
+        console.log('智能分割 - 分析部分:', part);
+        
+        // 检查是否是姓名（2-4个汉字）
+        if (part.length >= 2 && part.length <= 4) {
+            // 检查是否包含标签关键词
+            const isLabel = labelKeywords.some(keyword => part.includes(keyword));
+            if (isLabel) {
+                console.log('智能分割 - 忽略标签部分:', part);
+                // 将标签部分添加到地址（去掉标签关键词）
+                const cleanedPart = part.replace(/收件人[:：\s]*|姓名[:：\s]*|收货人[:：\s]*/gi, '');
+                if (cleanedPart) {
+                    if (result.address) {
+                        result.address += cleanedPart;
+                    } else {
+                        result.address = cleanedPart;
+                    }
+                }
+                continue;
+            }
+            
+            // 常见姓氏
+            const commonSurnames = ['李', '王', '张', '刘', '陈', '杨', '赵', '黄', '周', '吴', '徐', '孙', '胡', '朱', '高', '林',
+                                   '何', '郭', '马', '罗', '梁', '宋', '郑', '谢', '韩', '唐', '冯', '于', '董', '萧', '程', '曹',
+                                   '袁', '邓', '许', '傅', '沈', '曾', '彭', '吕', '苏', '卢', '蒋', '蔡', '贾', '丁', '魏', '薛',
+                                   '叶', '阎', '余', '潘', '杜', '戴', '夏', '钟', '汪', '田', '任', '姜', '范', '方', '石', '姚',
+                                   '谭', '廖', '邹', '熊', '金', '陆', '郝', '孔', '白', '崔', '康', '毛', '邱', '秦', '江', '史',
+                                   '顾', '侯', '邵', '孟', '龙', '万', '段', '漕', '钱', '汤', '尹', '黎', '易', '常', '武', '乔',
+                                   '贺', '赖', '龚', '文'];
+            
+            const firstChar = part.charAt(0);
+            const isName = commonSurnames.includes(firstChar) || 
+                          part.includes('先生') || part.includes('女士') || 
+                          part.includes('小姐') || part.includes('师傅');
+            
+            // 检查是否包含地址关键词（不是地址）
+            const addressKeywords = ['省', '市', '区', '县', '街道', '镇', '乡', '村', 
+                                    '路', '街', '道', '巷', '弄', '号', '栋', '单元', 
+                                    '楼', '层', '室', '小区', '花园', '广场', '大厦', 
+                                    '公寓', '校区', '宿舍', '大学', '学院', '学校'];
+            
+            const hasAddressKeyword = addressKeywords.some(keyword => part.includes(keyword));
+            
+            if (isName && !hasAddressKeyword && !result.name) {
+                result.name = part;
+                console.log('智能分割 - 识别为姓名:', part);
+                continue;
+            }
+        }
+        
+        // 剩余的部分都当作地址
+        if (part && !result.address.includes(part)) {
+            // 检查是否包含标签，如果包含则清理
+            const hasLabel = labelKeywords.some(keyword => part.includes(keyword));
+            if (hasLabel) {
+                // 清理标签
+                const cleanedPart = part.replace(/收件人[:：\s]*|姓名[:：\s]*|收货人[:：\s]*|手机[:：\s]*|电话[:：\s]*|联系方式[:：\s]*|所在地区[:：\s]*|详细地址[:：\s]*|地址[:：\s]*/gi, '');
+                if (cleanedPart) {
+                    if (result.address) {
+                        result.address += cleanedPart;
+                    } else {
+                        result.address = cleanedPart;
+                    }
+                    console.log('智能分割 - 清理标签后添加到地址:', cleanedPart);
+                }
+            } else {
+                if (result.address) {
+                    result.address += part;
+                } else {
+                    result.address = part;
+                }
+                console.log('智能分割 - 添加到地址:', part, '当前地址:', result.address);
+            }
+        }
+    }
+    
+    // 4. 如果还没有找到姓名，尝试其他方法
+    if (!result.name) {
+        // 尝试匹配"姓+先生/女士"模式
+        const namePattern = /([\u4e00-\u9fa5]{1,3})(先生|女士|小姐|师傅)/;
+        const nameMatch = text.match(namePattern);
+        if (nameMatch) {
+            result.name = nameMatch[1] + nameMatch[2];
+            console.log('智能分割 - 补充姓名(带称呼):', result.name);
+        } else {
+            // 尝试匹配单独的2-3个汉字（排除标签）
+            const chinesePattern = /[\u4e00-\u9fa5]{2,3}/g;
+            const chineseMatches = text.match(chinesePattern);
+            if (chineseMatches && chineseMatches.length > 0) {
+                // 过滤掉标签关键词
+                const filteredMatches = chineseMatches.filter(match => {
+                    return !labelKeywords.some(keyword => match.includes(keyword));
+                });
+                
+                if (filteredMatches.length > 0) {
+                    // 取第一个匹配的汉字序列作为姓名
+                    result.name = filteredMatches[0];
+                    console.log('智能分割 - 补充姓名(纯汉字):', result.name);
+                }
+            }
+        }
+    }
+    
+    // 5. 如果地址过长，可能是包含了姓名或电话
+    if (result.address) {
+        // 从地址中移除已识别的姓名
+        if (result.name && result.address.includes(result.name)) {
+            result.address = result.address.replace(result.name, '');
+        }
+        
+        // 从地址中移除手机号（如果还有）
+        if (result.phone && result.address.includes(result.phone)) {
+            result.address = result.address.replace(result.phone, '');
+        }
+    }
+    
+    // 6. 清理地址
+    if (result.address) {
+        result.address = result.address
+            .replace(/^[，。,.、;；\s]+|[，。,.、;；\s]+$/g, '')
+            .replace(/\s+/g, '');
+    }
+    
+    // 7. 判断是否成功
+    result.success = result.phone && result.address;
+    
+    // 特殊情况：如果地址包含特定关键词，即使没有姓名也认为成功
+    if (result.phone && result.address && !result.name) {
+        // 尝试从地址中提取可能的姓名（如"刘先生"在地址中）
+        const nameInAddress = result.address.match(/([\u4e00-\u9fa5]{2,4})(先生|女士|小姐|师傅)/);
+        if (nameInAddress) {
+            result.name = nameInAddress[1] + nameInAddress[2];
+            result.address = result.address.replace(result.name, '');
+            console.log('智能分割 - 从地址提取姓名:', result.name);
+        }
+        result.success = true;
+    }
+    
+    console.log('智能分割 - 最终结果:', result);
+    return result;
+}
         // ==================== 页面初始化 ====================
         document.addEventListener('DOMContentLoaded', async function() {
             try {
@@ -4553,18 +5256,71 @@
                             ${meal.supportDelivery !== false ? `
                             <div class="delivery-fields" id="deliveryFields" ${meal.supportDelivery === false ? 'style="display:none;"' : ''}>
                                 <div class="form-group">
-                                    <label class="form-label">收货人姓名 <span class="required">*</span></label>
-                                    <input type="text" class="form-input" id="customerName" placeholder="请输入姓名" required>
+                                    <label class="form-label">信息提供方式 <span class="required">*</span></label>
+                                    <div class="info-method-selector">
+                                        <label class="method-option">
+                                            <input type="radio" name="deliveryMethod" value="manual" checked>
+                                            <span>手动填写</span>
+                                        </label>
+                                        <label class="method-option">
+                                            <input type="radio" name="deliveryMethod" value="screenshot">
+                                            <span>上传截图</span>
+                                        </label>
+                                    </div>
                                 </div>
                                 
-                                <div class="form-group">
-                                    <label class="form-label">联系电话 <span class="required">*</span></label>
-                                    <input type="tel" class="form-input" id="customerPhone" placeholder="请输入手机号码" required>
+                                <div class="manual-fields" id="manualFields">
+                                    <!-- 粘贴识别区域 -->
+                               <div class="delivery-paste-area" id="deliveryPasteArea">
+                                   <textarea id="pasteTextarea" placeholder="请在这里粘贴您的配送信息"></textarea>
+                                   <button class="recognize-btn" id="recognizeBtn">
+                                       <i class="fas fa-magic"></i>
+                                       智能识别
+                                   </button>
+                               </div>
+                                    <div id="recognizeResult" style="display:none;"></div>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label">收货人姓名 <span class="required">*</span></label>
+                                        <input type="text" class="form-input" id="customerName" placeholder="请输入姓名" required>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label">联系电话 <span class="required">*</span></label>
+                                        <input type="tel" class="form-input" id="customerPhone" placeholder="请输入手机号码" required>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label">配送地址 <span class="required">*</span></label>
+                                        <input type="text" class="form-input" id="deliveryAddress" placeholder="请输入详细地址" required>
+                                    </div>
                                 </div>
                                 
-                                <div class="form-group">
-                                    <label class="form-label">配送地址 <span class="required">*</span></label>
-                                    <input type="text" class="form-input" id="deliveryAddress" placeholder="请输入详细地址" required>
+                                <div class="screenshot-fields hidden" id="screenshotFields">
+                                    <div class="form-group">
+                                        <label class="form-label">上传配送信息截图 <span class="required">*</span></label>
+                                        <div class="screenshot-upload-area" id="screenshotUploadArea">
+                                            <i class="fas fa-cloud-upload-alt"></i>
+                                            <p>点击或拖拽上传截图</p>
+                                            <p class="upload-hint">支持 JPG、PNG 格式，大小不超过 2MB，建议压缩后上传</p>
+                                            <input type="file" id="storeScreenshot" accept="image/*" style="display: none;">
+                                        </div>
+                                        <div class="screenshot-preview hidden" id="screenshotPreview">
+                                            <div class="screenshot-preview-container">
+                                                <img id="previewImage" src="" alt="截图预览">
+                                                <div class="image-info" id="imageInfo"></div>
+                                            </div>
+                                            <button type="button" class="remove-screenshot" id="removeScreenshot">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                        <div class="compress-progress" id="compressProgress">
+                                            <i class="fas fa-compress-alt"></i> 正在压缩图片... <span id="compressPercent">0%</span>
+                                        </div>
+                                        <div class="form-hint">
+                                            <i class="fas fa-lightbulb"></i> 系统会自动压缩图片到合适大小，确保上传速度
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             ` : ''}
@@ -4615,23 +5371,23 @@
                                 <div class="screenshot-method-fields hidden" id="screenshotMethodFields">
                                     <div class="form-group">
                                         <label class="form-label">上传门店截图 <span class="required">*</span></label>
-                                        <div class="screenshot-upload-area" id="screenshotUploadArea">
+                                        <div class="screenshot-upload-area" id="pickupScreenshotUploadArea">
                                             <i class="fas fa-cloud-upload-alt"></i>
                                             <p>点击或拖拽上传截图</p>
                                             <p class="upload-hint">支持 JPG、PNG 格式，大小不超过 2MB，建议压缩后上传</p>
-                                            <input type="file" id="storeScreenshot" accept="image/*" style="display: none;">
+                                            <input type="file" id="pickupStoreScreenshot" accept="image/*" style="display: none;">
                                         </div>
-                                        <div class="screenshot-preview hidden" id="screenshotPreview">
+                                        <div class="screenshot-preview hidden" id="pickupScreenshotPreview">
                                             <div class="screenshot-preview-container">
-                                                <img id="previewImage" src="" alt="截图预览">
-                                                <div class="image-info" id="imageInfo"></div>
+                                                <img id="pickupPreviewImage" src="" alt="截图预览">
+                                                <div class="image-info" id="pickupImageInfo"></div>
                                             </div>
-                                            <button type="button" class="remove-screenshot" id="removeScreenshot">
+                                            <button type="button" class="remove-screenshot" id="removePickupScreenshot">
                                                 <i class="fas fa-times"></i>
                                             </button>
                                         </div>
-                                        <div class="compress-progress" id="compressProgress">
-                                            <i class="fas fa-compress-alt"></i> 正在压缩图片... <span id="compressPercent">0%</span>
+                                        <div class="compress-progress" id="pickupCompressProgress">
+                                            <i class="fas fa-compress-alt"></i> 正在压缩图片... <span id="pickupCompressPercent">0%</span>
                                         </div>
                                         <div class="form-hint">
                                             <i class="fas fa-lightbulb"></i> 系统会自动压缩图片到合适大小，确保上传速度
@@ -4676,6 +5432,8 @@
 
             initOptionSelection(mealDetailPage);
             initDeliveryTypeToggle(mealDetailPage);
+            initDeliveryMethodToggle(mealDetailPage);
+            initPasteRecognition(mealDetailPage);
             initPickupMethod(mealDetailPage);
             initCart(mealDetailPage);
             initCheckout(mealDetailPage);
@@ -4945,6 +5703,124 @@
             });
         }
 
+        // ==================== 配送方式切换（手动填写/上传截图） ====================
+        function initDeliveryMethodToggle(container) {
+            container.querySelectorAll('input[name="deliveryMethod"]').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    const manualFields = container.querySelector('.manual-fields');
+                    const screenshotFields = container.querySelector('.screenshot-fields');
+
+                    if (this.value === 'manual') {
+                        manualFields.classList.remove('hidden');
+                        screenshotFields.classList.add('hidden');
+                    } else {
+                        screenshotFields.classList.remove('hidden');
+                        manualFields.classList.add('hidden');
+                    }
+                });
+            });
+        }
+
+        // ==================== 粘贴识别功能 ====================
+        function initPasteRecognition(container) {
+            const pasteTextarea = container.querySelector('#pasteTextarea');
+            const recognizeBtn = container.querySelector('#recognizeBtn');
+            const recognizeResult = container.querySelector('#recognizeResult');
+            const customerName = container.querySelector('#customerName');
+            const customerPhone = container.querySelector('#customerPhone');
+            const deliveryAddress = container.querySelector('#deliveryAddress');
+        
+            if (!pasteTextarea || !recognizeBtn) return;
+        
+            // 粘贴时自动识别（延迟执行，确保粘贴完成）
+            pasteTextarea.addEventListener('paste', function(e) {
+                setTimeout(() => {
+                    const text = pasteTextarea.value;
+                    if (text.trim()) {
+                        autoRecognize(text);
+                    }
+                }, 50);
+            });
+        
+            // 点击识别按钮
+            recognizeBtn.addEventListener('click', function() {
+                const text = pasteTextarea.value.trim();
+                if (!text) {
+                    showNotification('请先粘贴配送信息', 'error');
+                    pasteTextarea.focus();
+                    return;
+                }
+                
+                autoRecognize(text);
+            });
+        
+            // 输入时也可以触发识别（按回车键）
+            pasteTextarea.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && e.ctrlKey) {
+                    e.preventDefault();
+                    recognizeBtn.click();
+                }
+            });
+        
+            function autoRecognize(text) {
+                const result = recognizeDeliveryInfo(text);
+                
+                let resultHTML = '';
+                if (result.success) {
+                    resultHTML = `
+                        <div class="recognize-result">
+                            <p><strong>识别成功！</strong></p>
+                            
+                        </div>
+                    `;
+                    
+                    // 自动填充表单
+                    customerName.value = result.name;
+                    customerPhone.value = result.phone;
+                    deliveryAddress.value = result.address;
+                    
+                    // 添加应用按钮事件
+                    setTimeout(() => {
+                        const applyBtn = container.querySelector('#applyRecognition');
+                        if (applyBtn) {
+                            applyBtn.addEventListener('click', function() {
+                                customerName.value = result.name;
+                                customerPhone.value = result.phone;
+                                deliveryAddress.value = result.address;
+                                showNotification('识别结果已应用到表单', 'success');
+                            });
+                        }
+                    }, 100);
+                    
+                } else {
+                    resultHTML = `
+                        <div class="recognize-result" style="border-left-color: #e31837; background-color: #ffebee;">
+                            <p><strong>识别结果：</strong></p>
+                            <p><strong>姓名：</strong>${result.name || '未识别到姓名'}</p>
+                            <p><strong>电话：</strong>${result.phone || '未识别到电话'}</p>
+                            <p><strong>地址：</strong>${result.address || '未识别到地址'}</p>
+                            <p style="color: #e31837; margin-top: 8px; font-size: 0.8rem;">
+                                <i class="fas fa-exclamation-triangle"></i> 请手动补充信息
+                            </p>
+                        </div>
+                    `;
+                    
+                    // 部分填充表单
+                    if (result.name) customerName.value = result.name;
+                    if (result.phone) customerPhone.value = result.phone;
+                    if (result.address) deliveryAddress.value = result.address;
+                }
+                
+                recognizeResult.innerHTML = resultHTML;
+                recognizeResult.style.display = 'block';
+                
+                // 滚动到识别结果
+                recognizeResult.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'nearest'
+                });
+            }
+        }
         // ==================== 自提方式处理 ====================
         function initPickupMethod(container) {
             container.querySelectorAll('input[name="pickupMethod"]').forEach(radio => {
@@ -4962,54 +5838,108 @@
                 });
             });
 
-            const uploadArea = container.querySelector('.screenshot-upload-area');
-            if (uploadArea) {
-                const fileInput = uploadArea.querySelector('input[type="file"]');
-                const previewContainer = uploadArea.parentElement.querySelector('.screenshot-preview');
+            // 宅急送截图上传
+            const deliveryUploadArea = container.querySelector('#screenshotUploadArea');
+            if (deliveryUploadArea) {
+                const fileInput = deliveryUploadArea.querySelector('input[type="file"]');
+                const previewContainer = deliveryUploadArea.parentElement.querySelector('.screenshot-preview');
                 const previewImage = previewContainer ? previewContainer.querySelector('img') : null;
                 const removeBtn = previewContainer ? previewContainer.querySelector('.remove-screenshot') : null;
                 const compressProgress = container.querySelector('.compress-progress');
                 const compressPercent = compressProgress ? compressProgress.querySelector('#compressPercent') : null;
                 const imageInfo = container.querySelector('#imageInfo');
 
-                if (uploadArea && fileInput && previewContainer && previewImage && removeBtn) {
-                    uploadArea.addEventListener('click', function() {
+                if (deliveryUploadArea && fileInput && previewContainer && previewImage && removeBtn) {
+                    deliveryUploadArea.addEventListener('click', function() {
                         fileInput.click();
                     });
 
-                    uploadArea.addEventListener('dragover', function(e) {
+                    deliveryUploadArea.addEventListener('dragover', function(e) {
                         e.preventDefault();
                         this.style.borderColor = '#e31837';
                         this.style.backgroundColor = '#fff5f5';
                     });
 
-                    uploadArea.addEventListener('dragleave', function(e) {
+                    deliveryUploadArea.addEventListener('dragleave', function(e) {
                         e.preventDefault();
                         this.style.borderColor = '#ddd';
                         this.style.backgroundColor = '#f9f9f9';
                     });
 
-                    uploadArea.addEventListener('drop', function(e) {
+                    deliveryUploadArea.addEventListener('drop', function(e) {
                         e.preventDefault();
                         this.style.borderColor = '#ddd';
                         this.style.backgroundColor = '#f9f9f9';
 
                         if (e.dataTransfer.files.length) {
-                            handleFileSelect(e.dataTransfer.files[0], fileInput, previewContainer, previewImage, uploadArea, compressProgress, compressPercent, imageInfo);
+                            handleFileSelect(e.dataTransfer.files[0], fileInput, previewContainer, previewImage, deliveryUploadArea, compressProgress, compressPercent, imageInfo);
                         }
                     });
 
                     fileInput.addEventListener('change', function(e) {
                         if (e.target.files.length) {
-                            handleFileSelect(e.target.files[0], fileInput, previewContainer, previewImage, uploadArea, compressProgress, compressPercent, imageInfo);
+                            handleFileSelect(e.target.files[0], fileInput, previewContainer, previewImage, deliveryUploadArea, compressProgress, compressPercent, imageInfo);
                         }
                     });
 
                     removeBtn.addEventListener('click', function() {
                         fileInput.value = '';
                         previewContainer.classList.add('hidden');
-                        uploadArea.style.display = 'block';
+                        deliveryUploadArea.style.display = 'block';
                         if (compressProgress) compressProgress.classList.remove('active');
+                    });
+                }
+            }
+
+            // 自提截图上传
+            const pickupUploadArea = container.querySelector('#pickupScreenshotUploadArea');
+            if (pickupUploadArea) {
+                const pickupFileInput = pickupUploadArea.querySelector('input[type="file"]');
+                const pickupPreviewContainer = pickupUploadArea.parentElement.querySelector('.screenshot-preview');
+                const pickupPreviewImage = pickupPreviewContainer ? pickupPreviewContainer.querySelector('img') : null;
+                const pickupRemoveBtn = pickupPreviewContainer ? pickupPreviewContainer.querySelector('.remove-screenshot') : null;
+                const pickupCompressProgress = container.querySelector('#pickupCompressProgress');
+                const pickupCompressPercent = pickupCompressProgress ? pickupCompressProgress.querySelector('#pickupCompressPercent') : null;
+                const pickupImageInfo = container.querySelector('#pickupImageInfo');
+
+                if (pickupUploadArea && pickupFileInput && pickupPreviewContainer && pickupPreviewImage && pickupRemoveBtn) {
+                    pickupUploadArea.addEventListener('click', function() {
+                        pickupFileInput.click();
+                    });
+
+                    pickupUploadArea.addEventListener('dragover', function(e) {
+                        e.preventDefault();
+                        this.style.borderColor = '#e31837';
+                        this.style.backgroundColor = '#fff5f5';
+                    });
+
+                    pickupUploadArea.addEventListener('dragleave', function(e) {
+                        e.preventDefault();
+                        this.style.borderColor = '#ddd';
+                        this.style.backgroundColor = '#f9f9f9';
+                    });
+
+                    pickupUploadArea.addEventListener('drop', function(e) {
+                        e.preventDefault();
+                        this.style.borderColor = '#ddd';
+                        this.style.backgroundColor = '#f9f9f9';
+
+                        if (e.dataTransfer.files.length) {
+                            handleFileSelect(e.dataTransfer.files[0], pickupFileInput, pickupPreviewContainer, pickupPreviewImage, pickupUploadArea, pickupCompressProgress, pickupCompressPercent, pickupImageInfo);
+                        }
+                    });
+
+                    pickupFileInput.addEventListener('change', function(e) {
+                        if (e.target.files.length) {
+                            handleFileSelect(e.target.files[0], pickupFileInput, pickupPreviewContainer, pickupPreviewImage, pickupUploadArea, pickupCompressProgress, pickupCompressPercent, pickupImageInfo);
+                        }
+                    });
+
+                    pickupRemoveBtn.addEventListener('click', function() {
+                        pickupFileInput.value = '';
+                        pickupPreviewContainer.classList.add('hidden');
+                        pickupUploadArea.style.display = 'block';
+                        if (pickupCompressProgress) pickupCompressProgress.classList.remove('active');
                     });
                 }
             }
@@ -5242,32 +6172,76 @@
                     let pickupType = '';
 
                     if (deliveryType === 'delivery') {
-                        const customerName = container.querySelector('#customerName') ? container.querySelector('#customerName').value.trim() : '';
-                        const customerPhone = container.querySelector('#customerPhone') ? container.querySelector('#customerPhone').value.trim() : '';
-                        const deliveryAddress = container.querySelector('#deliveryAddress') ? container.querySelector('#deliveryAddress').value.trim() : '';
+                        const deliveryMethod = container.querySelector('input[name="deliveryMethod"]:checked').value;
+                        
+                        if (deliveryMethod === 'manual') {
+                            const customerName = container.querySelector('#customerName') ? container.querySelector('#customerName').value.trim() : '';
+                            const customerPhone = container.querySelector('#customerPhone') ? container.querySelector('#customerPhone').value.trim() : '';
+                            const deliveryAddress = container.querySelector('#deliveryAddress') ? container.querySelector('#deliveryAddress').value.trim() : '';
 
-                        if (!customerName) {
-                            showNotification('请输入收货人姓名', 'error');
-                            const nameInput = container.querySelector('#customerName');
-                            if (nameInput) nameInput.focus();
+                            if (!customerName) {
+                                showNotification('请输入收货人姓名', 'error');
+                                const nameInput = container.querySelector('#customerName');
+                                if (nameInput) nameInput.focus();
+                                return;
+                            }
+
+                            if (!customerPhone) {
+                                showNotification('请输入联系电话', 'error');
+                                const phoneInput = container.querySelector('#customerPhone');
+                                if (phoneInput) phoneInput.focus();
+                                return;
+                            }
+
+                            if (!deliveryAddress) {
+                                showNotification('请输入配送地址', 'error');
+                                const addressInput = container.querySelector('#deliveryAddress');
+                                if (addressInput) addressInput.focus();
+                                return;
+                            }
+
+                            deliveryInfo = `配送方式：宅急送\n信息提供：手动填写\n收货人：${customerName}\n联系电话：${customerPhone}\n配送地址：${deliveryAddress}`;
+                        } else {
+                            const screenshotInput = container.querySelector('#storeScreenshot');
+
+                            if (!screenshotInput.files || !screenshotInput.files.length) {
+                                showNotification('请上传配送信息截图', 'error');
+                                return;
+                            }
+
+                            const submitStatus = document.getElementById('submitStatus');
+                            submitStatus.textContent = '正在处理图片...';
+
+                            try {
+                                const file = screenshotInput.files[0];
+                                const reader = new FileReader();
+
+                                reader.onload = function(e) {
+                                    screenshotData = e.target.result;
+                                    hasScreenshot = true;
+
+                                    deliveryInfo = `配送方式：宅急送\n信息提供：截图上传`;
+
+                                    submitStatus.textContent = '图片处理完成';
+
+                                    setTimeout(() => {
+                                        submitStatus.textContent = '';
+                                        prepareOrderData(deliveryType, orderNote, deliveryInfo, hasScreenshot, screenshotData, pickupType);
+                                    }, 500);
+                                };
+
+                                reader.onerror = function() {
+                                    submitStatus.textContent = '图片读取失败，请重试';
+                                    showNotification('图片读取失败，请重试', 'error');
+                                };
+
+                                reader.readAsDataURL(file);
+                            } catch (error) {
+                                submitStatus.textContent = '图片处理失败';
+                                showNotification('图片处理失败: ' + error.message, 'error');
+                            }
                             return;
                         }
-
-                        if (!customerPhone) {
-                            showNotification('请输入联系电话', 'error');
-                            const phoneInput = container.querySelector('#customerPhone');
-                            if (phoneInput) phoneInput.focus();
-                            return;
-                        }
-
-                        if (!deliveryAddress) {
-                            showNotification('请输入配送地址', 'error');
-                            const addressInput = container.querySelector('#deliveryAddress');
-                            if (addressInput) addressInput.focus();
-                            return;
-                        }
-
-                        deliveryInfo = `配送方式：宅急送\n收货人：${customerName}\n联系电话：${customerPhone}\n配送地址：${deliveryAddress}`;
                     } else {
                         pickupType = container.querySelector('input[name="pickupType"]:checked').value;
                         const pickupMethod = container.querySelector('input[name="pickupMethod"]:checked').value;
@@ -5292,7 +6266,7 @@
 
                             deliveryInfo = `配送方式：到店自提\n自提方式：${pickupType}\n信息提供：手动填写\n自提城市：${pickupCity}\n自提门店：${pickupStore}`;
                         } else {
-                            const screenshotInput = container.querySelector('#storeScreenshot');
+                            const screenshotInput = container.querySelector('#pickupStoreScreenshot');
 
                             if (!screenshotInput.files || !screenshotInput.files.length) {
                                 showNotification('请上传门店截图', 'error');
@@ -5539,6 +6513,15 @@
                 if (pickupFields) pickupFields.classList.add('hidden');
             }
 
+            const manualMethodRadio = container.querySelector('input[name="deliveryMethod"][value="manual"]');
+            if (manualMethodRadio) {
+                manualMethodRadio.checked = true;
+                const manualFields = container.querySelector('.manual-fields');
+                const screenshotFields = container.querySelector('.screenshot-fields');
+                if (manualFields) manualFields.classList.remove('hidden');
+                if (screenshotFields) screenshotFields.classList.add('hidden');
+            }
+
             const textMethodRadio = container.querySelector('input[name="pickupMethod"][value="text"]');
             if (textMethodRadio) {
                 textMethodRadio.checked = true;
@@ -5555,6 +6538,21 @@
                 screenshotInput.value = '';
                 if (previewContainer) previewContainer.classList.add('hidden');
                 if (uploadArea) uploadArea.style.display = 'block';
+            }
+
+            const pickupScreenshotInput = container.querySelector('#pickupStoreScreenshot');
+            const pickupPreviewContainer = container.querySelector('#pickupScreenshotPreview');
+            const pickupUploadArea = container.querySelector('#pickupScreenshotUploadArea');
+            if (pickupScreenshotInput) {
+                pickupScreenshotInput.value = '';
+                if (pickupPreviewContainer) pickupPreviewContainer.classList.add('hidden');
+                if (pickupUploadArea) pickupUploadArea.style.display = 'block';
+            }
+
+            const recognizeResult = container.querySelector('#recognizeResult');
+            if (recognizeResult) {
+                recognizeResult.innerHTML = '';
+                recognizeResult.style.display = 'none';
             }
         }
 
@@ -6886,10 +7884,10 @@
 
                     if (group.items && group.items.length > 0) {
                         group.items.forEach((item, itemIndex) => {
-                            addOptionItemToGroup(groupId, item.name, item.addPrice || 0);
+                            addOptionItemToGroup(groupId, item.name, item.addPrice || 0, itemIndex);
                         });
                     } else {
-                        addOptionItemToGroup(groupId, '选项1', 0);
+                        addOptionItemToGroup(groupId, '选项1', 0, 0);
                     }
                 });
             } else {
@@ -6909,7 +7907,7 @@
             });
         }
 
-        // 添加选项组
+        // ==================== 修改后的添加选项组函数（支持插入） ====================
         function addOptionGroup() {
             const optionGroupsManagement = document.getElementById('optionGroupsManagement');
             const groupId = 'group-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
@@ -6977,16 +7975,16 @@
                 deleteOptionGroup(groupId);
             });
 
-            addOptionItemToGroup(groupId, '选项1', 0);
+            addOptionItemToGroup(groupId, '选项1', 0, 0);
         }
 
-        // 添加选项项
-        function addOptionItem(groupId) {
-            addOptionItemToGroup(groupId, '新选项', 0);
+        // ==================== 修改后的添加选项项函数（支持插入） ====================
+        function addOptionItem(groupId, position = 'bottom') {
+            addOptionItemToGroup(groupId, '新选项', 0, null, position);
         }
 
-        // 辅助函数：添加选项项到指定组
-        function addOptionItemToGroup(groupId, name, price) {
+        // 辅助函数：添加选项项到指定组（支持指定位置）
+        function addOptionItemToGroup(groupId, name, price, position = null, insertPosition = 'bottom') {
             const optionItemsList = document.getElementById(`option-items-${groupId}`);
             if (!optionItemsList) return;
 
@@ -6999,12 +7997,53 @@
                     <input type="text" class="form-input option-item-name-input" style="flex: 3;" placeholder="选项名称，例如：香辣鸡腿堡" value="${name || '选项'}">
                     <input type="number" class="form-input option-item-price-input" style="flex: 1;" placeholder="附加价格" min="0" step="0.01" value="${price || 0}">
                 </div>
-                <button class="action-btn delete-btn delete-option-item-btn" data-item-id="${itemId}">
-                    <i class="fas fa-trash"></i>
-                </button>
+                <div style="display: flex; gap: 4px;">
+                    <div class="insert-buttons">
+                        <button class="insert-btn up" title="在上方插入">
+                            <i class="fas fa-arrow-up"></i>
+                        </button>
+                        <button class="insert-btn down" title="在下方插入">
+                            <i class="fas fa-arrow-down"></i>
+                        </button>
+                    </div>
+                    <button class="action-btn delete-btn delete-option-item-btn" data-item-id="${itemId}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
             `;
 
-            optionItemsList.appendChild(optionItem);
+            // 根据插入位置添加
+            if (position !== null && position >= 0 && position < optionItemsList.children.length) {
+                if (insertPosition === 'top') {
+                    optionItemsList.insertBefore(optionItem, optionItemsList.children[position]);
+                } else {
+                    if (position + 1 < optionItemsList.children.length) {
+                        optionItemsList.insertBefore(optionItem, optionItemsList.children[position + 1]);
+                    } else {
+                        optionItemsList.appendChild(optionItem);
+                    }
+                }
+            } else {
+                optionItemsList.appendChild(optionItem);
+            }
+
+            // 添加上方插入按钮事件
+            const insertUpBtn = optionItem.querySelector('.insert-btn.up');
+            if (insertUpBtn) {
+                insertUpBtn.addEventListener('click', function() {
+                    const itemIndex = Array.from(optionItemsList.children).indexOf(optionItem);
+                    addOptionItemToGroup(groupId, '新选项', 0, itemIndex, 'top');
+                });
+            }
+
+            // 添加下方插入按钮事件
+            const insertDownBtn = optionItem.querySelector('.insert-btn.down');
+            if (insertDownBtn) {
+                insertDownBtn.addEventListener('click', function() {
+                    const itemIndex = Array.from(optionItemsList.children).indexOf(optionItem);
+                    addOptionItemToGroup(groupId, '新选项', 0, itemIndex, 'bottom');
+                });
+            }
 
             optionItem.querySelector('.delete-option-item-btn').addEventListener('click', function() {
                 deleteOptionItem(itemId);
@@ -7395,7 +8434,7 @@
                 deleteNewOptionGroup(groupId);
             });
 
-            addNewOptionItemToGroup(groupId, '选项1', 0);
+            addNewOptionItemToGroup(groupId, '选项1', 0, 0);
         }
 
         // 添加新选项项
@@ -7403,8 +8442,8 @@
             addNewOptionItemToGroup(groupId, '新选项', 0);
         }
 
-        // 辅助函数：添加新选项项到指定组
-        function addNewOptionItemToGroup(groupId, name, price) {
+        // 辅助函数：添加新选项项到指定组（支持插入）
+        function addNewOptionItemToGroup(groupId, name, price, position = null) {
             const optionItemsList = document.getElementById(`new-option-items-${groupId}`);
             if (!optionItemsList) return;
 
@@ -7417,12 +8456,44 @@
                     <input type="text" class="form-input new-option-item-name-input" style="flex: 3;" placeholder="选项名称，例如：香辣鸡腿堡" value="${name || '选项'}">
                     <input type="number" class="form-input new-option-item-price-input" style="flex: 1;" placeholder="附加价格" min="0" step="0.01" value="${price || 0}">
                 </div>
-                <button class="action-btn delete-btn new-delete-option-item-btn" data-item-id="${itemId}">
-                    <i class="fas fa-trash"></i>
-                </button>
+                <div style="display: flex; gap: 4px;">
+                    <div class="insert-buttons">
+                        <button class="insert-btn up" title="在上方插入">
+                            <i class="fas fa-arrow-up"></i>
+                        </button>
+                        <button class="insert-btn down" title="在下方插入">
+                            <i class="fas fa-arrow-down"></i>
+                        </button>
+                    </div>
+                    <button class="action-btn delete-btn new-delete-option-item-btn" data-item-id="${itemId}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
             `;
 
-            optionItemsList.appendChild(optionItem);
+            if (position !== null && position >= 0 && position < optionItemsList.children.length) {
+                optionItemsList.insertBefore(optionItem, optionItemsList.children[position]);
+            } else {
+                optionItemsList.appendChild(optionItem);
+            }
+
+            // 添加上方插入按钮事件
+            const insertUpBtn = optionItem.querySelector('.insert-btn.up');
+            if (insertUpBtn) {
+                insertUpBtn.addEventListener('click', function() {
+                    const itemIndex = Array.from(optionItemsList.children).indexOf(optionItem);
+                    addNewOptionItemToGroup(groupId, '新选项', 0, itemIndex);
+                });
+            }
+
+            // 添加下方插入按钮事件
+            const insertDownBtn = optionItem.querySelector('.insert-btn.down');
+            if (insertDownBtn) {
+                insertDownBtn.addEventListener('click', function() {
+                    const itemIndex = Array.from(optionItemsList.children).indexOf(optionItem);
+                    addNewOptionItemToGroup(groupId, '新选项', 0, itemIndex + 1);
+                });
+            }
 
             optionItem.querySelector('.new-delete-option-item-btn').addEventListener('click', function() {
                 deleteNewOptionItem(itemId);
