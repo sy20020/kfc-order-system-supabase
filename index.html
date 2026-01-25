@@ -2879,6 +2879,15 @@
 			#deliveryFields .form-group:has(#deliveryAddress[style*="display: none"]) {
 			    display: none;
 			}
+			.link-entered .header-btn,
+			    .link-entered .admin-btn,
+			    .link-entered .back-btn {
+			        display: none !important;
+			    }
+			    
+			    .link-entered .header-buttons {
+			        min-height: 40px; /* 保持高度避免布局跳动 */
+			    }
 			
         }
     </style>
@@ -4645,7 +4654,10 @@
 			document.addEventListener('DOMContentLoaded', async function() {
 				try {
 					showLoading('正在加载数据...');
-
+                     window.addEventListener('hashchange', function() {
+                                checkUrlForMeal();
+                            });
+						
 					if (!supabaseClient && window.supabase) {
 						supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 						console.log('Supabase 客户端已初始化');
@@ -4656,7 +4668,7 @@
 					}
 
 					await loadAllDataFromSupabase();
-
+                    checkUrlForMeal();
 					initHomePage();
 					initAdminPanel();
 					initMealManagement();
@@ -5005,84 +5017,92 @@
 
 			// ==================== 搜索套餐功能 ====================
 			function searchMeals(searchTerm) {
-				const mealGrid = document.getElementById('mealGrid');
-				const noMealsMessage = document.getElementById('noMealsMessage');
-
-				mealGrid.innerHTML = '';
-
-				if (!searchTerm) {
-					updateHomePage();
-					return;
-				}
-
-				const activeMeals = meals.filter(meal => meal.active !== false);
-
-				if (activeMeals.length === 0) {
-					noMealsMessage.style.display = 'block';
-					return;
-				}
-
-				noMealsMessage.style.display = 'none';
-
-				const searchTermLower = searchTerm.toLowerCase();
-
-				const filteredMeals = activeMeals.filter(meal => {
-					if (meal.name.toLowerCase().includes(searchTermLower)) return true;
-					if (meal.id.toLowerCase().includes(searchTermLower)) return true;
-					if (meal.price.toString().includes(searchTerm)) return true;
-					if (meal.tags && meal.tags.some(tag => tag.toLowerCase().includes(searchTermLower))) return true;
-					if (meal.description && meal.description.toLowerCase().includes(searchTermLower)) return true;
-					return false;
-				});
-
-				if (filteredMeals.length === 0) {
-					mealGrid.innerHTML =
-						`
-                    <div class="no-meals-message">
-                        <i class="fas fa-search"></i>
-                        <h3>未找到相关套餐</h3>
-                        <p>没有找到与"${searchTerm}"相关的套餐</p>
-                    </div>
-                `;
-					return;
-				}
-
-				filteredMeals.sort((a, b) => {
-					const orderDiff = (a.order || 9999) - (b.order || 9999);
-					if (orderDiff !== 0) return orderDiff;
-					return (b.createdAt || 0) - (a.createdAt || 0);
-				});
-
-				filteredMeals.forEach(meal => {
-					const mealCard = document.createElement('a');
-					mealCard.href = '#';
-					mealCard.className = 'meal-card';
-					if (meal.active === false) {
-						mealCard.classList.add('inactive');
-					}
-					mealCard.onclick = function(e) {
-						e.preventDefault();
-						if (meal.active === false) return;
-						showMealDetail(meal.id);
-					};
-
-					mealCard.innerHTML =
-						`
-                    <div class="meal-header">
-                        <h4 class="meal-name">${meal.name}</h4>
-                        <div class="meal-price">¥${meal.price}</div>
-                    </div>
-                    <div class="meal-description">
-                        ${meal.tags.map(tag => `<span class="meal-tag">${tag}</span>`).join('')}
-                        ${meal.supportDelivery === false ? '<span class="no-delivery-tag">仅自提</span>' : '<span class="delivery-tag">可宅急送</span>'}
-                        <p style="margin-top: 8px;">${meal.description}</p>
-                    </div>
-                `;
-
-					mealGrid.appendChild(mealCard);
-				});
+			    const mealGrid = document.getElementById('mealGrid');
+			    const noMealsMessage = document.getElementById('noMealsMessage');
+			
+			    mealGrid.innerHTML = '';
+			
+			    if (!searchTerm) {
+			        updateHomePage();
+			        return;
+			    }
+			
+			    const activeMeals = meals.filter(meal => meal.active !== false);
+			
+			    if (activeMeals.length === 0) {
+			        noMealsMessage.style.display = 'block';
+			        return;
+			    }
+			
+			    noMealsMessage.style.display = 'none';
+			
+			    const searchTermLower = searchTerm.toLowerCase();
+			
+			    const filteredMeals = activeMeals.filter(meal => {
+			        if (meal.name.toLowerCase().includes(searchTermLower)) return true;
+			        if (meal.id.toLowerCase().includes(searchTermLower)) return true;
+			        if (meal.price.toString().includes(searchTerm)) return true;
+			        if (meal.tags && meal.tags.some(tag => tag.toLowerCase().includes(searchTermLower))) return true;
+			        if (meal.description && meal.description.toLowerCase().includes(searchTermLower)) return true;
+			        return false;
+			    });
+			
+			    if (filteredMeals.length === 0) {
+			        mealGrid.innerHTML = `
+			            <div class="no-meals-message">
+			                <i class="fas fa-search"></i>
+			                <h3>未找到相关套餐</h3>
+			                <p>没有找到与"${searchTerm}"相关的套餐</p>
+			            </div>
+			        `;
+			        return;
+			    }
+			
+			    filteredMeals.sort((a, b) => {
+			        const orderDiff = (a.order || 9999) - (b.order || 9999);
+			        if (orderDiff !== 0) return orderDiff;
+			        return (b.createdAt || 0) - (a.createdAt || 0);
+			    });
+			
+			    filteredMeals.forEach(meal => {
+			        // 为每个套餐创建唯一的链接
+			        const mealLink = `#meal=${encodeURIComponent(meal.id)}`;
+			        
+			        const mealCard = document.createElement('a');
+			        mealCard.href = mealLink;  // 设置链接
+			        mealCard.className = 'meal-card';
+			        if (meal.active === false) {
+			            mealCard.classList.add('inactive');
+			        }
+			        
+			        // 添加点击事件监听器
+			        mealCard.addEventListener('click', function(e) {
+			            e.preventDefault();
+			            if (meal.active === false) return;
+			            
+			            // 更新URL
+			            const url = new URL(window.location);
+			            url.hash = `meal=${encodeURIComponent(meal.id)}`;
+			            window.history.pushState({}, '', url);
+			            
+			            showMealDetail(meal.id);
+			        });
+			
+			        mealCard.innerHTML = `
+			            <div class="meal-header">
+			                <h4 class="meal-name">${meal.name}</h4>
+			                <div class="meal-price">¥${meal.price}</div>
+			            </div>
+			            <div class="meal-description">
+			                ${meal.tags.map(tag => `<span class="meal-tag">${tag}</span>`).join('')}
+			                ${meal.supportDelivery === false ? '<span class="no-delivery-tag">仅自提</span>' : '<span class="delivery-tag">可宅急送</span>'}
+			                <p style="margin-top: 8px;">${meal.description}</p>
+			            </div>
+			        `;
+			
+			        mealGrid.appendChild(mealCard);
+			    });
 			}
-
 			// ==================== 管理员搜索套餐功能 ====================
 			function adminSearchMeals(searchTerm) {
 				const mealList = document.getElementById('mealList');
@@ -5240,75 +5260,84 @@
 			}
 
 			function updateHomePage() {
-				const mealGrid = document.getElementById('mealGrid');
-				const noMealsMessage = document.getElementById('noMealsMessage');
-				const mealSearchInput = document.getElementById('mealSearchInput');
-
-				if (mealSearchInput && mealSearchInput.value.trim()) {
-					searchMeals(mealSearchInput.value.trim());
-					return;
-				}
-
-				mealGrid.innerHTML = '';
-
-				const activeMeals = meals
-					.filter(meal => meal.active !== false)
-					.sort((a, b) => {
-						const orderDiff = (a.order || 9999) - (b.order || 9999);
-						if (orderDiff !== 0) return orderDiff;
-						return (b.createdAt || 0) - (a.createdAt || 0);
-					});
-
-				if (activeMeals.length === 0) {
-					noMealsMessage.style.display = 'block';
-					return;
-				}
-
-				noMealsMessage.style.display = 'none';
-
-				activeMeals.forEach(meal => {
-					const mealCard = document.createElement('a');
-					mealCard.href = '#';
-					mealCard.className = 'meal-card';
-					if (meal.active === false) {
-						mealCard.classList.add('inactive');
-					}
-					mealCard.onclick = function(e) {
-						e.preventDefault();
-						if (meal.active === false) return;
-						showMealDetail(meal.id);
-					};
-
-					mealCard.innerHTML =
-						`
-                    <div class="meal-header">
-                        <h4 class="meal-name">${meal.name}</h4>
-                        <div class="meal-price">¥${meal.price}</div>
-                    </div>
-                    <div class="meal-description">
-                        ${meal.tags.map(tag => `<span class="meal-tag">${tag}</span>`).join('')}
-                        ${meal.supportDelivery === false ? '<span class="no-delivery-tag">仅自提</span>' : '<span class="delivery-tag">可宅急送</span>'}
-                        <p style="margin-top: 8px;">${meal.description}</p>
-                    </div>
-                `;
-
-					mealGrid.appendChild(mealCard);
-				});
+			    const mealGrid = document.getElementById('mealGrid');
+			    const noMealsMessage = document.getElementById('noMealsMessage');
+			    const mealSearchInput = document.getElementById('mealSearchInput');
+			
+			    if (mealSearchInput && mealSearchInput.value.trim()) {
+			        searchMeals(mealSearchInput.value.trim());
+			        return;
+			    }
+			
+			    mealGrid.innerHTML = '';
+			
+			    const activeMeals = meals
+			        .filter(meal => meal.active !== false)
+			        .sort((a, b) => {
+			            const orderDiff = (a.order || 9999) - (b.order || 9999);
+			            if (orderDiff !== 0) return orderDiff;
+			            return (b.createdAt || 0) - (a.createdAt || 0);
+			        });
+			
+			    if (activeMeals.length === 0) {
+			        noMealsMessage.style.display = 'block';
+			        return;
+			    }
+			
+			    noMealsMessage.style.display = 'none';
+			
+			    activeMeals.forEach(meal => {
+			        // 为每个套餐创建唯一的链接
+			        const mealLink = `#meal=${encodeURIComponent(meal.id)}`;
+			        
+			        const mealCard = document.createElement('a');
+			        mealCard.href = mealLink;  // 设置链接
+			        mealCard.className = 'meal-card';
+			        if (meal.active === false) {
+			            mealCard.classList.add('inactive');
+			        }
+			        
+			        // 添加点击事件监听器
+			        mealCard.addEventListener('click', function(e) {
+			            e.preventDefault();
+			            if (meal.active === false) return;
+			            
+			            // 更新URL
+			            const url = new URL(window.location);
+			            url.hash = `meal=${encodeURIComponent(meal.id)}`;
+			            window.history.pushState({}, '', url);
+			            
+			            showMealDetail(meal.id);
+			        });
+			
+			        mealCard.innerHTML = `
+			            <div class="meal-header">
+			                <h4 class="meal-name">${meal.name}</h4>
+			                <div class="meal-price">¥${meal.price}</div>
+			            </div>
+			            <div class="meal-description">
+			                ${meal.tags.map(tag => `<span class="meal-tag">${tag}</span>`).join('')}
+			                ${meal.supportDelivery === false ? '<span class="no-delivery-tag">仅自提</span>' : '<span class="delivery-tag">可宅急送</span>'}
+			                <p style="margin-top: 8px;">${meal.description}</p>
+			            </div>
+			        `;
+			
+			        mealGrid.appendChild(mealCard);
+			    });
 			}
 
 			// ==================== 套餐详情页 ====================
-			function showMealDetail(mealId) {
-				const meal = meals.find(m => m.id === mealId);
-				if (!meal) return;
-
-				const mealDetailPage = document.getElementById('mealDetailPage');
-
-				mealDetailPage.innerHTML =
-					`
-                <a href="#" class="back-btn" onclick="showPage('homePage')">
-                    <i class="fas fa-arrow-left"></i>
-                    返回套餐列表
-                </a>
+	function showMealDetail(mealId) {
+	    const meal = meals.find(m => m.id === mealId);
+	    if (!meal) return;
+	
+	    const mealDetailPage = document.getElementById('mealDetailPage');
+	
+	    mealDetailPage.innerHTML = `
+	        <a href="#" class="back-btn" onclick="goBackToHome()">  <!-- 修改这里 -->
+	            <i class="fas fa-arrow-left"></i>
+	            返回套餐列表
+	        </a>
                 
                 <div class="main-content">
                     <div class="menu-section">
@@ -5642,20 +5671,127 @@ ${meal.supportDelivery !== false ? `
 			}
 
 			// ==================== 页面切换 ====================
-			function showPage(pageId) {
-				document.querySelectorAll('.meal-page-container').forEach(page => {
-					page.classList.remove('active');
-				});
+		// 添加这个新函数
+// 修改现有的 goBackToHome 函数
+function goBackToHome() {
+    // 清除URL中的套餐参数
+    const url = new URL(window.location);
+    url.hash = ''; // 清除hash部分
+    window.history.pushState({}, '', url);
+    
+    // 移除链接进入的标记
+    document.body.classList.remove('link-entered');
+    
+    showPage('homePage');
+}
 
-				document.getElementById(pageId).classList.add('active');
+// 修改页面加载完成后的初始化部分
+document.addEventListener('DOMContentLoaded', async function() {
+    try {
+        showLoading('正在加载数据...');
+        
+        // 先检查是否有从链接进入
+        checkUrlForMeal();
+        
+        window.addEventListener('hashchange', function() {
+            // 如果hash改变，也检查是否从链接进入
+            checkUrlForMeal();
+        });
+        
+        if (!supabaseClient && window.supabase) {
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            console.log('Supabase 客户端已初始化');
+        }
 
-				window.scrollTo(0, 0);
+        if (supabaseClient) {
+            await SupabaseData.initializeTables();
+        }
 
-				if (pageId === 'homePage') {
-					document.getElementById('viewOrdersBtn').style.display = 'flex';
-					document.getElementById('viewHomeBtn').style.display = 'none';
-				}
-			}
+        await loadAllDataFromSupabase();
+        
+        // 注意：这里不再调用 checkUrlForMeal()，因为上面已经调用了
+        
+        initHomePage();
+        initAdminPanel();
+        initMealManagement();
+        initNewMealManagement();
+        updateCartDisplay();
+        updateOrderBadge();
+        initImagePreview();
+        initPasswordVerification();
+        initStatusToggle();
+        initMyOrdersPage();
+        initHeaderButtons();
+        initSearchFunction();
+        initOrderConfirmModal();
+
+        document.getElementById('currentUserIdDisplay').textContent = currentUserId.substring(0, 12) + '...';
+
+        // 检查其他URL参数（如订单ID）
+        checkUrlParams();
+
+        showNotification('页面加载完成', 'success');
+        hideLoading();
+
+        console.log('页面初始化完成，数据已从Supabase加载');
+
+        startGlobalPolling();
+    } catch (error) {
+        console.error('页面初始化失败:', error);
+        showNotification('页面初始化失败，使用本地缓存数据', 'error');
+        hideLoading();
+
+        loadFromLocalCache();
+        
+        // 仍然检查是否有从链接进入
+        checkUrlForMeal();
+
+        initHomePage();
+        initAdminPanel();
+        initMealManagement();
+        initNewMealManagement();
+        updateCartDisplay();
+        updateOrderBadge();
+        initImagePreview();
+        initPasswordVerification();
+        initStatusToggle();
+        initMyOrdersPage();
+        initHeaderButtons();
+        initSearchFunction();
+        initOrderConfirmModal();
+
+        startGlobalPolling();
+    }
+});
+		
+		// 修改现有的 showPage 函数
+function showPage(pageId) {
+    document.querySelectorAll('.meal-page-container').forEach(page => {
+        page.classList.remove('active');
+    });
+
+    document.getElementById(pageId).classList.add('active');
+
+    window.scrollTo(0, 0);
+
+    if (pageId === 'homePage') {
+        // 移除链接进入的标记
+        document.body.classList.remove('link-entered');
+        
+        document.getElementById('viewOrdersBtn').style.display = 'flex';
+        document.getElementById('viewHomeBtn').style.display = 'none';
+        
+        // 检查URL中是否有套餐参数，如果有则显示对应套餐
+        checkUrlForMeal();
+    } else if (pageId === 'mealDetailPage') {
+        // 如果是从首页进入的（不是通过链接），则显示按钮
+        if (!window.location.hash || !window.location.hash.startsWith('#meal=')) {
+            document.body.classList.remove('link-entered');
+            document.getElementById('viewOrdersBtn').style.display = 'none';
+            document.getElementById('viewHomeBtn').style.display = 'flex';
+        }
+    }
+}
 
 			// ==================== 选项选择功能 ====================
 			function initOptionSelection(container) {
@@ -6811,19 +6947,37 @@ ${meal.supportDelivery !== false ? `
 				});
 			}
 
-			function checkUrlParams() {
-				const urlParams = new URLSearchParams(window.location.search);
-				const orderId = urlParams.get('order');
+function checkUrlParams() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const orderId = urlParams.get('order');
 
-				if (orderId) {
-					showMyOrdersPage();
+    if (orderId) {
+        showMyOrdersPage();
 
-					setTimeout(() => {
-						document.getElementById('orderSearchInput').value = orderId;
-						searchUserOrder(orderId);
-					}, 100);
-				}
-			}
+        setTimeout(() => {
+            document.getElementById('orderSearchInput').value = orderId;
+            searchUserOrder(orderId);
+        }, 100);
+    }
+}
+
+// 添加这个新函数来检查hash中的套餐参数
+function checkUrlForMeal() {
+    const hash = window.location.hash;
+    if (hash && hash.startsWith('#meal=')) {
+        const mealId = decodeURIComponent(hash.substring(6)); // 去掉 "#meal="
+        const meal = meals.find(m => m.id === mealId);
+        if (meal && meal.active !== false) {
+            // 延迟执行，确保页面已经加载完成
+            setTimeout(() => {
+                // 标记为从链接进入
+                document.body.classList.add('link-entered');
+                showMealDetail(mealId);
+            }, 100);
+        }
+    }
+}
+
 
 			function initMyOrdersPage() {
 				const orderSearchBtn = document.getElementById('orderSearchBtn');
