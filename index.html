@@ -2879,11 +2879,17 @@
 			#deliveryFields .form-group:has(#deliveryAddress[style*="display: none"]) {
 			    display: none;
 			}
-			.link-entered .header-btn,
-			    .link-entered .admin-btn,
-			    .link-entered .back-btn {
-			        display: none !important;
-			    }
+			
+		.link-entered .header-btn#viewHomeBtn,
+		.link-entered .admin-btn,
+		.link-entered .back-btn {
+		    display: none !important;
+		}
+		
+		/* 添加：确保查看订单按钮在链接进入时显示 */
+		.link-entered .header-btn#viewOrdersBtn {
+		    display: flex !important;
+		}
 			    
 			    .link-entered .header-buttons {
 			        min-height: 40px; /* 保持高度避免布局跳动 */
@@ -5327,275 +5333,285 @@
 			}
 
 			// ==================== 套餐详情页 ====================
-	function showMealDetail(mealId) {
-	    const meal = meals.find(m => m.id === mealId);
-	    if (!meal) return;
-	
-	    const mealDetailPage = document.getElementById('mealDetailPage');
-	
-	    mealDetailPage.innerHTML = `
-	        <a href="#" class="back-btn" onclick="goBackToHome()">  <!-- 修改这里 -->
-	            <i class="fas fa-arrow-left"></i>
-	            返回套餐列表
-	        </a>
-                
-                <div class="main-content">
-                    <div class="menu-section">
-                        <h2 class="section-title">
-                            <i class="fas fa-hamburger"></i>
-                            ${meal.name}
-                        </h2>
-                        
-                        <div class="highlight">
-                            <i class="fas fa-info-circle"></i>
-                            ${meal.supportDelivery === false ? '此套餐仅支持到店自提（堂食/打包）' : '此套餐支持宅急送配送和到店自提'}
-                        </div>
-                        
-                        <div class="instructions">
-                            <p><strong>套餐详情：</strong></p>
-                            <ul>
-                                <li>${meal.description}</li>
-                                <li>请按照要求选择选项</li>
-                                <li>提交订单后可在右上角"查看我的订单"查看订单状态</li>
-                            </ul>
-                        </div>
-                        
-                        <div class="meal-options" id="mealOptions">
-                            ${generateOptionsHTML(meal)}
-                        </div>
-                        <button class="add-to-cart" data-meal-id="${meal.id}" data-meal-name="${meal.name}" data-meal-price="${meal.price}" disabled>
-                            <i class="fas fa-cart-plus"></i>
-                            加入购物车
-                        </button>
-                    </div>
-                    
-                    <div class="right-section">
-                        <!-- 配送信息和购物车在一起 -->
-                        <div class="delivery-form">
-                            <h3 class="section-title">
-                                <i class="fas fa-truck"></i>
-                                配送信息
-                            </h3>
-                            
-                            <div class="order-type">
-                                ${meal.supportDelivery !== false ? `
-                                <label>
-                                    <input type="radio" name="deliveryType" value="delivery" checked>
-                                    <span>宅急送（免配送费）</span>
-                                </label>
-                                ` : ''}
-                                <label>
-                                    <input type="radio" name="deliveryType" value="pickup" ${meal.supportDelivery === false ? 'checked' : ''}>
-                                    <span>到店自提</span>
-                                </label>
-                            </div>
-                            
+// ==================== 套餐详情页 ====================
+function showMealDetail(mealId) {
+    const meal = meals.find(m => m.id === mealId);
+    if (!meal) return;
 
-${meal.supportDelivery !== false ? `
-<div class="delivery-fields" id="deliveryFields" ${meal.supportDelivery === false ? 'style="display:none;"' : ''}>
-    <div class="form-group">
-        <label class="form-label">信息提供方式 <span class="required">*</span></label>
-        <div class="info-method-selector">
-            <label class="method-option">
-                <input type="radio" name="deliveryMethod" value="manual">
-                <span>手动填写</span>
-            </label>
-            <label class="method-option">
-                <input type="radio" name="deliveryMethod" value="screenshot" checked>
-                <span>上传截图</span>
-            </label>
-        </div>
-    </div>
-    
-    <!-- 手动填写部分 - 默认隐藏 -->
-    <div class="manual-fields hidden" id="manualFields">
-        <!-- 粘贴识别区域 -->
-        <div class="delivery-paste-area" id="deliveryPasteArea">
-            <textarea id="pasteTextarea" placeholder="请在这里粘贴您的配送信息"></textarea>
-            <button class="recognize-btn" id="recognizeBtn">
-                <i class="fas fa-magic"></i>
-                智能识别
-            </button>
-        </div>
-        <div id="recognizeResult" style="display:none;"></div>
+    const mealDetailPage = document.getElementById('mealDetailPage');
+
+    mealDetailPage.innerHTML = `
+        <a href="#" class="back-btn" onclick="goBackToHome()">
+            <i class="fas fa-arrow-left"></i>
+            返回套餐列表
+        </a>
         
-        <!-- 姓名字段 - 上传截图模式下会隐藏 -->
-        <div class="form-group" id="nameFieldGroup">
-            <label class="form-label">收货人姓名 <span class="required">*</span></label>
-            <input type="text" class="form-input" id="customerName" placeholder="请输入姓名" required>
-        </div>
-        
-        <!-- 联系电话字段 - 始终显示，上传截图模式下为可选 -->
-        <div class="form-group" id="phoneFieldGroup">
-            <label class="form-label" id="phoneLabel">联系电话 <span class="required">*</span></label>
-            <input type="tel" class="form-input" id="customerPhone" placeholder="请输入手机号码" required>
-        </div>
-        
-        <!-- 地址字段 - 上传截图模式下会隐藏 -->
-        <div class="form-group" id="addressFieldGroup">
-            <label class="form-label">配送地址 <span class="required">*</span></label>
-            <input type="text" class="form-input" id="deliveryAddress" placeholder="请输入详细地址" required>
-        </div>
-    </div>
-    
-    <!-- 截图上传部分 - 默认显示，选择上传截图时才显示 -->
-    <div class="screenshot-fields" id="screenshotFields">
-        <div class="form-group">
-            <label class="form-label">上传配送信息截图 <span class="required">*</span></label>
-            <div class="screenshot-upload-area" id="screenshotUploadArea">
-                <i class="fas fa-cloud-upload-alt"></i>
-                <p>点击或拖拽上传截图</p>
-                <p class="upload-hint">支持 JPG、PNG 格式，大小不超过 2MB，建议压缩后上传</p>
-                <input type="file" id="storeScreenshot" accept="image/*" style="display: none;">
-            </div>
-            <div class="screenshot-preview hidden" id="screenshotPreview">
-                <div class="screenshot-preview-container">
-                    <img id="previewImage" src="" alt="截图预览">
-                    <div class="image-info" id="imageInfo"></div>
+        <div class="main-content">
+            <div class="menu-section">
+                <h2 class="section-title">
+                    <i class="fas fa-hamburger"></i>
+                    ${meal.name}
+                </h2>
+                
+                <div class="highlight">
+                    <i class="fas fa-info-circle"></i>
+                    ${meal.supportDelivery === false ? '此套餐仅支持到店自提（堂食/打包）' : '此套餐支持宅急送配送和到店自提'}
                 </div>
-                <button type="button" class="remove-screenshot" id="removeScreenshot">
-                    <i class="fas fa-times"></i>
+                
+                <div class="instructions">
+                    <p><strong>套餐详情：</strong></p>
+                    <ul>
+                        <li>${meal.description}</li>
+                        <li>请按照要求选择选项</li>
+                        <li>提交订单后可在右上角"查看我的订单"查看订单状态</li>
+                    </ul>
+                </div>
+                
+                <div class="meal-options" id="mealOptions">
+                    ${generateOptionsHTML(meal)}
+                </div>
+                <button class="add-to-cart" data-meal-id="${meal.id}" data-meal-name="${meal.name}" data-meal-price="${meal.price}" disabled>
+                    <i class="fas fa-cart-plus"></i>
+                    加入购物车
                 </button>
             </div>
-            <div class="compress-progress" id="compressProgress">
-                <i class="fas fa-compress-alt"></i> 正在压缩图片... <span id="compressPercent">0%</span>
-            </div>
-            <div class="form-hint">
-                <i class="fas fa-lightbulb"></i> 系统会自动压缩图片到合适大小，确保上传速度
-            </div>
-        </div>
-    </div>
-</div>
-                           ` : ''}
-                            
-                            <div class="pickup-fields ${meal.supportDelivery !== false ? 'hidden' : ''}" id="pickupFields" ${meal.supportDelivery === false ? 'style="display:block;"' : ''}>
-                                <div class="form-group">
-                                    <label class="form-label">自提方式 <span class="required">*</span></label>
-                                    <div class="pickup-type">
-                                        <label>
-                                            <input type="radio" name="pickupType" value="堂食" checked>
-                                            <span>堂食</span>
-                                        </label>
-                                        <label>
-                                            <input type="radio" name="pickupType" value="外带">
-                                            <span>外带</span>
-                                        </label>
-                                    </div>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label class="form-label">门店信息提供方式 <span class="required">*</span></label>
-                                    <div class="info-method-selector">
-                                        <label class="method-option">
-                                            <input type="radio" name="pickupMethod" value="text" checked>
-                                            <span>手动填写</span>
-                                        </label>
-                                        <label class="method-option">
-                                            <input type="radio" name="pickupMethod" value="screenshot">
-                                            <span>上传截图</span>
-                                        </label>
-                                    </div>
-                                </div>
-                                
-                                <div class="text-method-fields" id="textMethodFields">
-                                    <div class="store-selection">
-                                        <div class="form-group">
-                                            <label class="form-label">自提城市 <span class="required">*</span></label>
-                                            <input type="text" class="form-input" id="pickupCityInput" placeholder="例如：北京市" required>
-                                        </div>
-                                        
-                                        <div class="form-group">
-                                            <label class="form-label">自提门店 <span class="required">*</span></label>
-                                            <input type="text" class="form-input" id="pickupStoreInput" placeholder="例如：肯德基王府井店" required>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="screenshot-method-fields hidden" id="screenshotMethodFields">
-                                    <div class="form-group">
-                                        <label class="form-label">上传门店截图 <span class="required">*</span></label>
-                                        <div class="screenshot-upload-area" id="pickupScreenshotUploadArea">
-                                            <i class="fas fa-cloud-upload-alt"></i>
-                                            <p>点击或拖拽上传截图</p>
-                                            <p class="upload-hint">支持 JPG、PNG 格式，大小不超过 2MB，建议压缩后上传</p>
-                                            <input type="file" id="pickupStoreScreenshot" accept="image/*" style="display: none;">
-                                        </div>
-                                        <div class="screenshot-preview hidden" id="pickupScreenshotPreview">
-                                            <div class="screenshot-preview-container">
-                                                <img id="pickupPreviewImage" src="" alt="截图预览">
-                                                <div class="image-info" id="pickupImageInfo"></div>
-                                            </div>
-                                            <button type="button" class="remove-screenshot" id="removePickupScreenshot">
-                                                <i class="fas fa-times"></i>
-                                            </button>
-                                        </div>
-                                        <div class="compress-progress" id="pickupCompressProgress">
-                                            <i class="fas fa-compress-alt"></i> 正在压缩图片... <span id="pickupCompressPercent">0%</span>
-                                        </div>
-                                        <div class="form-hint">
-                                            <i class="fas fa-lightbulb"></i> 系统会自动压缩图片到合适大小，确保上传速度
-                                        </div>
-                                    </div>
-                                </div>
+            
+            <div class="right-section">
+                <!-- 配送信息和购物车在一起 -->
+                <div class="delivery-form">
+                    <h3 class="section-title">
+                        <i class="fas fa-truck"></i>
+                        配送信息
+                    </h3>
+                    
+                    <div class="order-type">
+                        ${meal.supportDelivery !== false ? `
+                        <label>
+                            <input type="radio" name="deliveryType" value="delivery" checked>
+                            <span>宅急送（免配送费）</span>
+                        </label>
+                        ` : ''}
+                        <label>
+                            <input type="radio" name="deliveryType" value="pickup" ${meal.supportDelivery === false ? 'checked' : ''}>
+                            <span>到店自提</span>
+                        </label>
+                    </div>
+                    
+                    ${meal.supportDelivery !== false ? `
+                    <div class="delivery-fields" id="deliveryFields" ${meal.supportDelivery === false ? 'style="display:none;"' : ''}>
+                        <div class="form-group">
+                            <label class="form-label">信息提供方式 <span class="required">*</span></label>
+                            <div class="info-method-selector">
+                                <label class="method-option">
+                                    <input type="radio" name="deliveryMethod" value="manual">
+                                    <span>手动填写</span>
+                                </label>
+                                <label class="method-option">
+                                    <input type="radio" name="deliveryMethod" value="screenshot" checked>
+                                    <span>上传截图</span>
+                                </label>
                             </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label">订单备注</label>
-                                <textarea class="form-input" id="orderNote" rows="2" placeholder="如有特殊要求请在此备注（例如：不吃辣，多要番茄酱等）"></textarea>
-                            </div>
-                            
-                            <!-- 购物车在配送信息表单底部 -->
-                            <div class="cart-section">
-                                <h2 class="section-title">
-                                    <i class="fas fa-shopping-cart"></i>
-                                    购物车
-                                </h2>
-                                
-                                <div class="cart-items" id="cartItems">
-                                    <div class="empty-cart-message">购物车是空的，请选择套餐</div>
-                                </div>
-                                
-                                <div class="cart-total">
-                                    <span>总计：</span>
-                                    <span class="total-price" id="totalPrice">¥0.00</span>
-                                </div>
-                                
-                                <!-- 移除进度条，改为简单的状态提示 -->
-                                <div class="submit-status" id="submitStatus"></div>
-                                
-                                <button class="checkout-btn quick-submit" id="checkoutBtn" disabled>
-                                    <i class="fas fa-credit-card"></i>
-                                    快速提交订单
+                        </div>
+                        
+                        <!-- 手动填写部分 - 默认隐藏 -->
+                        <div class="manual-fields hidden" id="manualFields">
+                            <!-- 粘贴识别区域 -->
+                            <div class="delivery-paste-area" id="deliveryPasteArea">
+                                <textarea id="pasteTextarea" placeholder="请在这里粘贴您的配送信息"></textarea>
+                                <button class="recognize-btn" id="recognizeBtn">
+                                    <i class="fas fa-magic"></i>
+                                    智能识别
                                 </button>
+                            </div>
+                            <div id="recognizeResult" style="display:none;"></div>
+                            
+                            <!-- 姓名字段 - 上传截图模式下会隐藏 -->
+                            <div class="form-group" id="nameFieldGroup">
+                                <label class="form-label">收货人姓名 <span class="required">*</span></label>
+                                <input type="text" class="form-input" id="customerName" placeholder="请输入姓名" required>
+                            </div>
+                            
+                            <!-- 联系电话字段 - 始终显示，上传截图模式下为可选 -->
+                            <div class="form-group" id="phoneFieldGroup">
+                                <label class="form-label" id="phoneLabel">联系电话 <span class="required">*</span></label>
+                                <input type="tel" class="form-input" id="customerPhone" placeholder="请输入手机号码" required>
+                            </div>
+                            
+                            <!-- 地址字段 - 上传截图模式下会隐藏 -->
+                            <div class="form-group" id="addressFieldGroup">
+                                <label class="form-label">配送地址 <span class="required">*</span></label>
+                                <input type="text" class="form-input" id="deliveryAddress" placeholder="请输入详细地址" required>
+                            </div>
+                        </div>
+                        
+                        <!-- 截图上传部分 - 默认显示，选择上传截图时才显示 -->
+                        <div class="screenshot-fields" id="screenshotFields">
+                            <div class="form-group">
+                                <label class="form-label">上传配送信息截图 <span class="required">*</span></label>
+                                <div class="screenshot-upload-area" id="screenshotUploadArea">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <p>点击或拖拽上传截图</p>
+                                    <p class="upload-hint">支持 JPG、PNG 格式，大小不超过 2MB，建议压缩后上传</p>
+                                    <input type="file" id="storeScreenshot" accept="image/*" style="display: none;">
+                                </div>
+                                <div class="screenshot-preview hidden" id="screenshotPreview">
+                                    <div class="screenshot-preview-container">
+                                        <img id="previewImage" src="" alt="截图预览">
+                                        <div class="image-info" id="imageInfo"></div>
+                                    </div>
+                                    <button type="button" class="remove-screenshot" id="removeScreenshot">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <div class="compress-progress" id="compressProgress">
+                                    <i class="fas fa-compress-alt"></i> 正在压缩图片... <span id="compressPercent">0%</span>
+                                </div>
+                                <div class="form-hint">
+                                    <i class="fas fa-lightbulb"></i> 系统会自动压缩图片到合适大小，确保上传速度
+                                </div>
                             </div>
                         </div>
                     </div>
+                    ` : ''}
+                    
+                    <div class="pickup-fields ${meal.supportDelivery !== false ? 'hidden' : ''}" id="pickupFields" ${meal.supportDelivery === false ? 'style="display:block;"' : ''}>
+                        <div class="form-group">
+                            <label class="form-label">自提方式 <span class="required">*</span></label>
+                            <div class="pickup-type">
+                                <label>
+                                    <input type="radio" name="pickupType" value="堂食" checked>
+                                    <span>堂食</span>
+                                </label>
+                                <label>
+                                    <input type="radio" name="pickupType" value="外带">
+                                    <span>外带</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">门店信息提供方式 <span class="required">*</span></label>
+                            <div class="info-method-selector">
+                                <label class="method-option">
+                                    <input type="radio" name="pickupMethod" value="text" checked>
+                                    <span>手动填写</span>
+                                </label>
+                                <label class="method-option">
+                                    <input type="radio" name="pickupMethod" value="screenshot">
+                                    <span>上传截图</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="text-method-fields" id="textMethodFields">
+                            <div class="store-selection">
+                                <div class="form-group">
+                                    <label class="form-label">自提城市 <span class="required">*</span></label>
+                                    <input type="text" class="form-input" id="pickupCityInput" placeholder="例如：北京市" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">自提门店 <span class="required">*</span></label>
+                                    <input type="text" class="form-input" id="pickupStoreInput" placeholder="例如：肯德基王府井店" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="screenshot-method-fields hidden" id="screenshotMethodFields">
+                            <div class="form-group">
+                                <label class="form-label">上传门店截图 <span class="required">*</span></label>
+                                <div class="screenshot-upload-area" id="pickupScreenshotUploadArea">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <p>点击或拖拽上传截图</p>
+                                    <p class="upload-hint">支持 JPG、PNG 格式，大小不超过 2MB，建议压缩后上传</p>
+                                    <input type="file" id="pickupStoreScreenshot" accept="image/*" style="display: none;">
+                                </div>
+                                <div class="screenshot-preview hidden" id="pickupScreenshotPreview">
+                                    <div class="screenshot-preview-container">
+                                        <img id="pickupPreviewImage" src="" alt="截图预览">
+                                        <div class="image-info" id="pickupImageInfo"></div>
+                                    </div>
+                                    <button type="button" class="remove-screenshot" id="removePickupScreenshot">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <div class="compress-progress" id="pickupCompressProgress">
+                                    <i class="fas fa-compress-alt"></i> 正在压缩图片... <span id="pickupCompressPercent">0%</span>
+                                </div>
+                                <div class="form-hint">
+                                    <i class="fas fa-lightbulb"></i> 系统会自动压缩图片到合适大小，确保上传速度
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">订单备注</label>
+                        <textarea class="form-input" id="orderNote" rows="2" placeholder="如有特殊要求请在此备注（例如：不吃辣，多要番茄酱等）"></textarea>
+                    </div>
+                    
+                    <!-- 购物车在配送信息表单底部 -->
+                    <div class="cart-section">
+                        <h2 class="section-title">
+                            <i class="fas fa-shopping-cart"></i>
+                            购物车
+                        </h2>
+                        
+                        <div class="cart-items" id="cartItems">
+                            <div class="empty-cart-message">购物车是空的，请选择套餐</div>
+                        </div>
+                        
+                        <div class="cart-total">
+                            <span>总计：</span>
+                            <span class="total-price" id="totalPrice">¥0.00</span>
+                        </div>
+                        
+                        <!-- 移除进度条，改为简单的状态提示 -->
+                        <div class="submit-status" id="submitStatus"></div>
+                        
+                        <button class="checkout-btn quick-submit" id="checkoutBtn" disabled>
+                            <i class="fas fa-credit-card"></i>
+                            快速提交订单
+                        </button>
+                    </div>
                 </div>
-            `;
+            </div>
+        </div>
+    `;
 
-				initOptionSelection(mealDetailPage);
-				initDeliveryTypeToggle(mealDetailPage);
-				initDeliveryMethodToggle(mealDetailPage);
-				initPasteRecognition(mealDetailPage);
-				initPickupMethod(mealDetailPage);
-				initCart(mealDetailPage);
-				initCheckout(mealDetailPage);
+    initOptionSelection(mealDetailPage);
+    initDeliveryTypeToggle(mealDetailPage);
+    initDeliveryMethodToggle(mealDetailPage);
+    initPasteRecognition(mealDetailPage);
+    initPickupMethod(mealDetailPage);
+    initCart(mealDetailPage);
+    initCheckout(mealDetailPage);
 
-				if (!meal.optionGroups || meal.optionGroups.length === 0) {
-					const addToCartBtn = mealDetailPage.querySelector('.add-to-cart');
-					if (addToCartBtn) {
-						addToCartBtn.disabled = false;
-						addToCartBtn.style.opacity = '1';
-						addToCartBtn.style.cursor = 'pointer';
-					}
-				}
+    if (!meal.optionGroups || meal.optionGroups.length === 0) {
+        const addToCartBtn = mealDetailPage.querySelector('.add-to-cart');
+        if (addToCartBtn) {
+            addToCartBtn.disabled = false;
+            addToCartBtn.style.opacity = '1';
+            addToCartBtn.style.cursor = 'pointer';
+        }
+    }
 
-				showPage('mealDetailPage');
+    showPage('mealDetailPage');
 
-				document.getElementById('viewOrdersBtn').style.display = 'none';
-				document.getElementById('viewHomeBtn').style.display = 'flex';
-			}
-
+    // ==================== 关键修改：正确处理按钮显示 ====================
+    // 检查是否是从链接进入的
+    const isLinkEntered = window.location.hash && window.location.hash.startsWith('#meal=');
+    
+    if (isLinkEntered) {
+        // 链接进入：显示查看订单按钮，隐藏返回首页按钮
+        document.getElementById('viewOrdersBtn').style.display = 'flex';
+        document.getElementById('viewHomeBtn').style.display = 'none';
+    } else {
+        // 正常从首页进入：隐藏查看订单按钮，显示返回首页按钮
+        document.getElementById('viewOrdersBtn').style.display = 'none';
+        document.getElementById('viewHomeBtn').style.display = 'flex';
+    }
+}
 			function generateOptionsHTML(meal) {
 				let html = '';
 
@@ -5682,9 +5698,12 @@ function goBackToHome() {
     // 移除链接进入的标记
     document.body.classList.remove('link-entered');
     
+    // 返回首页时显示查看订单按钮，隐藏返回首页按钮
+    document.getElementById('viewOrdersBtn').style.display = 'flex';
+    document.getElementById('viewHomeBtn').style.display = 'none';
+    
     showPage('homePage');
 }
-
 // 修改页面加载完成后的初始化部分
 document.addEventListener('DOMContentLoaded', async function() {
     try {
@@ -5765,6 +5784,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 });
 		
 		// 修改现有的 showPage 函数
+// 修改现有的 showPage 函数
 function showPage(pageId) {
     document.querySelectorAll('.meal-page-container').forEach(page => {
         page.classList.remove('active');
@@ -5778,15 +5798,20 @@ function showPage(pageId) {
         // 移除链接进入的标记
         document.body.classList.remove('link-entered');
         
+        // 在首页时两个按钮都显示
         document.getElementById('viewOrdersBtn').style.display = 'flex';
-        document.getElementById('viewHomeBtn').style.display = 'none';
+        document.getElementById('viewHomeBtn').style.display = 'flex';
         
         // 检查URL中是否有套餐参数，如果有则显示对应套餐
         checkUrlForMeal();
     } else if (pageId === 'mealDetailPage') {
-        // 如果是从首页进入的（不是通过链接），则显示按钮
-        if (!window.location.hash || !window.location.hash.startsWith('#meal=')) {
-            document.body.classList.remove('link-entered');
+        // 如果是从链接进入的
+        if (window.location.hash && window.location.hash.startsWith('#meal=')) {
+            // 链接进入：显示查看订单按钮，隐藏返回首页按钮
+            document.getElementById('viewOrdersBtn').style.display = 'flex';
+            document.getElementById('viewHomeBtn').style.display = 'none';
+        } else {
+            // 正常从首页进入：隐藏查看订单按钮，显示返回首页按钮
             document.getElementById('viewOrdersBtn').style.display = 'none';
             document.getElementById('viewHomeBtn').style.display = 'flex';
         }
@@ -6962,6 +6987,7 @@ function checkUrlParams() {
 }
 
 // 添加这个新函数来检查hash中的套餐参数
+// 修改这个函数来检查hash中的套餐参数
 function checkUrlForMeal() {
     const hash = window.location.hash;
     if (hash && hash.startsWith('#meal=')) {
@@ -6973,11 +6999,14 @@ function checkUrlForMeal() {
                 // 标记为从链接进入
                 document.body.classList.add('link-entered');
                 showMealDetail(mealId);
+                
+                // 在链接进入时，显示查看订单按钮，隐藏返回首页按钮
+                document.getElementById('viewOrdersBtn').style.display = 'flex';
+                document.getElementById('viewHomeBtn').style.display = 'none';
             }, 100);
         }
     }
 }
-
 
 			function initMyOrdersPage() {
 				const orderSearchBtn = document.getElementById('orderSearchBtn');
@@ -7013,13 +7042,13 @@ function checkUrlForMeal() {
 			}
 
 			function showMyOrdersPage() {
-				showPage('myOrdersPage');
-				renderUserOrders('all');
-
-				document.getElementById('viewOrdersBtn').style.display = 'none';
-				document.getElementById('viewHomeBtn').style.display = 'flex';
+			    showPage('myOrdersPage');
+			    renderUserOrders('all');
+			
+			    // 在我的订单页面，显示返回首页按钮，隐藏查看订单按钮
+			    document.getElementById('viewOrdersBtn').style.display = 'none';
+			    document.getElementById('viewHomeBtn').style.display = 'flex';
 			}
-
 			function renderUserOrders(filter = 'all') {
 				const myOrdersContainer = document.getElementById('myOrdersContainer');
 				const noUserOrdersMessage = document.getElementById('noUserOrdersMessage');
