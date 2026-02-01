@@ -2896,6 +2896,251 @@
 			    }
 			
         }
+		/* 分享链接管理样式 */
+		.share-link-management {
+		    margin-top: 15px;
+		}
+		
+		.share-link-item {
+		    background-color: #f9f9f9;
+		    padding: 12px;
+		    border-radius: 6px;
+		    margin-bottom: 8px;
+		    border-left: 3px solid #4CAF50;
+		}
+		
+		.share-link-header {
+		    display: flex;
+		    justify-content: space-between;
+		    align-items: center;
+		    margin-bottom: 8px;
+		}
+		
+		.share-link-code {
+		    font-weight: bold;
+		    color: #333;
+		    font-size: 1.1rem;
+		    font-family: monospace;
+		    background-color: #fff;
+		    padding: 4px 8px;
+		    border-radius: 4px;
+		    border: 1px solid #ddd;
+		}
+		
+		.share-link-info {
+		    font-size: 0.85rem;
+		    color: #666;
+		    margin-bottom: 6px;
+		}
+		
+		.share-link-info strong {
+		    color: #333;
+		}
+		
+		.share-link-url {
+		    background-color: #f0f0f0;
+		    padding: 8px;
+		    border-radius: 4px;
+		    font-size: 0.8rem;
+		    word-break: break-all;
+		    margin-top: 6px;
+		    border: 1px dashed #ddd;
+		}
+		
+		.share-link-actions {
+		    display: flex;
+		    gap: 8px;
+		    margin-top: 8px;
+		}
+		
+		.copy-link-btn {
+		    background-color: #4CAF50;
+		    color: white;
+		    border: none;
+		    padding: 6px 12px;
+		    border-radius: 4px;
+		    cursor: pointer;
+		    font-size: 0.8rem;
+		    display: flex;
+		    align-items: center;
+		    gap: 4px;
+		}
+		
+		.copy-link-btn:hover {
+		    background-color: #3d8b40;
+		}
+		
+		.deactivate-link-btn {
+		    background-color: #ff9800;
+		    color: white;
+		    border: none;
+		    padding: 6px 12px;
+		    border-radius: 4px;
+		    cursor: pointer;
+		    font-size: 0.8rem;
+		    display: flex;
+		    align-items: center;
+		    gap: 4px;
+		}
+		
+		.deactivate-link-btn:hover {
+		    background-color: #f57c00;
+		}
+		
+		.delete-link-btn {
+		    background-color: #f44336;
+		    color: white;
+		    border: none;
+		    padding: 6px 12px;
+		    border-radius: 4px;
+		    cursor: pointer;
+		    font-size: 0.8rem;
+		    display: flex;
+		    align-items: center;
+		    gap: 4px;
+		}
+		
+		.delete-link-btn:hover {
+		    background-color: #d32f2f;
+		}
+		
+		.share-link-stats {
+		    font-size: 0.75rem;
+		    color: #666;
+		    background-color: #e8f5e9;
+		    padding: 4px 8px;
+		    border-radius: 4px;
+		    margin-top: 6px;
+		}
+		
+		.share-link-stats.expired {
+		    background-color: #ffebee;
+		    color: #d32f2f;
+		}
+		
+		.share-link-stats.used-up {
+		    background-color: #fff3e0;
+		    color: #f57c00;
+		}
+		
+		/* 创建分享链接表单 */
+		.create-share-link-form {
+		    background-color: #f9f9f9;
+		    padding: 15px;
+		    border-radius: 8px;
+		    margin-bottom: 20px;
+		    border: 2px dashed #ddd;
+		}
+		
+		.create-share-link-form .form-row {
+		    display: flex;
+		    gap: 15px;
+		    margin-bottom: 12px;
+		    flex-wrap: wrap;
+		}
+		
+		.create-share-link-form .form-group {
+		    flex: 1;
+		    min-width: 200px;
+		}
+		
+		.create-share-link-form .form-label {
+		    font-weight: 500;
+		    margin-bottom: 4px;
+		    font-size: 0.9rem;
+		}
+		
+		.create-share-link-form .form-input,
+		.create-share-link-form .form-select {
+		    width: 100%;
+		    padding: 8px 12px;
+		    border: 1px solid #ddd;
+		    border-radius: 6px;
+		    font-size: 0.9rem;
+		}
+		
+		.generate-btn {
+		    background-color: #2196F3;
+		    color: white;
+		    border: none;
+		    padding: 8px 16px;
+		    border-radius: 6px;
+		    cursor: pointer;
+		    font-size: 0.9rem;
+		    display: flex;
+		    align-items: center;
+		    gap: 6px;
+		    margin-top: 10px;
+		}
+		
+		.generate-btn:hover {
+		    background-color: #1976D2;
+		}
+		
+		/* 分享链接进入的页面样式 */
+		.link-entered .cart-section {
+		    border: 2px solid #4CAF50;
+		}
+		
+		.link-entered .highlight {
+		    background-color: #e8f5e9;
+		    border-left: 3px solid #4CAF50;
+		}
+		
+		.link-entered .checkout-btn {
+		    background-color: #4CAF50;
+		}
+		
+		.link-entered .checkout-btn:hover {
+		    background-color: #3d8b40;
+		}
+		
+		.link-code-display {
+		    background-color: #4CAF50;
+		    color: white;
+		    padding: 4px 8px;
+		    border-radius: 4px;
+		    font-weight: bold;
+		    font-family: monospace;
+		    margin-left: 8px;
+		}
+		/* 添加到CSS样式表的合适位置，可以在已有的样式后面添加 */
+		.share-code-display {
+		    background-color: #4CAF50;
+		    color: white;
+		    padding: 2px 8px;
+		    border-radius: 12px;
+		    font-size: 0.8rem;
+		    font-weight: bold;
+		    margin-left: 8px;
+		    vertical-align: middle;
+		    display: inline-block;
+		    font-family: monospace;
+		}
+		
+		.order-id {
+		    font-weight: bold;
+		    color: #333;
+		    font-size: 1.1rem;
+		    margin-bottom: 4px;
+		    display: flex;
+		    align-items: center;
+		    flex-wrap: wrap;
+		    gap: 8px;
+		}
+		
+		/* 在移动端调整显示 */
+		@media (max-width: 768px) {
+		    .order-id {
+		        flex-direction: column;
+		        align-items: flex-start;
+		    }
+		    
+		    .share-code-display {
+		        margin-left: 0;
+		        margin-top: 4px;
+		    }
+		}
     </style>
 	</head>
 	<body>
@@ -3110,6 +3355,7 @@
 					<button class="admin-tab active" data-tab="orders">订单管理</button>
 					<button class="admin-tab" data-tab="meals">套餐管理</button>
 					<button class="admin-tab" data-tab="addMeal">添加套餐</button>
+					<button class="admin-tab" data-tab="shareLinks">分享链接</button> <!-- 新增 -->
 				</div>
 
 				<div id="ordersTab" class="admin-tab-content active">
@@ -3130,7 +3376,81 @@
 						</div>
 					</div>
 				</div>
+				<!-- 在admin-tab-content部分添加新内容 -->
+				<div id="shareLinksTab" class="admin-tab-content">
+					<h3 class="section-title" id="shareLinksTitle">
+						<i class="fas fa-share-alt"></i>
+						分享链接管理
+					</h3>
 
+					<div class="create-share-link-form">
+						<h4 style="margin-bottom: 15px; color: #333; font-size: 1.1rem;">
+							<i class="fas fa-plus-circle"></i> 创建新分享链接
+						</h4>
+
+						<div class="form-row">
+							<div class="form-group">
+								<label class="form-label">关联套餐 <span class="required">*</span></label>
+								<select class="form-select" id="shareLinkMeal">
+									<option value="">请选择套餐</option>
+								</select>
+							</div>
+
+							<div class="form-group">
+								<label class="form-label">有效时长</label>
+								<select class="form-select" id="shareLinkDuration">
+									<option value="1">1小时</option>
+									<option value="3">3小时</option>
+									<option value="6">6小时</option>
+									<option value="12">12小时</option>
+									<option value="24" selected>24小时</option>
+									<option value="48">48小时</option>
+									<option value="168">7天</option>
+									<option value="720">30天</option>
+									<option value="0">永久有效</option>
+								</select>
+							</div>
+						</div>
+
+						<div class="form-row">
+							<div class="form-group">
+								<label class="form-label">最大使用次数</label>
+								<input type="number" class="form-input" id="shareLinkMaxUses" min="1" max="1000" value="1">
+								<div class="form-hint">
+									<i class="fas fa-lightbulb"></i> 每个链接最多可被使用多少次（默认1次）
+								</div>
+							</div>
+
+							<div class="form-group">
+								<label class="form-label">自定义代码（可选）</label>
+								<input type="text" class="form-input" id="shareLinkCustomCode" placeholder="留空则自动生成" maxlength="6" pattern="[A-Za-z0-9]{6}">
+								<div class="form-hint">
+									<i class="fas fa-lightbulb"></i> 6位字母数字，如：ABC123，留空则自动生成
+								</div>
+							</div>
+						</div>
+
+						<button class="generate-btn" id="generateShareLinkBtn">
+							<i class="fas fa-link"></i> 生成分享链接
+						</button>
+					</div>
+
+					<div class="share-link-management">
+						<h4 style="margin-bottom: 15px; color: #333; font-size: 1.1rem;">
+							<i class="fas fa-list"></i> 已创建的分享链接
+						</h4>
+
+						<div class="share-link-list" id="shareLinkList">
+							<!-- 分享链接列表将在这里动态生成 -->
+						</div>
+
+						<div class="no-share-links" id="noShareLinksMessage" style="text-align: center; padding: 30px 15px; color: #666;">
+							<i class="fas fa-share-alt" style="font-size: 2.5rem; color: #ddd; margin-bottom: 12px;"></i>
+							<h3>暂无分享链接</h3>
+							<p>点击上方"生成分享链接"按钮创建第一个分享链接</p>
+						</div>
+					</div>
+				</div>
 				<div id="mealsTab" class="admin-tab-content">
 					<!-- 搜索区域 -->
 					<div class="admin-search-container">
@@ -3410,6 +3730,12 @@
 			let orders = [];
 			let newOrdersCount = 0;
 			const ADMIN_PASSWORD = "200104";
+			// 在现有的全局变量后添加
+			let shareLinks = [];
+			let currentShareCode = null;
+			let currentShareLink = null;
+			let isSavingNewMeal = false;
+
 
 			let adminPollingInterval = null;
 			let globalPollingInterval = null;
@@ -3636,6 +3962,7 @@
 							screenshotData: item.screenshot_data,
 							feedbackScreenshotData: item.feedback_screenshot_data || null,
 							userId: item.user_id,
+							shareCode: item.share_code || null, // 添加分享码
 							createdAt: item.created_at ? new Date(item.created_at).getTime() : Date.now(),
 							updatedAt: item.updated_at ? new Date(item.updated_at).getTime() : Date.now(),
 							objectId: item.id
@@ -3667,6 +3994,7 @@
 							has_screenshot: order.hasScreenshot || false,
 							screenshot_data: order.screenshotData,
 							feedback_screenshot_data: order.feedbackScreenshotData || null,
+							share_code: order.shareCode || null, // 添加分享码字段
 							updated_at: new Date().toISOString()
 						};
 
@@ -3715,6 +4043,7 @@
 							screenshotData: result.screenshot_data,
 							feedbackScreenshotData: result.feedback_screenshot_data || null,
 							userId: result.user_id,
+							shareCode: result.share_code || null, // 返回分享码
 							createdAt: createdAt,
 							updatedAt: updatedAt,
 							objectId: result.id
@@ -3745,6 +4074,218 @@
 					} catch (error) {
 						console.error('删除订单失败:', error);
 						throw error;
+					}
+				}
+				// ==================== 分享链接相关方法 ====================
+				static async loadShareLinks() {
+					const supabase = supabaseClient;
+					if (!supabase) {
+						console.error('Supabase 客户端未初始化');
+						return [];
+					}
+
+					try {
+						const {
+							data,
+							error
+						} = await supabase
+							.from('share_links')
+							.select('*')
+							.order('created_at', {
+								ascending: false
+							});
+
+						if (error) throw error;
+
+						return data.map(item => ({
+							id: item.id,
+							code: item.code,
+							mealId: item.meal_id,
+							maxUses: item.max_uses || 1,
+							usedCount: item.used_count || 0,
+							expiresAt: item.expires_at ? new Date(item.expires_at).getTime() : null,
+							active: item.active !== false,
+							createdAt: item.created_at ? new Date(item.created_at).getTime() : Date.now(),
+							updatedAt: item.updated_at ? new Date(item.updated_at).getTime() : Date.now(),
+							objectId: item.id
+						}));
+					} catch (error) {
+						console.error('加载分享链接数据失败:', error);
+						return [];
+					}
+				}
+
+				static async saveShareLink(shareLink) {
+					const supabase = supabaseClient;
+					if (!supabase) {
+						console.error('Supabase 客户端未初始化');
+						throw new Error('Supabase 客户端未初始化');
+					}
+
+					try {
+						const shareLinkData = {
+							code: shareLink.code,
+							meal_id: shareLink.mealId,
+							max_uses: shareLink.maxUses,
+							used_count: shareLink.usedCount || 0,
+							expires_at: shareLink.expiresAt ? new Date(shareLink.expiresAt).toISOString() : null,
+							active: shareLink.active !== false,
+							updated_at: new Date().toISOString()
+						};
+
+						let result;
+
+						if (shareLink.objectId) {
+							// 更新
+							const {
+								data,
+								error
+							} = await supabase
+								.from('share_links')
+								.update(shareLinkData)
+								.eq('id', shareLink.id)
+								.select();
+
+							if (error) throw error;
+							result = data[0];
+						} else {
+							// 新增
+							shareLinkData.created_at = new Date().toISOString();
+
+							const {
+								data,
+								error
+							} = await supabase
+								.from('share_links')
+								.insert([shareLinkData])
+								.select();
+
+							if (error) throw error;
+							result = data[0];
+						}
+
+						return {
+							id: result.id,
+							code: result.code,
+							mealId: result.meal_id,
+							maxUses: result.max_uses,
+							usedCount: result.used_count || 0,
+							expiresAt: result.expires_at ? new Date(result.expires_at).getTime() : null,
+							active: result.active !== false,
+							createdAt: result.created_at ? new Date(result.created_at).getTime() : Date.now(),
+							updatedAt: result.updated_at ? new Date(result.updated_at).getTime() : Date.now(),
+							objectId: result.id
+						};
+					} catch (error) {
+						console.error('保存分享链接失败:', error);
+						throw error;
+					}
+				}
+
+				static async deleteShareLink(shareLinkId) {
+					const supabase = supabaseClient;
+					if (!supabase) {
+						console.error('Supabase 客户端未初始化');
+						throw new Error('Supabase 客户端未初始化');
+					}
+
+					try {
+						const {
+							error
+						} = await supabase
+							.from('share_links')
+							.delete()
+							.eq('id', shareLinkId);
+
+						if (error) throw error;
+						return true;
+					} catch (error) {
+						console.error('删除分享链接失败:', error);
+						throw error;
+					}
+				}
+
+				static async getShareLinkByCode(code) {
+					const supabase = supabaseClient;
+					if (!supabase) {
+						console.error('Supabase 客户端未初始化');
+						return null;
+					}
+
+					try {
+						const {
+							data,
+							error
+						} = await supabase
+							.from('share_links')
+							.select('*')
+							.eq('code', code)
+							.maybeSingle();
+
+						if (error) throw error;
+
+						if (!data) return null;
+
+						return {
+							id: data.id,
+							code: data.code,
+							mealId: data.meal_id,
+							maxUses: data.max_uses,
+							usedCount: data.used_count || 0,
+							expiresAt: data.expires_at ? new Date(data.expires_at).getTime() : null,
+							active: data.active !== false,
+							createdAt: data.created_at ? new Date(data.created_at).getTime() : Date.now(),
+							updatedAt: data.updated_at ? new Date(data.updated_at).getTime() : Date.now(),
+							objectId: data.id
+						};
+					} catch (error) {
+						console.error('获取分享链接失败:', error);
+						return null;
+					}
+				}
+
+				static async incrementShareLinkUse(code) {
+					const supabase = supabaseClient;
+					if (!supabase) {
+						console.error('Supabase 客户端未初始化');
+						return false;
+					}
+
+					try {
+						// 首先获取当前链接
+						const {
+							data: linkData,
+							error: fetchError
+						} = await supabase
+							.from('share_links')
+							.select('used_count')
+							.eq('code', code)
+							.maybeSingle();
+
+						if (fetchError) throw fetchError;
+
+						if (!linkData) {
+							throw new Error('分享链接不存在');
+						}
+
+						const newUsedCount = (linkData.used_count || 0) + 1;
+
+						const {
+							error: updateError
+						} = await supabase
+							.from('share_links')
+							.update({
+								used_count: newUsedCount,
+								updated_at: new Date().toISOString()
+							})
+							.eq('code', code);
+
+						if (updateError) throw updateError;
+
+						return true;
+					} catch (error) {
+						console.error('增加分享链接使用次数失败:', error);
+						return false;
 					}
 				}
 
@@ -3945,6 +4486,7 @@
 							screenshotData: order.screenshotData,
 							feedbackScreenshotData: order.feedbackScreenshotData || null,
 							userId: order.userId,
+							shareCode: order.shareCode || null, // 添加分享码
 							createdAt: Date.now(),
 							updatedAt: Date.now(),
 							objectId: 'local_' + order.id
@@ -3965,6 +4507,7 @@
 							has_screenshot: order.hasScreenshot || false,
 							screenshot_data: order.screenshotData,
 							feedback_screenshot_data: order.feedbackScreenshotData || null,
+							share_code: order.shareCode || null, // 添加分享码字段
 							created_at: new Date().toISOString(),
 							updated_at: new Date().toISOString()
 						};
@@ -3995,6 +4538,7 @@
 							screenshotData: order.screenshotData,
 							feedbackScreenshotData: order.feedbackScreenshotData || null,
 							userId: order.userId,
+							shareCode: order.shareCode || null, // 返回分享码
 							createdAt: Date.now(),
 							updatedAt: Date.now(),
 							objectId: 'pending_' + order.id
@@ -4014,6 +4558,7 @@
 							screenshotData: order.screenshotData,
 							feedbackScreenshotData: order.feedbackScreenshotData || null,
 							userId: order.userId,
+							shareCode: order.shareCode || null, // 返回分享码
 							createdAt: Date.now(),
 							updatedAt: Date.now(),
 							objectId: 'local_' + order.id
@@ -4660,10 +5205,10 @@
 			document.addEventListener('DOMContentLoaded', async function() {
 				try {
 					showLoading('正在加载数据...');
-                     window.addEventListener('hashchange', function() {
-                                checkUrlForMeal();
-                            });
-						
+					window.addEventListener('hashchange', function() {
+						checkUrlForMeal();
+					});
+
 					if (!supabaseClient && window.supabase) {
 						supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 						console.log('Supabase 客户端已初始化');
@@ -4674,7 +5219,7 @@
 					}
 
 					await loadAllDataFromSupabase();
-                    checkUrlForMeal();
+					checkUrlForMeal();
 					initHomePage();
 					initAdminPanel();
 					initMealManagement();
@@ -4727,42 +5272,36 @@
 			// ==================== 数据加载函数 ====================
 			async function loadAllDataFromSupabase() {
 				try {
-					const [mealsData, ordersData, countData] = await Promise.all([
+					const [mealsData, ordersData, countData, shareLinksData] = await Promise.all([
 						SupabaseData.loadMeals(),
 						SupabaseData.loadOrders(),
-						SupabaseData.loadNewOrdersCount()
+						SupabaseData.loadNewOrdersCount(),
+						SupabaseData.loadShareLinks()
 					]);
 
 					meals = mealsData;
 					orders = ordersData;
 					newOrdersCount = countData;
+					shareLinks = shareLinksData;
 
-					localStorage.setItem('kfcMealsCache', JSON.stringify(meals.map(m => ({
-						id: m.id,
-						name: m.name,
-						price: m.price,
-						tags: m.tags,
-						description: m.description,
-						order: m.order,
-						active: m.active,
-						supportDelivery: m.supportDelivery
-					}))));
+					// 调试：打印订单数据，确认是否有shareCode
+					console.log('加载的订单数据:', orders.map(o => ({
+						id: o.id,
+						shareCode: o.shareCode
+					})));
 
+					// 保存到本地缓存
 					localStorage.setItem('kfcOrdersCache', JSON.stringify(orders.map(o => ({
 						id: o.id,
 						timestamp: o.timestamp,
 						status: o.status,
 						totalPrice: o.totalPrice,
-						userId: o.userId
+						userId: o.userId,
+						shareCode: o.shareCode || null // 确保保存分享码
 					}))));
 
-					localStorage.setItem('newOrdersCountCache', newOrdersCount.toString());
+					console.log('数据加载完成，订单数:', orders.length);
 
-					console.log('数据加载完成:', {
-						套餐数: meals.length,
-						订单数: orders.length,
-						新订单计数: newOrdersCount
-					});
 				} catch (error) {
 					console.error('加载数据失败:', error);
 					throw error;
@@ -4927,7 +5466,172 @@
 
 				orderConfirmModal.classList.add('active');
 			}
+			
+			// ==================== 修改：检查URL中是否有分享链接参数 ====================
+			// ==================== 修改：检查URL中是否有分享链接参数 ====================
+			function checkUrlForShareLink() {
+			    const hash = window.location.hash;
+			    console.log('检查URL hash:', hash);
+			    
+			    if (hash && hash.startsWith('#share=')) {
+			        const shareCode = decodeURIComponent(hash.substring(7)); // 去掉 "#share="
+			        currentShareCode = shareCode;
+			        console.log('检测到分享链接，代码:', shareCode);
+			        return true; // 表示检测到分享链接
+			    }
+			    
+			    // 如果不是分享链接，检查是否是套餐链接
+			    if (hash && hash.startsWith('#meal=')) {
+			        // 这是正常的套餐链接，清除分享链接状态
+			        clearShareLinkState();
+			    }
+			    
+			    return false; // 没有检测到分享链接
+			}
 
+			// 修改：验证分享链接有效性
+			// ==================== 修改：验证分享链接有效性 ====================
+			// ==================== 修改：验证分享链接有效性 ====================
+			async function validateShareLink(shareCode) {
+			    try {
+			        console.log('验证分享链接，代码:', shareCode);
+			        
+			        const shareLink = await SupabaseData.getShareLinkByCode(shareCode);
+			
+			        if (!shareLink) {
+			            console.log('分享链接不存在');
+			            showNotification('分享链接无效或不存在', 'error');
+			            return false;
+			        }
+			
+			        if (!shareLink.active) {
+			            console.log('分享链接已被禁用');
+			            showNotification('该分享链接已被禁用', 'error');
+			            return false;
+			        }
+			
+			        // 检查过期时间
+			        if (shareLink.expiresAt && Date.now() > shareLink.expiresAt) {
+			            console.log('分享链接已过期');
+			            showNotification('该分享链接已过期', 'error');
+			            return false;
+			        }
+			
+			        // 检查使用次数
+			        if (shareLink.usedCount >= shareLink.maxUses) {
+			            console.log('分享链接使用次数已达上限');
+			            showNotification('该分享链接使用次数已达上限', 'error');
+			            return false;
+			        }
+			
+			        // 保存当前分享链接信息
+			        currentShareLink = shareLink;
+			        console.log('分享链接信息:', currentShareLink);
+			
+			        // 标记为链接进入模式
+			        document.body.classList.add('link-entered');
+			
+			        // 显示分享链接信息
+			        const remainingUses = shareLink.maxUses - shareLink.usedCount;
+			        showNotification(`已通过分享链接进入，剩余可使用次数：${remainingUses}`, 'success');
+			
+			        // 关键修改：等待套餐数据加载完成
+			        console.log('等待套餐数据加载...当前套餐数:', meals.length);
+			        
+			        // 如果套餐数据还没加载，等待一下
+			        if (meals.length === 0) {
+			            console.log('套餐数据为空，等待加载...');
+			            // 尝试重新加载数据
+			            try {
+			                await loadAllDataFromSupabase();
+			                console.log('重新加载数据完成，套餐数:', meals.length);
+			            } catch (loadError) {
+			                console.error('重新加载数据失败:', loadError);
+			                // 尝试从本地缓存加载
+			                loadFromLocalCache();
+			                console.log('从本地缓存加载，套餐数:', meals.length);
+			            }
+			        }
+			
+			        // 等待数据加载的辅助函数
+			        const waitForData = (maxAttempts = 10, interval = 300) => {
+			            return new Promise((resolve, reject) => {
+			                let attempts = 0;
+			                
+			                const checkData = () => {
+			                    attempts++;
+			                    console.log(`等待数据加载... 尝试 ${attempts}/${maxAttempts}`);
+			                    
+			                    // 检查是否找到对应的套餐
+			                    const meal = meals.find(m => m.id === shareLink.mealId);
+			                    if (meal) {
+			                        console.log('找到套餐:', meal.name);
+			                        resolve(meal);
+			                        return;
+			                    }
+			                    
+			                    if (attempts >= maxAttempts) {
+			                        console.error('等待数据超时，未找到套餐');
+			                        reject(new Error('等待数据超时'));
+			                        return;
+			                    }
+			                    
+			                    setTimeout(checkData, interval);
+			                };
+			                
+			                checkData();
+			            });
+			        };
+			
+			        // 尝试跳转到套餐
+			        try {
+			            console.log('开始跳转到套餐，套餐ID:', shareLink.mealId);
+			            
+			            // 立即尝试一次
+			            const meal = meals.find(m => m.id === shareLink.mealId);
+			            if (meal) {
+			                if (meal.active !== false) {
+			                    console.log('立即跳转到套餐:', meal.name);
+			                    setTimeout(() => {
+			                        showMealDetail(shareLink.mealId);
+			                    }, 100);
+			                    return true;
+			                } else {
+			                    showNotification('该套餐已下架', 'error');
+			                    return false;
+			                }
+			            }
+			            
+			            // 如果没找到，等待数据加载
+			            console.log('套餐未找到，等待数据加载...');
+			            const foundMeal = await waitForData();
+			            
+			            if (foundMeal) {
+			                if (foundMeal.active !== false) {
+			                    console.log('等待后找到套餐，跳转到:', foundMeal.name);
+			                    setTimeout(() => {
+			                        showMealDetail(shareLink.mealId);
+			                    }, 100);
+			                    return true;
+			                } else {
+			                    showNotification('该套餐已下架', 'error');
+			                    return false;
+			                }
+			            }
+			            
+			            return false;
+			        } catch (waitError) {
+			            console.error('等待数据超时:', waitError);
+			            showNotification('加载套餐数据超时，请刷新页面重试', 'error');
+			            return false;
+			        }
+			    } catch (error) {
+			        console.error('验证分享链接失败:', error);
+			        showNotification('验证分享链接失败', 'error');
+			        return false;
+			    }
+			}
+		
 			// ==================== 全局轮询函数 ====================
 			function startGlobalPolling() {
 				if (globalPollingInterval) {
@@ -5023,78 +5727,80 @@
 
 			// ==================== 搜索套餐功能 ====================
 			function searchMeals(searchTerm) {
-			    const mealGrid = document.getElementById('mealGrid');
-			    const noMealsMessage = document.getElementById('noMealsMessage');
-			
-			    mealGrid.innerHTML = '';
-			
-			    if (!searchTerm) {
-			        updateHomePage();
-			        return;
-			    }
-			
-			    const activeMeals = meals.filter(meal => meal.active !== false);
-			
-			    if (activeMeals.length === 0) {
-			        noMealsMessage.style.display = 'block';
-			        return;
-			    }
-			
-			    noMealsMessage.style.display = 'none';
-			
-			    const searchTermLower = searchTerm.toLowerCase();
-			
-			    const filteredMeals = activeMeals.filter(meal => {
-			        if (meal.name.toLowerCase().includes(searchTermLower)) return true;
-			        if (meal.id.toLowerCase().includes(searchTermLower)) return true;
-			        if (meal.price.toString().includes(searchTerm)) return true;
-			        if (meal.tags && meal.tags.some(tag => tag.toLowerCase().includes(searchTermLower))) return true;
-			        if (meal.description && meal.description.toLowerCase().includes(searchTermLower)) return true;
-			        return false;
-			    });
-			
-			    if (filteredMeals.length === 0) {
-			        mealGrid.innerHTML = `
+				const mealGrid = document.getElementById('mealGrid');
+				const noMealsMessage = document.getElementById('noMealsMessage');
+
+				mealGrid.innerHTML = '';
+
+				if (!searchTerm) {
+					updateHomePage();
+					return;
+				}
+
+				const activeMeals = meals.filter(meal => meal.active !== false);
+
+				if (activeMeals.length === 0) {
+					noMealsMessage.style.display = 'block';
+					return;
+				}
+
+				noMealsMessage.style.display = 'none';
+
+				const searchTermLower = searchTerm.toLowerCase();
+
+				const filteredMeals = activeMeals.filter(meal => {
+					if (meal.name.toLowerCase().includes(searchTermLower)) return true;
+					if (meal.id.toLowerCase().includes(searchTermLower)) return true;
+					if (meal.price.toString().includes(searchTerm)) return true;
+					if (meal.tags && meal.tags.some(tag => tag.toLowerCase().includes(searchTermLower))) return true;
+					if (meal.description && meal.description.toLowerCase().includes(searchTermLower)) return true;
+					return false;
+				});
+
+				if (filteredMeals.length === 0) {
+					mealGrid.innerHTML =
+						`
 			            <div class="no-meals-message">
 			                <i class="fas fa-search"></i>
 			                <h3>未找到相关套餐</h3>
 			                <p>没有找到与"${searchTerm}"相关的套餐</p>
 			            </div>
 			        `;
-			        return;
-			    }
-			
-			    filteredMeals.sort((a, b) => {
-			        const orderDiff = (a.order || 9999) - (b.order || 9999);
-			        if (orderDiff !== 0) return orderDiff;
-			        return (b.createdAt || 0) - (a.createdAt || 0);
-			    });
-			
-			    filteredMeals.forEach(meal => {
-			        // 为每个套餐创建唯一的链接
-			        const mealLink = `#meal=${encodeURIComponent(meal.id)}`;
-			        
-			        const mealCard = document.createElement('a');
-			        mealCard.href = mealLink;  // 设置链接
-			        mealCard.className = 'meal-card';
-			        if (meal.active === false) {
-			            mealCard.classList.add('inactive');
-			        }
-			        
-			        // 添加点击事件监听器
-			        mealCard.addEventListener('click', function(e) {
-			            e.preventDefault();
-			            if (meal.active === false) return;
-			            
-			            // 更新URL
-			            const url = new URL(window.location);
-			            url.hash = `meal=${encodeURIComponent(meal.id)}`;
-			            window.history.pushState({}, '', url);
-			            
-			            showMealDetail(meal.id);
-			        });
-			
-			        mealCard.innerHTML = `
+					return;
+				}
+
+				filteredMeals.sort((a, b) => {
+					const orderDiff = (a.order || 9999) - (b.order || 9999);
+					if (orderDiff !== 0) return orderDiff;
+					return (b.createdAt || 0) - (a.createdAt || 0);
+				});
+
+				filteredMeals.forEach(meal => {
+					// 为每个套餐创建唯一的链接
+					const mealLink = `#meal=${encodeURIComponent(meal.id)}`;
+
+					const mealCard = document.createElement('a');
+					mealCard.href = mealLink; // 设置链接
+					mealCard.className = 'meal-card';
+					if (meal.active === false) {
+						mealCard.classList.add('inactive');
+					}
+
+					// 添加点击事件监听器
+					mealCard.addEventListener('click', function(e) {
+						e.preventDefault();
+						if (meal.active === false) return;
+
+						// 更新URL
+						const url = new URL(window.location);
+						url.hash = `meal=${encodeURIComponent(meal.id)}`;
+						window.history.pushState({}, '', url);
+
+						showMealDetail(meal.id);
+					});
+
+					mealCard.innerHTML =
+						`
 			            <div class="meal-header">
 			                <h4 class="meal-name">${meal.name}</h4>
 			                <div class="meal-price">¥${meal.price}</div>
@@ -5105,9 +5811,9 @@
 			                <p style="margin-top: 8px;">${meal.description}</p>
 			            </div>
 			        `;
-			
-			        mealGrid.appendChild(mealCard);
-			    });
+
+					mealGrid.appendChild(mealCard);
+				});
 			}
 			// ==================== 管理员搜索套餐功能 ====================
 			function adminSearchMeals(searchTerm) {
@@ -5266,57 +5972,58 @@
 			}
 
 			function updateHomePage() {
-			    const mealGrid = document.getElementById('mealGrid');
-			    const noMealsMessage = document.getElementById('noMealsMessage');
-			    const mealSearchInput = document.getElementById('mealSearchInput');
-			
-			    if (mealSearchInput && mealSearchInput.value.trim()) {
-			        searchMeals(mealSearchInput.value.trim());
-			        return;
-			    }
-			
-			    mealGrid.innerHTML = '';
-			
-			    const activeMeals = meals
-			        .filter(meal => meal.active !== false)
-			        .sort((a, b) => {
-			            const orderDiff = (a.order || 9999) - (b.order || 9999);
-			            if (orderDiff !== 0) return orderDiff;
-			            return (b.createdAt || 0) - (a.createdAt || 0);
-			        });
-			
-			    if (activeMeals.length === 0) {
-			        noMealsMessage.style.display = 'block';
-			        return;
-			    }
-			
-			    noMealsMessage.style.display = 'none';
-			
-			    activeMeals.forEach(meal => {
-			        // 为每个套餐创建唯一的链接
-			        const mealLink = `#meal=${encodeURIComponent(meal.id)}`;
-			        
-			        const mealCard = document.createElement('a');
-			        mealCard.href = mealLink;  // 设置链接
-			        mealCard.className = 'meal-card';
-			        if (meal.active === false) {
-			            mealCard.classList.add('inactive');
-			        }
-			        
-			        // 添加点击事件监听器
-			        mealCard.addEventListener('click', function(e) {
-			            e.preventDefault();
-			            if (meal.active === false) return;
-			            
-			            // 更新URL
-			            const url = new URL(window.location);
-			            url.hash = `meal=${encodeURIComponent(meal.id)}`;
-			            window.history.pushState({}, '', url);
-			            
-			            showMealDetail(meal.id);
-			        });
-			
-			        mealCard.innerHTML = `
+				const mealGrid = document.getElementById('mealGrid');
+				const noMealsMessage = document.getElementById('noMealsMessage');
+				const mealSearchInput = document.getElementById('mealSearchInput');
+
+				if (mealSearchInput && mealSearchInput.value.trim()) {
+					searchMeals(mealSearchInput.value.trim());
+					return;
+				}
+
+				mealGrid.innerHTML = '';
+
+				const activeMeals = meals
+					.filter(meal => meal.active !== false)
+					.sort((a, b) => {
+						const orderDiff = (a.order || 9999) - (b.order || 9999);
+						if (orderDiff !== 0) return orderDiff;
+						return (b.createdAt || 0) - (a.createdAt || 0);
+					});
+
+				if (activeMeals.length === 0) {
+					noMealsMessage.style.display = 'block';
+					return;
+				}
+
+				noMealsMessage.style.display = 'none';
+
+				activeMeals.forEach(meal => {
+					// 为每个套餐创建唯一的链接
+					const mealLink = `#meal=${encodeURIComponent(meal.id)}`;
+
+					const mealCard = document.createElement('a');
+					mealCard.href = mealLink; // 设置链接
+					mealCard.className = 'meal-card';
+					if (meal.active === false) {
+						mealCard.classList.add('inactive');
+					}
+
+					// 添加点击事件监听器
+					mealCard.addEventListener('click', function(e) {
+						e.preventDefault();
+						if (meal.active === false) return;
+
+						// 更新URL
+						const url = new URL(window.location);
+						url.hash = `meal=${encodeURIComponent(meal.id)}`;
+						window.history.pushState({}, '', url);
+
+						showMealDetail(meal.id);
+					});
+
+					mealCard.innerHTML =
+						`
 			            <div class="meal-header">
 			                <h4 class="meal-name">${meal.name}</h4>
 			                <div class="meal-price">¥${meal.price}</div>
@@ -5327,20 +6034,21 @@
 			                <p style="margin-top: 8px;">${meal.description}</p>
 			            </div>
 			        `;
-			
-			        mealGrid.appendChild(mealCard);
-			    });
+
+					mealGrid.appendChild(mealCard);
+				});
 			}
 
 			// ==================== 套餐详情页 ====================
-// ==================== 套餐详情页 ====================
-function showMealDetail(mealId) {
-    const meal = meals.find(m => m.id === mealId);
-    if (!meal) return;
+			// ==================== 套餐详情页 ====================
+			function showMealDetail(mealId) {
+				const meal = meals.find(m => m.id === mealId);
+				if (!meal) return;
 
-    const mealDetailPage = document.getElementById('mealDetailPage');
+				const mealDetailPage = document.getElementById('mealDetailPage');
 
-    mealDetailPage.innerHTML = `
+				mealDetailPage.innerHTML =
+					`
         <a href="#" class="back-btn" onclick="goBackToHome()">
             <i class="fas fa-arrow-left"></i>
             返回套餐列表
@@ -5579,39 +6287,83 @@ function showMealDetail(mealId) {
         </div>
     `;
 
-    initOptionSelection(mealDetailPage);
-    initDeliveryTypeToggle(mealDetailPage);
-    initDeliveryMethodToggle(mealDetailPage);
-    initPasteRecognition(mealDetailPage);
-    initPickupMethod(mealDetailPage);
-    initCart(mealDetailPage);
-    initCheckout(mealDetailPage);
+				initOptionSelection(mealDetailPage);
+				initDeliveryTypeToggle(mealDetailPage);
+				initDeliveryMethodToggle(mealDetailPage);
+				initPasteRecognition(mealDetailPage);
+				initPickupMethod(mealDetailPage);
+				initCart(mealDetailPage);
+				initCheckout(mealDetailPage);
 
-    if (!meal.optionGroups || meal.optionGroups.length === 0) {
-        const addToCartBtn = mealDetailPage.querySelector('.add-to-cart');
-        if (addToCartBtn) {
-            addToCartBtn.disabled = false;
-            addToCartBtn.style.opacity = '1';
-            addToCartBtn.style.cursor = 'pointer';
-        }
-    }
+				if (!meal.optionGroups || meal.optionGroups.length === 0) {
+					const addToCartBtn = mealDetailPage.querySelector('.add-to-cart');
+					if (addToCartBtn) {
+						addToCartBtn.disabled = false;
+						addToCartBtn.style.opacity = '1';
+						addToCartBtn.style.cursor = 'pointer';
+					}
+				}
+				// 在showMealDetail函数中，在生成HTML后添加
+				// 检查是否通过分享链接进入，如果是则限制只能提交一次
+				if (currentShareLink) {
+					const remainingUses = currentShareLink.maxUses - currentShareLink.usedCount;
+					if (remainingUses <= 0) {
+						// 禁用提交按钮
+						setTimeout(() => {
+							const checkoutBtn = document.querySelector('.checkout-btn');
+							if (checkoutBtn) {
+								checkoutBtn.disabled = true;
+								checkoutBtn.innerHTML = '<i class="fas fa-times"></i> 使用次数已用完';
+								checkoutBtn.title = '此分享链接使用次数已用完';
+							}
 
-    showPage('mealDetailPage');
+							// 显示提示信息
+							const highlightDiv = document.querySelector('.highlight');
+							if (highlightDiv) {
+								highlightDiv.innerHTML =
+									`
+                    <i class="fas fa-exclamation-triangle"></i>
+                    此分享链接使用次数已用完，您只能查看套餐信息，无法提交订单
+                `;
+								highlightDiv.style.backgroundColor = '#ffebee';
+								highlightDiv.style.borderLeftColor = '#e31837';
+							}
+						}, 100);
+					}
+					
+					 else {
+						// 显示剩余使用次数
+						setTimeout(() => {
+							const highlightDiv = document.querySelector('.highlight');
+							if (highlightDiv) {
+								highlightDiv.innerHTML +=
+									`
+                    <div style="margin-top: 5px; font-size: 0.9em;">
+                        <i class="fas fa-link"></i>       剩余可提交次数：${remainingUses}
+                    </div>
+                `;
+							}
+						}, 100);
+					}
+				}
+				
+				showPage('mealDetailPage');
 
-    // ==================== 关键修改：正确处理按钮显示 ====================
-    // 检查是否是从链接进入的
-    const isLinkEntered = window.location.hash && window.location.hash.startsWith('#meal=');
-    
-    if (isLinkEntered) {
-        // 链接进入：显示查看订单按钮，隐藏返回首页按钮
-        document.getElementById('viewOrdersBtn').style.display = 'flex';
-        document.getElementById('viewHomeBtn').style.display = 'none';
-    } else {
-        // 正常从首页进入：隐藏查看订单按钮，显示返回首页按钮
-        document.getElementById('viewOrdersBtn').style.display = 'none';
-        document.getElementById('viewHomeBtn').style.display = 'flex';
-    }
-}
+				// ==================== 关键修改：正确处理按钮显示 ====================
+				// 检查是否是从链接进入的
+				const isLinkEntered = window.location.hash && window.location.hash.startsWith('#meal=');
+
+				if (isLinkEntered) {
+					// 链接进入：显示查看订单按钮，隐藏返回首页按钮
+					document.getElementById('viewOrdersBtn').style.display = 'flex';
+					document.getElementById('viewHomeBtn').style.display = 'none';
+				} else {
+					// 正常从首页进入：隐藏查看订单按钮，显示返回首页按钮
+					document.getElementById('viewOrdersBtn').style.display = 'none';
+					document.getElementById('viewHomeBtn').style.display = 'flex';
+				}
+			}
+
 			function generateOptionsHTML(meal) {
 				let html = '';
 
@@ -5687,137 +6439,565 @@ function showMealDetail(mealId) {
 			}
 
 			// ==================== 页面切换 ====================
-		// 添加这个新函数
-// 修改现有的 goBackToHome 函数
-function goBackToHome() {
-    // 清除URL中的套餐参数
-    const url = new URL(window.location);
-    url.hash = ''; // 清除hash部分
-    window.history.pushState({}, '', url);
-    
-    // 移除链接进入的标记
-    document.body.classList.remove('link-entered');
-    
-    // 返回首页时显示查看订单按钮，隐藏返回首页按钮
-    document.getElementById('viewOrdersBtn').style.display = 'flex';
-    document.getElementById('viewHomeBtn').style.display = 'none';
-    
-    showPage('homePage');
-}
-// 修改页面加载完成后的初始化部分
-document.addEventListener('DOMContentLoaded', async function() {
-    try {
-        showLoading('正在加载数据...');
-        
-        // 先检查是否有从链接进入
-        checkUrlForMeal();
-        
-        window.addEventListener('hashchange', function() {
-            // 如果hash改变，也检查是否从链接进入
-            checkUrlForMeal();
-        });
-        
-        if (!supabaseClient && window.supabase) {
-            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            console.log('Supabase 客户端已初始化');
-        }
+			// 添加这个新函数
+			// 修改现有的 goBackToHome 函数
+			// 修改goBackToHome函数
+			// ==================== 修改：返回首页函数 ====================
+			// ==================== 修改：返回首页函数 ====================
+			function goBackToHome() {
+			    // 清理分享链接状态
+			    clearShareLinkState();
+			    
+			    // 清除URL中的hash参数
+			    const url = new URL(window.location);
+			    url.hash = ''; // 清除hash部分
+			    window.history.replaceState({}, '', url);
+			    
+			    // 返回首页时显示查看订单按钮，隐藏返回首页按钮
+			    document.getElementById('viewOrdersBtn').style.display = 'flex';
+			    document.getElementById('viewHomeBtn').style.display = 'none';
+			    
+			    showPage('homePage');
+			}
 
-        if (supabaseClient) {
-            await SupabaseData.initializeTables();
-        }
+			// 修改：在header按钮的返回首页功能中添加清理
+			// ==================== 修改：DOMContentLoaded事件处理 ====================
+			document.addEventListener('DOMContentLoaded', async function() {
+			    try {
+			        showLoading('正在加载数据...');
+			        
+			        // 初始化supabase客户端
+			        if (!supabaseClient && window.supabase) {
+			            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+			            console.log('Supabase 客户端已初始化');
+			        }
+			
+			        if (supabaseClient) {
+			            await SupabaseData.initializeTables();
+			        }
+			
+			        // 先检查是否有分享链接参数
+			        console.log('检查URL中的分享链接...');
+			        const hash = window.location.hash;
+			        if (hash && hash.startsWith('#share=')) {
+			            const shareCode = decodeURIComponent(hash.substring(7));
+			            currentShareCode = shareCode;
+			            console.log('检测到分享链接，代码:', shareCode);
+			        }
+			
+			        // 加载所有数据
+			        console.log('开始加载数据...');
+			        await loadAllDataFromSupabase();
+			        console.log('数据加载完成，套餐数:', meals.length);
+			
+			        // 如果有分享链接，验证并跳转
+			        if (currentShareCode) {
+			            console.log('验证分享链接...');
+			            await validateShareLink(currentShareCode);
+			        } else {
+			            // 如果没有分享链接，检查套餐链接
+			            console.log('检查套餐链接...');
+			            checkUrlForMeal();
+			        }
+			
+			        // 初始化页面各部分
+			        console.log('初始化页面...');
+			        initHomePage();
+			        initAdminPanel();
+			        initMealManagement();
+			        initNewMealManagement();
+			        updateCartDisplay();
+			        updateOrderBadge();
+			        initImagePreview();
+			        initPasswordVerification();
+			        initStatusToggle();
+			        initMyOrdersPage();
+			        initHeaderButtons();
+			        initSearchFunction();
+			        initOrderConfirmModal();
+			        
+			        // 加载所有数据后，初始化分享链接管理
+			        initShareLinkManagement();
+			
+			        document.getElementById('currentUserIdDisplay').textContent = currentUserId.substring(0, 12) + '...';
+			
+			        showNotification('页面加载完成', 'success');
+			        hideLoading();
+			
+			        console.log('页面初始化完成');
+			
+			        startGlobalPolling();
+			    } catch (error) {
+			        console.error('页面初始化失败:', error);
+			        showNotification('页面初始化失败，使用本地缓存数据', 'error');
+			        hideLoading();
+			
+			        // 使用本地缓存数据
+			        loadFromLocalCache();
+			        console.log('使用本地缓存，套餐数:', meals.length);
+			
+			        // 如果有分享链接，尝试用本地数据验证
+			        const hash = window.location.hash;
+			        if (hash && hash.startsWith('#share=')) {
+			            const shareCode = decodeURIComponent(hash.substring(7));
+			            currentShareCode = shareCode;
+			            console.log('本地缓存模式下验证分享链接...');
+			            await validateShareLink(currentShareCode);
+			        } else {
+			            checkUrlForMeal();
+			        }
+			
+			        // 初始化页面
+			        initHomePage();
+			        initAdminPanel();
+			        initMealManagement();
+			        initNewMealManagement();
+			        updateCartDisplay();
+			        updateOrderBadge();
+			        initImagePreview();
+			        initPasswordVerification();
+			        initStatusToggle();
+			        initMyOrdersPage();
+			        initHeaderButtons();
+			        initSearchFunction();
+			        initOrderConfirmModal();
+			
+			        startGlobalPolling();
+			    }
+			});
 
-        await loadAllDataFromSupabase();
-        
-        // 注意：这里不再调用 checkUrlForMeal()，因为上面已经调用了
-        
-        initHomePage();
-        initAdminPanel();
-        initMealManagement();
-        initNewMealManagement();
-        updateCartDisplay();
-        updateOrderBadge();
-        initImagePreview();
-        initPasswordVerification();
-        initStatusToggle();
-        initMyOrdersPage();
-        initHeaderButtons();
-        initSearchFunction();
-        initOrderConfirmModal();
+			// 新增：初始化分享链接管理
+			function initShareLinkManagement() {
+				// 填充套餐选择下拉框
+				const mealSelect = document.getElementById('shareLinkMeal');
+				if (mealSelect) {
+					mealSelect.innerHTML = '<option value="">请选择套餐</option>';
+					meals.forEach(meal => {
+						if (meal.active !== false) {
+							const option = document.createElement('option');
+							option.value = meal.id;
+							option.textContent = meal.name;
+							mealSelect.appendChild(option);
+						}
+					});
+				}
 
-        document.getElementById('currentUserIdDisplay').textContent = currentUserId.substring(0, 12) + '...';
+				// 生成分享链接按钮事件
+				const generateBtn = document.getElementById('generateShareLinkBtn');
+				if (generateBtn) {
+					generateBtn.addEventListener('click', async function() {
+						await generateShareLink();
+					});
+				}
 
-        // 检查其他URL参数（如订单ID）
-        checkUrlParams();
+				// 加载分享链接列表
+				loadShareLinkList();
+				// 事件委托处理分享链接操作
+				document.addEventListener('click', function(e) {
+					// 复制链接按钮
+					if (e.target.closest('.copy-link-btn')) {
+						const btn = e.target.closest('.copy-link-btn');
+						const url = btn.dataset.url;
+						copyToClipboard(url);
+						showNotification('链接已复制到剪贴板', 'success');
+					}
 
-        showNotification('页面加载完成', 'success');
-        hideLoading();
+					// 禁用/启用链接按钮
+					if (e.target.closest('.deactivate-link-btn')) {
+						const btn = e.target.closest('.deactivate-link-btn');
+						const code = btn.dataset.code;
+						toggleShareLinkActive(code);
+					}
 
-        console.log('页面初始化完成，数据已从Supabase加载');
+					// 删除链接按钮
+					if (e.target.closest('.delete-link-btn')) {
+						const btn = e.target.closest('.delete-link-btn');
+						const code = btn.dataset.code;
+						deleteShareLink(code);
+					}
+				});
+			}
+			
+			// 新增：复制到剪贴板
+			function copyToClipboard(text) {
+				const textarea = document.createElement('textarea');
+				textarea.value = text;
+				document.body.appendChild(textarea);
+				textarea.select();
+				document.execCommand('copy');
+				document.body.removeChild(textarea);
+			}
 
-        startGlobalPolling();
-    } catch (error) {
-        console.error('页面初始化失败:', error);
-        showNotification('页面初始化失败，使用本地缓存数据', 'error');
-        hideLoading();
-
-        loadFromLocalCache();
-        
-        // 仍然检查是否有从链接进入
-        checkUrlForMeal();
-
-        initHomePage();
-        initAdminPanel();
-        initMealManagement();
-        initNewMealManagement();
-        updateCartDisplay();
-        updateOrderBadge();
-        initImagePreview();
-        initPasswordVerification();
-        initStatusToggle();
-        initMyOrdersPage();
-        initHeaderButtons();
-        initSearchFunction();
-        initOrderConfirmModal();
-
-        startGlobalPolling();
-    }
-});
 		
-		// 修改现有的 showPage 函数
-// 修改现有的 showPage 函数
-function showPage(pageId) {
-    document.querySelectorAll('.meal-page-container').forEach(page => {
-        page.classList.remove('active');
-    });
+			// 修改：切换分享链接状态
+			async function toggleShareLinkActive(code) {
+				const link = shareLinks.find(l => l.code === code);
+				if (!link) return;
 
-    document.getElementById(pageId).classList.add('active');
+				const newActive = !link.active;
 
-    window.scrollTo(0, 0);
+				if (confirm(`确定要${newActive ? '启用' : '禁用'}分享链接 ${code} 吗？`)) {
+					try {
+						link.active = newActive;
+						link.updatedAt = Date.now();
 
-    if (pageId === 'homePage') {
-        // 移除链接进入的标记
-        document.body.classList.remove('link-entered');
-        
-        // 在首页时两个按钮都显示
-        document.getElementById('viewOrdersBtn').style.display = 'flex';
-        document.getElementById('viewHomeBtn').style.display = 'flex';
-        
-        // 检查URL中是否有套餐参数，如果有则显示对应套餐
-        checkUrlForMeal();
-    } else if (pageId === 'mealDetailPage') {
-        // 如果是从链接进入的
-        if (window.location.hash && window.location.hash.startsWith('#meal=')) {
-            // 链接进入：显示查看订单按钮，隐藏返回首页按钮
-            document.getElementById('viewOrdersBtn').style.display = 'flex';
-            document.getElementById('viewHomeBtn').style.display = 'none';
-        } else {
-            // 正常从首页进入：隐藏查看订单按钮，显示返回首页按钮
-            document.getElementById('viewOrdersBtn').style.display = 'none';
-            document.getElementById('viewHomeBtn').style.display = 'flex';
-        }
-    }
-}
+						await SupabaseData.saveShareLink(link);
+						showNotification(`分享链接已${newActive ? '启用' : '禁用'}`, 'success');
 
+						// 重新加载列表
+						loadShareLinkList();
+
+						// 如果当前页面是通过这个链接进入的，且链接被禁用，则显示空白
+						if (!newActive && currentShareCode === code) {
+							clearPageContent();
+						}
+					} catch (error) {
+						console.error('切换分享链接状态失败:', error);
+						showNotification('操作失败：' + error.message, 'error');
+					}
+				}
+			}
+
+			// 修改：删除分享链接
+			async function deleteShareLink(code) {
+				const link = shareLinks.find(l => l.code === code);
+				if (!link) return;
+
+				if (confirm(`确定要删除分享链接 ${code} 吗？此操作不可恢复！`)) {
+					try {
+						await SupabaseData.deleteShareLink(link.id);
+
+						// 从本地数据中移除
+						shareLinks = shareLinks.filter(l => l.code !== code);
+
+						showNotification('分享链接已删除', 'success');
+
+						// 重新加载列表
+						loadShareLinkList();
+
+						// 如果当前页面是通过这个链接进入的，则显示空白
+						if (currentShareCode === code) {
+							clearPageContent();
+						}
+					} catch (error) {
+						console.error('删除分享链接失败:', error);
+						showNotification('删除失败：' + error.message, 'error');
+					}
+				}
+			}
+
+			// 新增：清空页面内容，显示空白
+			function clearPageContent() {
+				// 获取容器元素
+				const container = document.querySelector('.container');
+				if (!container) return;
+
+				// 清空容器内容
+				container.innerHTML = '';
+
+				// 添加空白提示
+				container.innerHTML =
+					`
+        <div style="
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 80vh;
+            text-align: center;
+            flex-direction: column;
+            padding: 40px 20px;
+        ">
+            <div style="
+                font-size: 48px;
+                color: #ccc;
+                margin-bottom: 20px;
+            ">
+                <i class="fas fa-ban"></i>
+            </div>
+            <h2 style="
+                color: #666;
+                margin-bottom: 10px;
+                font-size: 1.5rem;
+            ">
+                链接已失效
+            </h2>
+            <p style="
+                color: #999;
+                font-size: 1rem;
+                line-height: 1.5;
+                max-width: 400px;
+            ">
+                该分享链接已被管理员禁用或删除<br>
+                无法继续访问页面内容
+            </p>
+        </div>
+    `;
+
+				// 隐藏所有按钮和功能
+				const adminBtn = document.getElementById('adminBtn');
+				if (adminBtn) adminBtn.style.display = 'none';
+
+				const headerButtons = document.querySelector('.header-buttons');
+				if (headerButtons) headerButtons.style.display = 'none';
+
+				// 移除链接进入的标记
+				document.body.classList.remove('link-entered');
+
+				// 清空URL中的hash，避免刷新后再次进入
+				const url = new URL(window.location);
+				url.hash = '';
+				window.history.replaceState({}, '', url);
+
+				// 清空分享链接相关状态
+				currentShareCode = null;
+				currentShareLink = null;
+			}
+			// 新增：生成分享链接
+			async function generateShareLink() {
+				const mealSelect = document.getElementById('shareLinkMeal');
+				const durationSelect = document.getElementById('shareLinkDuration');
+				const maxUsesInput = document.getElementById('shareLinkMaxUses');
+				const customCodeInput = document.getElementById('shareLinkCustomCode');
+
+				if (!mealSelect.value) {
+					showNotification('请选择关联套餐', 'error');
+					return;
+				}
+
+				// 生成或使用自定义代码
+				let code = customCodeInput.value.trim();
+				if (!code) {
+					// 生成6位随机代码
+					code = generateRandomCode(6);
+				} else {
+					// 验证自定义代码格式
+					if (!/^[A-Za-z0-9]{6}$/.test(code)) {
+						showNotification('自定义代码必须是6位字母数字', 'error');
+						return;
+					}
+
+					// 检查代码是否已存在
+					const existingLink = shareLinks.find(link => link.code === code);
+					if (existingLink) {
+						showNotification('该代码已存在，请使用其他代码', 'error');
+						return;
+					}
+				}
+
+				// 计算过期时间
+				const durationHours = parseInt(durationSelect.value);
+				let expiresAt = null;
+				if (durationHours > 0) {
+					expiresAt = Date.now() + (durationHours * 60 * 60 * 1000);
+				}
+
+				const maxUses = parseInt(maxUsesInput.value) || 1;
+
+				const shareLink = {
+					code: code,
+					mealId: mealSelect.value,
+					maxUses: maxUses,
+					usedCount: 0,
+					expiresAt: expiresAt,
+					active: true
+				};
+
+				try {
+					const savedLink = await SupabaseData.saveShareLink(shareLink);
+
+					// 更新本地数据
+					shareLinks.push(savedLink);
+
+					// 显示生成的链接
+					const shareUrl = `${window.location.origin}${window.location.pathname}#share=${code}`;
+
+					showNotification(`分享链接生成成功！代码：${code}`, 'success');
+
+					// 显示链接信息
+					const resultHTML =
+						`
+		            <div class="recognize-result" style="border-left-color: #4CAF50; margin-top: 10px;">
+		                <p><strong>分享链接生成成功！</strong></p>
+		                <p><strong>代码：</strong>${code}</p>
+		                <p><strong>完整链接：</strong></p>
+		                <div class="share-link-url">${shareUrl}</div>
+		                <p><strong>使用说明：</strong></p>
+		                <p>1. 将此链接发送给用户</p>
+		                <p>2. 用户通过链接进入后只能提交${maxUses}次订单</p>
+		                <p>3. ${durationHours > 0 ? `链接将在${durationHours}小时后过期` : '链接永久有效'}</p>
+		            </div>
+		        `;
+
+					const generateBtn = document.getElementById('generateShareLinkBtn');
+					if (generateBtn) {
+						generateBtn.insertAdjacentHTML('afterend', resultHTML);
+					}
+
+					// 重新加载列表
+					loadShareLinkList();
+
+					// 清空表单
+					customCodeInput.value = '';
+
+				} catch (error) {
+					console.error('生成分享链接失败:', error);
+					showNotification('生成分享链接失败：' + error.message, 'error');
+				}
+			}
+
+			// 新增：生成随机代码
+			function generateRandomCode(length) {
+				const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+				let result = '';
+				for (let i = 0; i < length; i++) {
+					result += chars.charAt(Math.floor(Math.random() * chars.length));
+				}
+				return result;
+			}
+
+			// 新增：加载分享链接列表
+			async function loadShareLinkList() {
+				const shareLinkList = document.getElementById('shareLinkList');
+				const noShareLinksMessage = document.getElementById('noShareLinksMessage');
+
+				if (!shareLinkList) return;
+
+				try {
+					// 从服务器重新加载以确保数据最新
+					const updatedLinks = await SupabaseData.loadShareLinks();
+					shareLinks = updatedLinks;
+
+					shareLinkList.innerHTML = '';
+
+					if (shareLinks.length === 0) {
+						if (noShareLinksMessage) noShareLinksMessage.style.display = 'block';
+						return;
+					}
+
+					if (noShareLinksMessage) noShareLinksMessage.style.display = 'none';
+
+					shareLinks.forEach(link => {
+						const linkElement = createShareLinkElement(link);
+						shareLinkList.appendChild(linkElement);
+					});
+				} catch (error) {
+					console.error('加载分享链接列表失败:', error);
+					shareLinkList.innerHTML = '<div class="no-share-links">加载失败，请刷新重试</div>';
+				}
+			}
+
+			// 新增：创建分享链接元素
+			function createShareLinkElement(link) {
+				const element = document.createElement('div');
+				element.className = 'share-link-item';
+
+				// 查找关联的套餐
+				const meal = meals.find(m => m.id === link.mealId);
+				const mealName = meal ? meal.name : '未知套餐';
+
+				// 计算状态
+				const now = Date.now();
+				const isExpired = link.expiresAt && now > link.expiresAt;
+				const isUsedUp = link.usedCount >= link.maxUses;
+				const isActive = link.active && !isExpired && !isUsedUp;
+
+				// 格式化过期时间
+				let expiresAtText = '永久有效';
+				if (link.expiresAt) {
+					const date = new Date(link.expiresAt);
+					expiresAtText = date.toLocaleString('zh-CN');
+				}
+
+				// 生成完整链接
+				const shareUrl = `${window.location.origin}${window.location.pathname}#share=${link.code}`;
+
+				// 状态文本
+				let statusText = '有效';
+				let statusClass = 'share-link-stats';
+				if (!isActive) {
+					statusText = '已失效';
+					statusClass = 'share-link-stats expired';
+				} else if (isUsedUp) {
+					statusText = '已用完';
+					statusClass = 'share-link-stats used-up';
+				} else if (isExpired) {
+					statusText = '已过期';
+					statusClass = 'share-link-stats expired';
+				}
+
+				element.innerHTML =
+					`
+		        <div class="share-link-header">
+		            <div class="share-link-code">${link.code}</div>
+		            <span class="${statusClass}">${statusText}</span>
+		        </div>
+		        <div class="share-link-info">
+		            <p><strong>关联套餐：</strong>${mealName}</p>
+		            <p><strong>使用次数：</strong>${link.usedCount} / ${link.maxUses}</p>
+		            <p><strong>过期时间：</strong>${expiresAtText}</p>
+		            <p><strong>创建时间：</strong>${new Date(link.createdAt).toLocaleString('zh-CN')}</p>
+		        </div>
+		        <div class="share-link-url">
+		            ${shareUrl}
+		        </div>
+		        <div class="share-link-actions">
+		            <button class="copy-link-btn" data-code="${link.code}" data-url="${shareUrl}">
+		                <i class="fas fa-copy"></i> 复制链接
+		            </button>
+		            <button class="deactivate-link-btn" data-code="${link.code}">
+		                <i class="fas fa-ban"></i> ${link.active ? '禁用' : '启用'}
+		            </button>
+		            <button class="delete-link-btn" data-code="${link.code}">
+		                <i class="fas fa-trash"></i> 删除
+		            </button>
+		        </div>
+		    `;
+
+				return element;
+			}
+			// 修改现有的 showPage 函数
+
+			// 修改：页面切换
+			function showPage(pageId) {
+				document.querySelectorAll('.meal-page-container').forEach(page => {
+					page.classList.remove('active');
+				});
+
+				document.getElementById(pageId).classList.add('active');
+
+				window.scrollTo(0, 0);
+
+				if (pageId === 'homePage') {
+					// 移除链接进入的标记
+					document.body.classList.remove('link-entered');
+
+					// 在首页时显示查看订单按钮，隐藏返回首页按钮
+					document.getElementById('viewOrdersBtn').style.display = 'flex';
+					document.getElementById('viewHomeBtn').style.display = 'flex';
+
+					// 检查URL中是否有分享链接参数，如果有则跳转到套餐
+					checkUrlForShareLink();
+				} else if (pageId === 'mealDetailPage') {
+					// 检查是否是从链接进入的（包括分享链接和直接套餐链接）
+					const isLinkEntered = (window.location.hash &&
+						(window.location.hash.startsWith('#meal=') ||
+							window.location.hash.startsWith('#share=')));
+
+					if (isLinkEntered) {
+						// 链接进入：显示查看订单按钮，隐藏返回首页按钮
+						document.getElementById('viewOrdersBtn').style.display = 'flex';
+						document.getElementById('viewHomeBtn').style.display = 'none';
+					} else {
+						// 正常从首页进入：隐藏查看订单按钮，显示返回首页按钮
+						document.getElementById('viewOrdersBtn').style.display = 'none';
+						document.getElementById('viewHomeBtn').style.display = 'flex';
+					}
+				} else if (pageId === 'myOrdersPage') {
+					// 在我的订单页面，显示返回首页按钮，隐藏查看订单按钮
+					document.getElementById('viewOrdersBtn').style.display = 'none';
+					document.getElementById('viewHomeBtn').style.display = 'flex';
+				}
+			}
 			// ==================== 选项选择功能 ====================
 			function initOptionSelection(container) {
 				container.querySelectorAll('.counter-btn.increment').forEach(button => {
@@ -6732,12 +7912,14 @@ function showPage(pageId) {
 					totalPrice: totalPrice,
 					hasScreenshot: hasScreenshot,
 					screenshotData: screenshotData,
-					userId: currentUserId
+					userId: currentUserId,
+					shareCode: currentShareCode || null, // 新增：记录分享链接代码
+					shareLinkId: currentShareLink ? currentShareLink.id : null // 新增：记录分享链接ID
 				};
 
 				showOrderConfirm(orderData);
 			}
-
+			// ==================== 完成订单提交 ====================
 			// ==================== 完成订单提交 ====================
 			async function completeOrderSubmission(orderData) {
 				const checkoutBtn = document.querySelector('.checkout-btn');
@@ -6750,6 +7932,9 @@ function showPage(pageId) {
 				checkoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 提交中...';
 
 				try {
+					// 在订单数据中添加分享码字段
+					orderData.shareCode = currentShareCode || null;
+
 					const savedOrder = await SupabaseData.quickSaveOrder(orderData);
 					console.log('订单快速提交成功:', savedOrder);
 
@@ -6757,6 +7942,24 @@ function showPage(pageId) {
 					orders.unshift(savedOrder);
 
 					newOrdersCount++;
+
+					// 新增：如果订单是通过分享链接提交的，更新使用次数
+					if (currentShareCode && currentShareLink) {
+						try {
+							await SupabaseData.incrementShareLinkUse(currentShareCode);
+
+							// 更新本地数据
+							const linkIndex = shareLinks.findIndex(link => link.code === currentShareCode);
+							if (linkIndex !== -1) {
+								shareLinks[linkIndex].usedCount++;
+								shareLinks[linkIndex].updatedAt = Date.now();
+							}
+
+							console.log('分享链接使用次数已更新');
+						} catch (countError) {
+							console.warn('更新分享链接使用次数失败，但不影响订单提交:', countError);
+						}
+					}
 
 					setTimeout(async () => {
 						try {
@@ -6772,7 +7975,8 @@ function showPage(pageId) {
 						timestamp: o.timestamp,
 						status: o.status,
 						totalPrice: o.totalPrice,
-						userId: o.userId
+						userId: o.userId,
+						shareCode: o.shareCode || null // 保存分享码到本地缓存
 					}))));
 					localStorage.setItem('newOrdersCountCache', newOrdersCount.toString());
 
@@ -6798,43 +8002,46 @@ function showPage(pageId) {
 							renderOrders(activeFilter);
 						}
 
+						// 构建成功消息HTML，添加分享码显示
+
 						const successHTML =
 							`
-                        <div style="text-align: center; padding: 15px;">
-                            <i class="fas fa-check-circle" style="font-size: 2.5rem; color: #4CAF50; margin-bottom: 10px;"></i>
-                            <h3 style="color: #4CAF50; margin-bottom: 8px; font-size: 1.2rem;">订单提交成功！</h3>
-                            <p style="margin-bottom: 10px; font-size: 0.9rem;">订单号：<strong>${orderData.id}</strong></p>
-                            <p style="margin-bottom: 15px; font-size: 0.85rem;">我们已收到您的订单，请耐心等待处理</p>
-                            <div style="display: flex; gap: 8px; justify-content: center; margin-top: 15px;">
-                                <button id="viewOrderDetail" style="background-color: #e31837; color: white; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-size: 0.9rem;">
-                                    <i class="fas fa-clipboard-list"></i> 查看订单详情
-                                </button>
-                                <button id="backToHome" style="background-color: #f0f0f0; color: #333; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-size: 0.9rem;">
-                                    <i class="fas fa-home"></i> 返回首页
-                                </button>
-                            </div>
-                        </div>
-                    `;
+			                <div style="text-align: center; padding: 15px;">
+			                    <i class="fas fa-check-circle" style="font-size: 2.5rem; color: #4CAF50; margin-bottom: 10px;"></i>
+			                    <h3 style="color: #4CAF50; margin-bottom: 8px; font-size: 1.2rem;">订单提交成功！</h3>
+			                    <p style="margin-bottom: 10px; font-size: 0.9rem;">订单号：<strong>${orderData.id}</strong></p>
+			                   
+			                    <p style="margin-bottom: 15px; font-size: 0.85rem;">我们已收到您的订单，请耐心等待处理</p>
+			                    <div style="display: flex; gap: 8px; justify-content: center; margin-top: 15px;">
+			                        <button id="viewOrderDetail" style="background-color: #e31837; color: white; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-size: 0.9rem;">
+			                            <i class="fas fa-clipboard-list"></i> 查看订单详情
+			                        </button>
+			                        <button id="backToHome" style="background-color: #f0f0f0; color: #333; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-size: 0.9rem;">
+			                            <i class="fas fa-home"></i> 返回首页
+			                        </button>
+			                    </div>
+			                </div>
+			            `;
 
 						const successModal = document.createElement('div');
 						successModal.className = 'order-confirm-modal active';
 						successModal.innerHTML =
 							`
-                        <div class="order-confirm-box" style="max-width: 350px; max-height: 400px;">
-                            <div class="order-confirm-header" style="padding: 12px 15px;">
-                                <h2 class="order-confirm-title" style="font-size: 1.1rem;">
-                                    <i class="fas fa-check-circle"></i>
-                                    提交成功
-                                </h2>
-                                <button class="order-confirm-close" onclick="this.closest('.order-confirm-modal').remove(); document.body.style.overflow='auto';">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                            <div class="order-confirm-body" style="padding: 15px; max-height: 280px; overflow-y: auto;">
-                                ${successHTML}
-                            </div>
-                        </div>
-                    `;
+			                <div class="order-confirm-box" style="max-width: 350px; max-height: 400px;">
+			                    <div class="order-confirm-header" style="padding: 12px 15px;">
+			                        <h2 class="order-confirm-title" style="font-size: 1.1rem;">
+			                            <i class="fas fa-check-circle"></i>
+			                            提交成功
+			                        </h2>
+			                        <button class="order-confirm-close" onclick="this.closest('.order-confirm-modal').remove(); document.body.style.overflow='auto';">
+			                            <i class="fas fa-times"></i>
+			                        </button>
+			                    </div>
+			                    <div class="order-confirm-body" style="padding: 15px; max-height: 280px; overflow-y: auto;">
+			                        ${successHTML}
+			                    </div>
+			                </div>
+			            `;
 
 						document.body.style.overflow = 'hidden';
 
@@ -6887,7 +8094,6 @@ function showPage(pageId) {
 					checkoutBtn.innerHTML = '<i class="fas fa-credit-card"></i> 快速提交订单';
 				}
 			}
-
 			const highlightStyle = document.createElement('style');
 			highlightStyle.textContent =
 				`
@@ -6972,41 +8178,51 @@ function showPage(pageId) {
 				});
 			}
 
-function checkUrlParams() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const orderId = urlParams.get('order');
+			function checkUrlParams() {
+				const urlParams = new URLSearchParams(window.location.search);
+				const orderId = urlParams.get('order');
 
-    if (orderId) {
-        showMyOrdersPage();
+				if (orderId) {
+					showMyOrdersPage();
 
-        setTimeout(() => {
-            document.getElementById('orderSearchInput').value = orderId;
-            searchUserOrder(orderId);
-        }, 100);
-    }
-}
+					setTimeout(() => {
+						document.getElementById('orderSearchInput').value = orderId;
+						searchUserOrder(orderId);
+					}, 100);
+				}
+			}
 
-// 添加这个新函数来检查hash中的套餐参数
-// 修改这个函数来检查hash中的套餐参数
-function checkUrlForMeal() {
-    const hash = window.location.hash;
-    if (hash && hash.startsWith('#meal=')) {
-        const mealId = decodeURIComponent(hash.substring(6)); // 去掉 "#meal="
-        const meal = meals.find(m => m.id === mealId);
-        if (meal && meal.active !== false) {
-            // 延迟执行，确保页面已经加载完成
-            setTimeout(() => {
-                // 标记为从链接进入
-                document.body.classList.add('link-entered');
-                showMealDetail(mealId);
-                
-                // 在链接进入时，显示查看订单按钮，隐藏返回首页按钮
-                document.getElementById('viewOrdersBtn').style.display = 'flex';
-                document.getElementById('viewHomeBtn').style.display = 'none';
-            }, 100);
-        }
-    }
-}
+			// 添加这个新函数来检查hash中的套餐参数
+			// 修改：检查hash中的套餐参数
+			function checkUrlForMeal() {
+				const hash = window.location.hash;
+				// 只有没有当前分享链接且hash中包含套餐参数时才跳转
+				if (!currentShareLink && hash && hash.startsWith('#meal=')) {
+					const mealId = decodeURIComponent(hash.substring(6)); // 去掉 "#meal="
+					const meal = meals.find(m => m.id === mealId);
+					if (meal && meal.active !== false) {
+						// 标记为从链接进入
+						document.body.classList.add('link-entered');
+
+						// 延迟执行，确保页面已经加载完成
+						setTimeout(() => {
+							showMealDetail(mealId);
+
+							// 在链接进入时，显示查看订单按钮，隐藏返回首页按钮
+							document.getElementById('viewOrdersBtn').style.display = 'flex';
+							document.getElementById('viewHomeBtn').style.display = 'none';
+						}, 100);
+					}
+				}
+			}
+			
+			// ==================== 新增：清理分享链接状态函数 ====================
+			function clearShareLinkState() {
+			    currentShareCode = null;
+			    currentShareLink = null;
+			    document.body.classList.remove('link-entered');
+			}
+
 
 			function initMyOrdersPage() {
 				const orderSearchBtn = document.getElementById('orderSearchBtn');
@@ -7042,13 +8258,14 @@ function checkUrlForMeal() {
 			}
 
 			function showMyOrdersPage() {
-			    showPage('myOrdersPage');
-			    renderUserOrders('all');
-			
-			    // 在我的订单页面，显示返回首页按钮，隐藏查看订单按钮
-			    document.getElementById('viewOrdersBtn').style.display = 'none';
-			    document.getElementById('viewHomeBtn').style.display = 'flex';
+				showPage('myOrdersPage');
+				renderUserOrders('all');
+
+				// 在我的订单页面，显示返回首页按钮，隐藏查看订单按钮
+				document.getElementById('viewOrdersBtn').style.display = 'none';
+				document.getElementById('viewHomeBtn').style.display = 'flex';
 			}
+
 			function renderUserOrders(filter = 'all') {
 				const myOrdersContainer = document.getElementById('myOrdersContainer');
 				const noUserOrdersMessage = document.getElementById('noUserOrdersMessage');
@@ -7545,7 +8762,11 @@ function checkUrlForMeal() {
 						deliveryHTML += `<p>${line}</p>`;
 					}
 				});
-
+				let shareCodeHTML = '';
+				if (order.shareCode) {
+					shareCodeHTML =
+						`<p><span style="font-size: 20px; font-weight: bold;">分享码：</span><span style="font-size: 20px; font-weight: bold; background-color: green; color: white; padding: 4px 10px; border-radius: 4px; display: inline-block; margin-left: 4px;">${order.shareCode}</span></p>`;
+				}
 				let screenshotHTML = '';
 				if (order.hasScreenshot && order.screenshotData) {
 					screenshotHTML =
@@ -7618,6 +8839,7 @@ function checkUrlForMeal() {
                     ${order.orderNote ? `<p><strong>备注：</strong>${order.orderNote}</p>` : ''}
                     ${screenshotHTML}
                     ${feedbackHTML}
+					${shareCodeHTML}
                 </div>
                 
                 <div class="form-group" style="margin-top: 12px;">
@@ -8765,6 +9987,11 @@ function checkUrlForMeal() {
 
 			// ==================== 添加新套餐管理 ====================
 			function initNewMealManagement() {
+				 // 防止重复初始化
+				    if (window.newMealManagementInitialized) {
+				        return;
+				    }
+				    window.newMealManagementInitialized = true;
 				const statusToggle = document.getElementById('newMealActive');
 				const statusText = document.getElementById('newStatusText');
 				const supportDeliveryToggle = document.getElementById('newMealSupportDelivery');
@@ -8801,10 +10028,35 @@ function checkUrlForMeal() {
 				document.getElementById('newAddFixedItemBtn').addEventListener('click', function() {
 					addNewFixedItem();
 				});
-
-				document.getElementById('saveNewMealBtn').addEventListener('click', async function() {
-					await saveNewMeal();
-				});
+				// 修复保存按钮事件监听器，防止重复绑定
+				    const saveNewMealBtn = document.getElementById('saveNewMealBtn');
+				    
+				    // 移除之前可能绑定的事件监听器
+				    const newSaveBtn = saveNewMealBtn.cloneNode(true);
+				    saveNewMealBtn.parentNode.replaceChild(newSaveBtn, saveNewMealBtn);
+				    
+// 绑定新的事件监听器
+    document.getElementById('saveNewMealBtn').addEventListener('click', async function(e) {
+        // 防止重复提交
+        e.preventDefault();
+        e.stopPropagation();
+        
+        if (this.disabled) return;
+        
+        // 禁用按钮，防止重复点击
+        this.disabled = true;
+        const originalText = this.innerHTML;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 保存中...';
+        
+        try {
+            await saveNewMeal();
+        } catch (error) {
+            console.error('保存套餐失败:', error);
+            // 恢复按钮状态
+            this.disabled = false;
+            this.innerHTML = originalText;
+        }
+    });
 
 				if (document.querySelectorAll('#newOptionGroupsManagement .option-group-item').length === 0) {
 					addNewOptionGroup();
@@ -8993,7 +10245,157 @@ function checkUrlForMeal() {
 					fixedItem.remove();
 				});
 			}
+async function saveNewMeal() {
+    // 防止重复执行
+    if (isSavingNewMeal) {
+        return;
+    }
+    
+    isSavingNewMeal = true;
+    
+    try {
+        // 获取表单数据
+        const name = document.getElementById('newMealName').value.trim();
+        const price = parseFloat(document.getElementById('newMealPrice').value);
+        const order = parseInt(document.getElementById('newMealOrder').value) || 9999;
+        const tags = document.getElementById('newMealTags').value.split(',').map(tag => tag.trim()).filter(tag => tag);
+        const description = document.getElementById('newMealDescription').value.trim();
+        const active = document.getElementById('newMealActive').checked;
+        const supportDelivery = document.getElementById('newMealSupportDelivery').checked;
+        
+        // 验证输入
+        if (!name || !price || !description) {
+            throw new Error('请填写完整的套餐信息');
+        }
+        
+        if (price <= 0) {
+            throw new Error('价格必须大于0');
+        }
+        
+        // 获取选项组数据
+        const optionGroups = [];
+        const optionGroupItems = document.querySelectorAll('#newOptionGroupsManagement .option-group-item');
+        
+        optionGroupItems.forEach(item => {
+            const title = item.querySelector('.option-group-title-input').value.trim();
+            const minSelect = parseInt(item.querySelector('.min-select-input').value) || 0;
+            const maxSelect = parseInt(item.querySelector('.max-select-input').value) || 1;
+            const repeat = item.querySelector('.repeat-toggle').checked;
+            const maxPerItem = parseInt(item.querySelector('.max-per-item-input').value) || 1;
+            const rules = item.querySelector('.rules-input').value.trim();
+            
+            if (title) {
+                const items = [];
+                const itemElements = item.querySelectorAll('.option-item-list-item');
+                
+                itemElements.forEach(itemEl => {
+                    const itemName = itemEl.querySelector('.option-item-name-input').value.trim();
+                    const addPrice = parseFloat(itemEl.querySelector('.add-price-input').value) || 0;
+                    
+                    if (itemName) {
+                        items.push({ name: itemName, addPrice });
+                    }
+                });
+                
+                if (items.length > 0) {
+                    optionGroups.push({
+                        title,
+                        minSelect,
+                        maxSelect,
+                        repeat,
+                        maxPerItem,
+                        rules,
+                        items
+                    });
+                }
+            }
+        });
+        
+        // 获取固定搭配数据
+        const fixedItems = [];
+        const fixedItemElements = document.querySelectorAll('#newFixedItemsManagement .fixed-item-list-item');
+        
+        fixedItemElements.forEach(item => {
+            const name = item.querySelector('.fixed-item-name-input').value.trim();
+            const quantity = parseInt(item.querySelector('.fixed-item-quantity-input').value) || 1;
+            
+            if (name && quantity > 0) {
+                fixedItems.push({ name, quantity });
+            }
+        });
+        
+        // 生成唯一ID
+        const mealId = 'meal_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        
+        // 创建套餐对象
+        const newMeal = {
+            id: mealId,
+            name,
+            price,
+            order,
+            tags,
+            description,
+            active,
+            supportDelivery,
+            optionGroups,
+            fixedItems: fixedItems.length > 0 ? fixedItems : [],
+            createdAt: Date.now(),
+            updatedAt: Date.now()
+        };
+        
+        // 保存到Supabase
+        const savedMeal = await SupabaseData.saveMeal(newMeal);
+        
+        // 更新本地数据
+        meals.push(savedMeal);
+        
+        // 显示成功消息
+        showNotification('套餐添加成功！', 'success');
+        
+        // 重置表单
+        resetNewMealForm();
+        
+        // 更新套餐列表
+        const activeFilter = document.querySelector('.meal-filter-btn.active')?.dataset.mealFilter || 'all';
+        updateMealList(activeFilter);
+        
+        // 返回到套餐列表
+        document.querySelector('.admin-tab[data-tab="meals"]').click();
+        
+    } catch (error) {
+        console.error('保存套餐失败:', error);
+        showNotification('保存套餐失败: ' + error.message, 'error');
+        throw error;
+    } finally {
+        isSavingNewMeal = false;
+        // 恢复按钮状态
+        const saveBtn = document.getElementById('saveNewMealBtn');
+        if (saveBtn) {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = '<i class="fas fa-plus-circle"></i> 添加新套餐';
+        }
+    }
+}
 
+// 重置添加套餐表单
+function resetNewMealForm() {
+    document.getElementById('newMealName').value = '';
+    document.getElementById('newMealPrice').value = '';
+    document.getElementById('newMealOrder').value = '9999';
+    document.getElementById('newMealTags').value = '';
+    document.getElementById('newMealDescription').value = '';
+    document.getElementById('newMealActive').checked = true;
+    document.getElementById('newMealSupportDelivery').checked = true;
+    
+    // 重置选项组
+    const newOptionGroupsManagement = document.getElementById('newOptionGroupsManagement');
+    newOptionGroupsManagement.innerHTML = '';
+    addNewOptionGroup();
+    
+    // 重置固定搭配
+    const newFixedItemsManagement = document.getElementById('newFixedItemsManagement');
+    newFixedItemsManagement.innerHTML = '';
+}
 			// ==================== 保存新套餐函数 ====================
 			async function saveNewMeal() {
 				const mealName = document.getElementById('newMealName').value.trim();
