@@ -2896,6 +2896,23 @@
 			    }
 			
         }
+		/* 在已有的 .link-entered 规则之后添加移动端规则 */
+		@media (max-width: 768px) {
+		    .link-entered .back-btn,
+		    .link-entered .admin-btn {
+		        display: none !important;
+		    }
+		    
+		    /* 确保在分享链接模式下，移动端的查看订单按钮显示 */
+		    .link-entered .header-btn#viewOrdersBtn {
+		        display: flex !important;
+		    }
+		    
+		    /* 隐藏返回首页按钮 */
+		    .link-entered .header-btn#viewHomeBtn {
+		        display: none !important;
+		    }
+		}
 		/* 分享链接管理样式 */
 		.share-link-management {
 		    margin-top: 15px;
@@ -3141,6 +3158,7 @@
 		        margin-top: 4px;
 		    }
 		}
+		
     </style>
 	</head>
 	<body>
@@ -8128,15 +8146,16 @@
 					}
 				}
 			}
-			// 新增：清理分享链接状态
-			function clearShareLinkState() {
-				currentShareCode = null;
-				currentShareLink = null;
-				document.body.classList.remove('link-entered');
-
-				// 从sessionStorage中清除分享链接信息
-				sessionStorage.removeItem('currentShareLink');
-			}
+		// 修改现有的 clearShareLinkState 函数
+		function clearShareLinkState() {
+		    document.body.classList.remove('link-entered');
+		    currentShareCode = null;
+		    currentShareLink = null;
+		    
+		    // 更新按钮显示状态
+		    document.getElementById('viewOrdersBtn').style.display = 'none';
+		    document.getElementById('viewHomeBtn').style.display = 'flex';
+		}
 
 			function initMyOrdersPage() {
 				const orderSearchBtn = document.getElementById('orderSearchBtn');
