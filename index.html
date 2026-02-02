@@ -3228,6 +3228,23 @@
 			        display: none !important;
 			    }
 			}
+			/* 添加到CSS样式表的合适位置 */
+			.blank-page-message {
+			    margin-top: 50px;
+			    background-color: #f9f9f9;
+			    border-radius: 10px;
+			    padding: 40px 20px;
+			    text-align: center;
+			    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+			    border: 1px solid #eee;
+			}
+			
+			@media (max-width: 768px) {
+			    .blank-page-message {
+			        margin-top: 30px;
+			        padding: 30px 15px;
+			    }
+			}
     </style>
 	</head>
 	<body>
@@ -5585,6 +5602,35 @@
 			}
 			
 			// ==================== 修改：检查URL中是否有分享链接参数 ====================
+			// ==================== 修改：检查URL中的分享链接 ====================
+			async function checkUrlForShareLink() {
+			    const hash = window.location.hash;
+			    if (hash && hash.startsWith('#share=')) {
+			        const shareCode = decodeURIComponent(hash.substring(7)); // 去掉 "#share="
+			        currentShareCode = shareCode;
+			        
+			        // 验证分享链接
+			        const isValid = await validateShareLink(shareCode);
+			        if (!isValid) {
+			            // 验证失败，显示空白页面
+			            console.log('分享链接验证失败，显示空白页面');
+			        }
+			        
+			        console.log('检测到分享链接:', shareCode);
+			        return true;
+			    }
+			    return false;
+			}
+			
+			// ==================== 修改：检查URL参数 ====================
+			async function checkUrlParams() {
+			    // 先检查是否有分享链接
+			    const hasShareLink = await checkUrlForShareLink();
+			    if (hasShareLink) return;
+			    
+			    // 如果没有分享链接，再检查其他URL参数（如套餐）
+			    checkUrlForMeal();
+			}
 		// ==================== 检查URL中的分享链接 ====================
 		function checkUrlForShareLink() {
 		    const hash = window.location.hash;
@@ -5614,29 +5660,58 @@
 		}
 			// 修改：验证分享链接有效性
 			// ==================== 修改：验证分享链接有效性 ====================
+			// ==================== 修改：验证分享链接有效性 ====================
 			async function validateShareLink(shareCode) {
 			    try {
 			        const shareLink = await SupabaseData.getShareLinkByCode(shareCode);
 			
 			        if (!shareLink) {
 			            showNotification('分享链接无效或不存在', 'error');
+			            // 清除无效的分享码
+			            currentShareCode = null;
+			            currentShareLink = null;
+			            document.body.classList.remove('link-entered');
+			            
+			            // 不跳转到首页，而是显示空白页面
+			            hideAllPagesAndContent();
 			            return false;
 			        }
 			
 			        if (!shareLink.active) {
 			            showNotification('该分享链接已被禁用', 'error');
+			            // 清除无效的分享码
+			            currentShareCode = null;
+			            currentShareLink = null;
+			            document.body.classList.remove('link-entered');
+			            
+			            // 不跳转到首页，而是显示空白页面
+			            hideAllPagesAndContent();
 			            return false;
 			        }
 			
 			        // 检查过期时间
 			        if (shareLink.expiresAt && Date.now() > shareLink.expiresAt) {
 			            showNotification('该分享链接已过期', 'error');
+			            // 清除无效的分享码
+			            currentShareCode = null;
+			            currentShareLink = null;
+			            document.body.classList.remove('link-entered');
+			            
+			            // 不跳转到首页，而是显示空白页面
+			            hideAllPagesAndContent();
 			            return false;
 			        }
 			
 			        // 检查使用次数
 			        if (shareLink.usedCount >= shareLink.maxUses) {
 			            showNotification('该分享链接使用次数已达上限', 'error');
+			            // 清除无效的分享码
+			            currentShareCode = null;
+			            currentShareLink = null;
+			            document.body.classList.remove('link-entered');
+			            
+			            // 不跳转到首页，而是显示空白页面
+			            hideAllPagesAndContent();
 			            return false;
 			        }
 			
@@ -5662,10 +5737,14 @@
 			                        return true;
 			                    } else {
 			                        showNotification('该套餐已下架', 'error');
+			                        // 套餐下架也显示空白页面
+			                        hideAllPagesAndContent();
 			                        return false;
 			                    }
 			                } else {
 			                    showNotification('关联的套餐不存在', 'error');
+			                    // 套餐不存在也显示空白页面
+			                    hideAllPagesAndContent();
 			                    return false;
 			                }
 			            }
@@ -5692,6 +5771,8 @@
 			                    return true;
 			                }
 			                showNotification('无法加载关联的套餐，请刷新页面重试', 'error');
+			                // 加载失败也显示空白页面
+			                hideAllPagesAndContent();
 			            }, 1000);
 			        }, 300);
 			
@@ -5699,9 +5780,91 @@
 			    } catch (error) {
 			        console.error('验证分享链接失败:', error);
 			        showNotification('验证分享链接失败', 'error');
+			        // 验证失败也显示空白页面
+			        hideAllPagesAndContent();
 			        return false;
 			    }
 			}
+// ==================== 新增：隐藏所有页面和内容 ====================
+function hideAllPagesAndContent() {
+    // 隐藏所有页面容器
+    document.querySelectorAll('.meal-page-container').forEach(page => {
+        page.classList.remove('active');
+    });
+    
+    // 隐藏搜索容器
+    const searchContainer = document.querySelector('.search-container');
+    if (searchContainer) searchContainer.style.display = 'none';
+    
+    // 隐藏导航菜单
+    const navMenu = document.querySelector('.nav-menu');
+    if (navMenu) navMenu.style.display = 'none';
+    
+    // 隐藏页脚
+    const footer = document.querySelector('.footer');
+    if (footer) footer.style.display = 'none';
+    
+    // 确保在链接进入模式下，只显示查看订单按钮
+    document.body.classList.add('link-entered');
+    
+    // 显示查看订单按钮
+    const viewOrdersBtn = document.getElementById('viewOrdersBtn');
+    if (viewOrdersBtn) viewOrdersBtn.style.display = 'flex';
+    
+    // 隐藏返回首页按钮
+    const viewHomeBtn = document.getElementById('viewHomeBtn');
+    if (viewHomeBtn) viewHomeBtn.style.display = 'none';
+    
+    // 隐藏管理员按钮
+    const adminBtn = document.getElementById('adminBtn');
+    if (adminBtn) adminBtn.style.display = 'none';
+    
+    // 隐藏返回按钮（如果存在）
+    const backBtns = document.querySelectorAll('.back-btn');
+    backBtns.forEach(btn => {
+        btn.style.display = 'none';
+    });
+    
+    // 清空URL hash
+    window.location.hash = '';
+    
+    // 创建空白页面提示（可选）
+    const container = document.querySelector('.container');
+    if (container) {
+        // 移除可能存在的空白提示
+        const existingBlankMessage = container.querySelector('.blank-page-message');
+        if (existingBlankMessage) existingBlankMessage.remove();
+        
+        // 添加空白页面提示
+        const blankMessage = document.createElement('div');
+        blankMessage.className = 'blank-page-message';
+        blankMessage.innerHTML = `
+            <div style="text-align: center; padding: 100px 20px; color: #999;">
+                <i class="fas fa-link-slash" style="font-size: 48px; margin-bottom: 20px;"></i>
+                <h3>链接已失效</h3>
+                <p>该链接可能已过期、被删除或使用次数已达上限</p>
+                <p style="margin-top: 20px;">
+                    <button class="header-btn" id="showOrdersFromBlank" style="display: inline-flex;">
+                        <i class="fas fa-clipboard-list"></i>
+                        查看我的订单
+                    </button>
+                </p>
+            </div>
+        `;
+        container.appendChild(blankMessage);
+        
+        // 为空白页面中的查看订单按钮添加事件
+        setTimeout(() => {
+            const showOrdersBtn = document.getElementById('showOrdersFromBlank');
+            if (showOrdersBtn) {
+                showOrdersBtn.addEventListener('click', function() {
+                    showPage('myOrdersPage');
+                });
+            }
+        }, 100);
+    }
+}
+
 
 			// ==================== 全局轮询函数 ====================
 			function startGlobalPolling() {
@@ -6110,16 +6273,15 @@
 				});
 			}
 
-			// ==================== 套餐详情页 ====================
-			// ==================== 套餐详情页 ====================
-			function showMealDetail(mealId) {
-				const meal = meals.find(m => m.id === mealId);
-				if (!meal) return;
+// ==================== 套餐详情页 ====================
+function showMealDetail(mealId) {
+    
+    const meal = meals.find(m => m.id === mealId);
+    if (!meal) return;
+    const mealDetailPage = document.getElementById('mealDetailPage');
 
-				const mealDetailPage = document.getElementById('mealDetailPage');
-
-				mealDetailPage.innerHTML =
-					`
+    mealDetailPage.innerHTML =
+        `
         <a href="#" class="back-btn" onclick="goBackToHome()">
             <i class="fas fa-arrow-left"></i>
             返回套餐列表
@@ -6307,15 +6469,12 @@
                         <!-- 移除进度条，改为简单的状态提示 -->
                         <div class="submit-status" id="submitStatus"></div>
                         
-                        <button class="checkout-btn quick-submit" id="checkoutBtn" disabled>
-                            <i class="fas fa-credit-card"></i>
-                            快速提交订单
-                        </button>
+                        <button class="checkout-btn" id="checkoutBtn" ${currentShareLink ? '' : 'style="display: none;"'} disabled>提交订单</button>
                     </div>
                 </div>
             </div>
         </div>
-    `;
+        `;
 
 				initOptionSelection(mealDetailPage);
 				initDeliveryTypeToggle(mealDetailPage);
