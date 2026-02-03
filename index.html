@@ -5552,7 +5552,6 @@
 					initHeaderButtons();
 					initSearchFunction();
 					initOrderConfirmModal();
-					initShareLinkCopyButtons();  // 添加这一行
 
 					document.getElementById('currentUserIdDisplay').textContent = currentUserId.substring(0, 12) + '...';
 
@@ -5564,6 +5563,53 @@
 					console.log('页面初始化完成，数据已从Supabase加载');
 
 					startGlobalPolling();
+					// 在DOM加载完成后添加这个修复
+					document.addEventListener('DOMContentLoaded', function() {
+					    // 修复复制按钮点击事件
+					    document.addEventListener('click', function(e) {
+					        const copyBtn = e.target.closest('.copy-link-btn');
+					        if (copyBtn) {
+					            e.preventDefault();
+					            
+					            // 获取链接代码
+					            const shareCode = copyBtn.dataset.code;
+					            if (!shareCode) return;
+					            
+					            // 构建正确的URL（修复undefined问题）
+					            const baseUrl = window.location.origin + window.location.pathname;
+					            const cleanBaseUrl = baseUrl.replace('undefined', '');
+					            const shareUrl = cleanBaseUrl + '#share=' + encodeURIComponent(shareCode);
+					            
+					            // 复制到剪贴板
+					            navigator.clipboard.writeText(shareUrl).then(() => {
+					                showNotification('分享链接已复制到剪贴板', 'success');
+					            }).catch(err => {
+					                console.error('复制失败:', err);
+					                // 备用方法：使用document.execCommand
+					                const tempInput = document.createElement('input');
+					                tempInput.value = shareUrl;
+					                document.body.appendChild(tempInput);
+					                tempInput.select();
+					                document.execCommand('copy');
+					                document.body.removeChild(tempInput);
+					                showNotification('链接已复制', 'success');
+					            });
+					        }
+					    });
+					    
+					    // 修复显示在页面上的链接文本
+					    setTimeout(() => {
+					        document.querySelectorAll('.share-link-url').forEach(element => {
+					            if (element.textContent.includes('undefined')) {
+					                const baseUrl = window.location.origin + window.location.pathname;
+					                const cleanBaseUrl = baseUrl.replace('undefined', '');
+					                const currentText = element.textContent;
+					                const fixedText = currentText.replace(/https?:\/\/[^\/]*\/undefined/, cleanBaseUrl);
+					                element.textContent = fixedText;
+					            }
+					        });
+					    }, 1000);
+					});
 				} catch (error) {
 					console.error('页面初始化失败:', error);
 					showNotification('页面初始化失败，使用本地缓存数据', 'error');
@@ -5586,6 +5632,7 @@
 					initOrderConfirmModal();
 
 					startGlobalPolling();
+					
 				}
 				// 添加窗口大小变化监听器，处理移动端按钮显示
 				window.addEventListener('resize', function() {
@@ -5823,15 +5870,6 @@
 			    const hash = window.location.hash;
 			    if (hash && hash.startsWith('#share=')) {
 			        const shareCode = decodeURIComponent(hash.substring(7)); // 去掉 "#share="
-					 
-					        // ========== 添加开始：检查分享码是否有效 ==========
-					        if (!shareCode || shareCode === 'undefined' || shareCode === undefined || shareCode.trim() === '') {
-					            console.log('检测到无效分享码:', shareCode);
-					            showNotification('分享链接无效', 'error');
-					            hideAllPagesAndContent();
-					            return false;
-					        }
-					        // ========== 添加结束 ==========
 			        currentShareCode = shareCode;
 			        
 			        // 验证分享链接
@@ -5883,22 +5921,11 @@
 		    }
 		    return false;
 		}
-			
+			// 修改：验证分享链接有效性
+			// ==================== 修改：验证分享链接有效性 ====================
 			// ==================== 修改：验证分享链接有效性 ====================
 			async function validateShareLink(shareCode) {
 			    try {
-					// ========== 添加开始：首先检查 shareCode 是否有效 ==========
-					        if (!shareCode || shareCode === 'undefined' || shareCode === undefined || shareCode.trim() === '') {
-					            console.log('分享链接无效:', shareCode);
-					            showNotification('分享链接无效或不存在', 'error');
-					            currentShareCode = null;
-					            currentShareLink = null;
-					            document.body.classList.remove('link-entered');
-					            hideAllPagesAndContent();
-					            return false;
-					        }
-					        // ========== 添加结束 ==========
-					        // ========== 添加结束 ==========
 			        const shareLink = await SupabaseData.getShareLinkByCode(shareCode);
 			
 			        if (!shareLink) {
@@ -12000,31 +12027,6 @@ function initAdminPanelTabs() {
             }
         `;
 			document.head.appendChild(notificationStyle);
-			// 添加到文件末尾（在最后一个函数之后）
-			function initShareLinkCopyButtons() {
-			    // 为所有复制按钮添加事件监听器
-			    document.addEventListener('click', function(e) {
-			        if (e.target.closest('.copy-link-btn')) {
-			            const copyBtn = e.target.closest('.copy-link-btn');
-			            const shareCode = copyBtn.getAttribute('data-share-code');
-			            
-			            // 检查分享码是否有效
-			            if (!shareCode || shareCode === 'undefined' || shareCode === undefined || shareCode.trim() === '') {
-			                showNotification('分享码无效，无法复制', 'error');
-			                return;
-			            }
-			            
-			            const url = window.location.origin + window.location.pathname + '#share=' + shareCode;
-			            navigator.clipboard.writeText(url).then(() => {
-			                showNotification('链接已复制到剪贴板', 'success');
-			            }).catch(err => {
-			                console.error('复制失败: ', err);
-			                showNotification('复制失败，请手动复制链接', 'error');
-			            });
-			        }
-			    });
-			}
-
 		</script>
 	</body>
 </html>
