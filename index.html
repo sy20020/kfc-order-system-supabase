@@ -3737,20 +3737,28 @@
 				        </div>
 				    </div>
 				
-				    <div class="meal-filters" style="margin: 15px 0;">
-				        <button class="meal-filter-btn active" data-share-filter="all">全部链接</button>
-				        <button class="meal-filter-btn" data-share-filter="active">有效链接</button>
-				        <button class="meal-filter-btn" data-share-filter="expired">已过期</button>
-				        <button class="meal-filter-btn" data-share-filter="used">已用完</button>
-				        
-				        <!-- 套餐筛选下拉框 -->
-				        <div style="position: relative; display: inline-block;">
-				            <select class="form-select" id="shareLinkFilterByMeal" style="padding: 6px 30px 6px 12px; font-size: 0.85rem; border-radius: 18px; border: 1px solid #ddd; background-color: #f0f0f0; min-width: 150px;">
-				                <option value="">所有套餐</option>
-				            </select>
-				            <i class="fas fa-filter" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #666; font-size: 0.8rem;"></i>
-				        </div>
-				    </div>
+				   <div class="meal-filters" style="margin: 15px 0;">
+				       <button class="meal-filter-btn active" data-share-filter="all">全部链接</button>
+				       <button class="meal-filter-btn" data-share-filter="active">有效链接</button>
+				       <button class="meal-filter-btn" data-share-filter="expired">已过期</button>
+				       <button class="meal-filter-btn" data-share-filter="used">已用完</button>
+				       
+				       <!-- 套餐筛选下拉框 -->
+				       <div style="position: relative; display: inline-block;">
+				           <select class="form-select" id="shareLinkFilterByMeal" style="padding: 6px 30px 6px 12px; font-size: 0.85rem; border-radius: 18px; border: 1px solid #ddd; background-color: #f0f0f0; min-width: 150px;">
+				               <option value="">所有套餐</option>
+				           </select>
+				           <i class="fas fa-filter" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #666; font-size: 0.8rem;"></i>
+				       </div>
+				       
+				       <!-- 新增：一键删除和导出按钮 -->
+				       <button class="meal-filter-btn" id="deleteAllByMealBtn" style="background-color: #f44336; color: white; display: none;">
+				           <i class="fas fa-trash-alt"></i> 一键删除该套餐所有链接
+				       </button>
+				       <button class="meal-filter-btn" id="exportShareCodesBtn" style="background-color: #4CAF50; color: white;">
+				           <i class="fas fa-download"></i> 导出编码
+				       </button>
+				   </div>
 				
 				    <div class="share-link-management">
 				        <h4 style="margin-bottom: 15px; color: #333; font-size: 1.1rem;">
@@ -5563,53 +5571,6 @@
 					console.log('页面初始化完成，数据已从Supabase加载');
 
 					startGlobalPolling();
-					// 在DOM加载完成后添加这个修复
-					document.addEventListener('DOMContentLoaded', function() {
-					    // 修复复制按钮点击事件
-					    document.addEventListener('click', function(e) {
-					        const copyBtn = e.target.closest('.copy-link-btn');
-					        if (copyBtn) {
-					            e.preventDefault();
-					            
-					            // 获取链接代码
-					            const shareCode = copyBtn.dataset.code;
-					            if (!shareCode) return;
-					            
-					            // 构建正确的URL（修复undefined问题）
-					            const baseUrl = window.location.origin + window.location.pathname;
-					            const cleanBaseUrl = baseUrl.replace('undefined', '');
-					            const shareUrl = cleanBaseUrl + '#share=' + encodeURIComponent(shareCode);
-					            
-					            // 复制到剪贴板
-					            navigator.clipboard.writeText(shareUrl).then(() => {
-					                showNotification('分享链接已复制到剪贴板', 'success');
-					            }).catch(err => {
-					                console.error('复制失败:', err);
-					                // 备用方法：使用document.execCommand
-					                const tempInput = document.createElement('input');
-					                tempInput.value = shareUrl;
-					                document.body.appendChild(tempInput);
-					                tempInput.select();
-					                document.execCommand('copy');
-					                document.body.removeChild(tempInput);
-					                showNotification('链接已复制', 'success');
-					            });
-					        }
-					    });
-					    
-					    // 修复显示在页面上的链接文本
-					    setTimeout(() => {
-					        document.querySelectorAll('.share-link-url').forEach(element => {
-					            if (element.textContent.includes('undefined')) {
-					                const baseUrl = window.location.origin + window.location.pathname;
-					                const cleanBaseUrl = baseUrl.replace('undefined', '');
-					                const currentText = element.textContent;
-					                const fixedText = currentText.replace(/https?:\/\/[^\/]*\/undefined/, cleanBaseUrl);
-					                element.textContent = fixedText;
-					            }
-					        });
-					    }, 1000);
-					});
 				} catch (error) {
 					console.error('页面初始化失败:', error);
 					showNotification('页面初始化失败，使用本地缓存数据', 'error');
@@ -5632,7 +5593,6 @@
 					initOrderConfirmModal();
 
 					startGlobalPolling();
-					
 				}
 				// 添加窗口大小变化监听器，处理移动端按钮显示
 				window.addEventListener('resize', function() {
@@ -12027,6 +11987,779 @@ function initAdminPanelTabs() {
             }
         `;
 			document.head.appendChild(notificationStyle);
+			
+			
+			
+			// ==================== 新增：导出分享链接编码功能 ====================
+			function exportShareCodes() {
+			    // 获取当前筛选条件
+			    const activeFilter = document.querySelector('.meal-filter-btn.active[data-share-filter]');
+			    const filter = activeFilter ? activeFilter.dataset.shareFilter : 'all';
+			    const searchTerm = document.getElementById('shareLinkSearchInput').value.trim().toLowerCase();
+			    const mealSelect = document.getElementById('shareLinkFilterByMeal');
+			    const mealFilter = mealSelect.value;
+			    
+			    // 过滤链接
+			    let filteredLinks = [...shareLinks];
+			    
+			    if (filter === 'active') {
+			        filteredLinks = filteredLinks.filter(link => link.active);
+			        filteredLinks = filteredLinks.filter(link => {
+			            if (link.expiresAt && link.expiresAt < Date.now()) return false;
+			            if (link.usedCount >= link.maxUses) return false;
+			            return true;
+			        });
+			    } else if (filter === 'expired') {
+			        filteredLinks = filteredLinks.filter(link => {
+			            if (link.expiresAt && link.expiresAt < Date.now()) return true;
+			            return false;
+			        });
+			    } else if (filter === 'used') {
+			        filteredLinks = filteredLinks.filter(link => link.usedCount >= link.maxUses);
+			    }
+			    
+			    if (searchTerm) {
+			        filteredLinks = filteredLinks.filter(link => {
+			            const meal = meals.find(m => m.id === link.mealId);
+			            const mealName = meal ? meal.name.toLowerCase() : '';
+			            return link.code.toLowerCase().includes(searchTerm) || 
+			                   mealName.includes(searchTerm);
+			        });
+			    }
+			    
+			    if (mealFilter) {
+			        filteredLinks = filteredLinks.filter(link => link.mealId === mealFilter);
+			    }
+			    
+			    if (filteredLinks.length === 0) {
+			        showNotification('没有可导出的分享链接', 'warning');
+			        return;
+			    }
+			    
+			    // 生成导出内容
+			    let exportContent = `肯德基点餐系统分享链接编码导出\n`;
+			    exportContent += `导出时间: ${new Date().toLocaleString('zh-CN')}\n`;
+			    exportContent += `导出数量: ${filteredLinks.length} 个\n`;
+			    exportContent += `导出条件: ${getFilterDescription(filter, mealFilter, searchTerm)}\n`;
+			    exportContent += '========================================\n\n';
+			    
+			    filteredLinks.forEach((link, index) => {
+			        const meal = meals.find(m => m.id === link.mealId);
+			        const mealName = meal ? meal.name : '未知套餐';
+			        const status = getShareLinkStatusText(link);
+			        const expiresText = link.expiresAt ? 
+			            new Date(link.expiresAt).toLocaleString('zh-CN') : '永久有效';
+			        const usesText = `${link.usedCount}/${link.maxUses}`;
+			        const fullUrl = `${window.location.origin}${window.location.pathname}#share=${link.code}`;
+			        
+			        exportContent += `${index + 1}. 链接编码: ${link.code}\n`;
+			        exportContent += `   关联套餐: ${mealName}\n`;
+			        exportContent += `   使用情况: ${usesText}次\n`;
+			        exportContent += `   过期时间: ${expiresText}\n`;
+			        exportContent += `   状态: ${status}\n`;
+			        exportContent += `   完整链接: ${fullUrl}\n`;
+			        exportContent += `   生成时间: ${new Date(link.createdAt).toLocaleString('zh-CN')}\n`;
+			        exportContent += '\n';
+			    });
+			    
+			    // 创建下载
+			    const blob = new Blob([exportContent], { type: 'text/plain;charset=utf-8' });
+			    const url = URL.createObjectURL(blob);
+			    const a = document.createElement('a');
+			    a.href = url;
+			    a.download = `分享链接编码_${new Date().toISOString().split('T')[0]}_${filteredLinks.length}个.txt`;
+			    document.body.appendChild(a);
+			    a.click();
+			    document.body.removeChild(a);
+			    URL.revokeObjectURL(url);
+			    
+			    showNotification(`已导出 ${filteredLinks.length} 个分享链接编码`, 'success');
+			}
+			
+			// 辅助函数：获取分享链接状态文本
+			function getShareLinkStatusText(link) {
+			    if (!link.active) return '已禁用';
+			    if (link.expiresAt && link.expiresAt < Date.now()) return '已过期';
+			    if (link.usedCount >= link.maxUses) return '已用完';
+			    return '有效';
+			}
+			
+			// 辅助函数：获取筛选条件描述
+			function getFilterDescription(filter, mealFilter, searchTerm) {
+			    let description = '';
+			    
+			    // 状态筛选
+			    const filterMap = {
+			        'all': '全部链接',
+			        'active': '有效链接',
+			        'expired': '已过期',
+			        'used': '已用完'
+			    };
+			    description += filterMap[filter] || '全部链接';
+			    
+			    // 套餐筛选
+			    if (mealFilter) {
+			        const meal = meals.find(m => m.id === mealFilter);
+			        if (meal) {
+			            description += ` | 套餐: ${meal.name}`;
+			        }
+			    }
+			    
+			    // 搜索词
+			    if (searchTerm) {
+			        description += ` | 搜索: ${searchTerm}`;
+			    }
+			    
+			    return description;
+			}
+			// ==================== 分享链接管理功能修复和增强 ====================
+			
+			// 1. 修复：自定义代码前缀功能
+			document.getElementById('generateShareLinkBtn').addEventListener('click', async function() {
+			    const mealSelect = document.getElementById('shareLinkMeal');
+			    const mealId = mealSelect.value;
+			    const quantity = parseInt(document.getElementById('shareLinkQuantity').value) || 1;
+			    const duration = parseInt(document.getElementById('shareLinkDuration').value);
+			    const maxUses = parseInt(document.getElementById('shareLinkMaxUses').value) || 1;
+			    const codePrefix = document.getElementById('shareLinkCodePrefix').value.trim();
+			    
+			    if (!mealId) {
+			        showNotification('请选择关联套餐', 'error');
+			        return;
+			    }
+			    
+			    if (quantity < 1 || quantity > 100) {
+			        showNotification('生成数量必须在1-100之间', 'error');
+			        return;
+			    }
+			    
+			    showLoading('正在生成分享链接...');
+			    
+			    try {
+			        const generatedLinks = [];
+			        
+			        for (let i = 0; i < quantity; i++) {
+			            // 生成代码（应用前缀）
+			            let code;
+			            if (codePrefix) {
+			                // 如果有前缀，生成"前缀+随机数"格式
+			                const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
+			                code = codePrefix + randomSuffix;
+			            } else {
+			                // 没有前缀，生成纯随机代码
+			                code = Math.random().toString(36).substring(2, 8).toUpperCase();
+			            }
+			            
+			            // 确保代码唯一
+			            let attempts = 0;
+			            while (shareLinks.some(link => link.code === code) && attempts < 10) {
+			                if (codePrefix) {
+			                    const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
+			                    code = codePrefix + randomSuffix;
+			                } else {
+			                    code = Math.random().toString(36).substring(2, 8).toUpperCase();
+			                }
+			                attempts++;
+			            }
+			            
+			            const expiresAt = duration > 0 ? Date.now() + (duration * 60 * 60 * 1000) : null;
+			            
+			            const shareLink = {
+			                id: 'temp_' + Date.now() + '_' + i,
+			                code: code,
+			                mealId: mealId,
+			                maxUses: maxUses,
+			                usedCount: 0,
+			                expiresAt: expiresAt,
+			                active: true,
+			                createdAt: Date.now(),
+			                updatedAt: Date.now()
+			            };
+			            
+			            // 保存到数据库
+			            const savedLink = await SupabaseData.saveShareLink(shareLink);
+			            generatedLinks.push(savedLink);
+			            
+			            // 添加到本地数组
+			            shareLinks.push(savedLink);
+			        }
+			        
+			        // 重新渲染列表
+			        renderShareLinkList('all');
+			        
+			        showNotification(`成功生成 ${quantity} 个分享链接`, 'success');
+			        
+			        // 重置表单
+			        document.getElementById('shareLinkQuantity').value = 1;
+			        document.getElementById('shareLinkCodePrefix').value = '';
+			        
+			    } catch (error) {
+			        console.error('生成分享链接失败:', error);
+			        showNotification('生成分享链接失败', 'error');
+			    } finally {
+			        hideLoading();
+			    }
+			});
+			
+			// 2. 新增：初始化分享链接管理（完整函数）
+			async function initShareLinksManagement() {
+			    // 更新套餐选择器
+			    updateShareLinkMealSelect();
+			    
+			    // 添加事件监听器
+			    document.getElementById('shareLinkSearchBtn').addEventListener('click', function() {
+			        const searchTerm = document.getElementById('shareLinkSearchInput').value.trim();
+			        renderShareLinkList('all', searchTerm);
+			    });
+			    
+			    document.getElementById('shareLinkSearchInput').addEventListener('keypress', function(e) {
+			        if (e.key === 'Enter') {
+			            const searchTerm = this.value.trim();
+			            renderShareLinkList('all', searchTerm);
+			        }
+			    });
+			    
+			    // 添加筛选按钮事件监听器
+			    document.querySelectorAll('.meal-filter-btn[data-share-filter]').forEach(btn => {
+			        btn.addEventListener('click', function() {
+			            // 移除其他按钮的active类
+			            document.querySelectorAll('.meal-filter-btn[data-share-filter]').forEach(b => {
+			                b.classList.remove('active');
+			            });
+			            // 添加当前按钮的active类
+			            this.classList.add('active');
+			            
+			            const filter = this.dataset.shareFilter;
+			            const searchTerm = document.getElementById('shareLinkSearchInput').value.trim();
+			            const mealFilter = document.getElementById('shareLinkFilterByMeal').value;
+			            
+			            renderShareLinkList(filter, searchTerm, mealFilter);
+			        });
+			    });
+			    
+			    // 添加套餐筛选器变化监听
+			    const shareLinkFilterByMeal = document.getElementById('shareLinkFilterByMeal');
+			    const deleteAllByMealBtn = document.getElementById('deleteAllByMealBtn');
+			    
+			    if (shareLinkFilterByMeal && deleteAllByMealBtn) {
+			        shareLinkFilterByMeal.addEventListener('change', function() {
+			            const mealId = this.value;
+			            if (mealId) {
+			                deleteAllByMealBtn.style.display = 'inline-block';
+			            } else {
+			                deleteAllByMealBtn.style.display = 'none';
+			            }
+			            
+			            const activeFilter = document.querySelector('.meal-filter-btn.active[data-share-filter]');
+			            const filter = activeFilter ? activeFilter.dataset.shareFilter : 'all';
+			            const searchTerm = document.getElementById('shareLinkSearchInput').value.trim();
+			            
+			            renderShareLinkList(filter, searchTerm, mealId);
+			        });
+			    }
+			    
+			    // 一键删除按钮点击事件
+			    if (deleteAllByMealBtn) {
+			        deleteAllByMealBtn.addEventListener('click', async function() {
+			            const mealId = shareLinkFilterByMeal.value;
+			            if (!mealId) {
+			                showNotification('请先选择套餐', 'warning');
+			                return;
+			            }
+			            
+			            const meal = meals.find(m => m.id === mealId);
+			            const mealName = meal ? meal.name : '未知套餐';
+			            const linksToDelete = shareLinks.filter(link => link.mealId === mealId);
+			            
+			            if (linksToDelete.length === 0) {
+			                showNotification(`套餐【${mealName}】下没有分享链接`, 'warning');
+			                return;
+			            }
+			            
+			            if (!confirm(`确定要删除套餐【${mealName}】下的所有分享链接吗？共 ${linksToDelete.length} 个链接，此操作不可撤销！`)) {
+			                return;
+			            }
+			            
+			            showLoading('正在删除...');
+			            try {
+			                let deletedCount = 0;
+			                for (const link of linksToDelete) {
+			                    await SupabaseData.deleteShareLink(link.id);
+			                    deletedCount++;
+			                }
+			                
+			                // 从本地数组中删除
+			                shareLinks = shareLinks.filter(link => link.mealId !== mealId);
+			                
+			                // 重新渲染列表
+			                renderShareLinkList('all');
+			                
+			                // 重置筛选器
+			                shareLinkFilterByMeal.value = '';
+			                this.style.display = 'none';
+			                
+			                showNotification(`成功删除 ${deletedCount} 个分享链接`, 'success');
+			            } catch (error) {
+			                console.error('删除分享链接失败:', error);
+			                showNotification('删除分享链接失败', 'error');
+			            } finally {
+			                hideLoading();
+			            }
+			        });
+			    }
+			    
+			    // 导出编码按钮点击事件
+			    const exportShareCodesBtn = document.getElementById('exportShareCodesBtn');
+			    if (exportShareCodesBtn) {
+			        exportShareCodesBtn.addEventListener('click', function() {
+			            exportShareCodes();
+			        });
+			    }
+			    
+			    // 初始渲染
+			    renderShareLinkList('all');
+			}
+			
+			// 3. 辅助函数：更新套餐选择器
+			function updateShareLinkMealSelect() {
+			    const mealSelect = document.getElementById('shareLinkMeal');
+			    const filterMealSelect = document.getElementById('shareLinkFilterByMeal');
+			    
+			    if (!mealSelect || !filterMealSelect) return;
+			    
+			    // 清空选项
+			    mealSelect.innerHTML = '<option value="">请选择套餐</option>';
+			    filterMealSelect.innerHTML = '<option value="">所有套餐</option>';
+			    
+			    // 按排序顺序添加套餐
+			    const sortedMeals = [...meals].sort((a, b) => {
+			        const orderA = a.order || 9999;
+			        const orderB = b.order || 9999;
+			        return orderA - orderB;
+			    });
+			    
+			    sortedMeals.forEach(meal => {
+			        if (meal.active !== false) {
+			            const option = document.createElement('option');
+			            option.value = meal.id;
+			            option.textContent = `${meal.name} (¥${meal.price})`;
+			            mealSelect.appendChild(option);
+			            
+			            const filterOption = option.cloneNode(true);
+			            filterMealSelect.appendChild(filterOption);
+			        }
+			    });
+			}
+			
+			// 导出分享链接编码功能 - 只导出完整链接
+			function exportShareCodes() {
+			    // 获取当前筛选条件
+			    const activeFilter = document.querySelector('.meal-filter-btn.active[data-share-filter]');
+			    const filter = activeFilter ? activeFilter.dataset.shareFilter : 'all';
+			    const searchTerm = document.getElementById('shareLinkSearchInput').value.trim().toLowerCase();
+			    const mealSelect = document.getElementById('shareLinkFilterByMeal');
+			    const mealFilter = mealSelect.value;
+			    
+			    // 过滤链接
+			    let filteredLinks = [...shareLinks];
+			    
+			    // 根据状态筛选
+			    if (filter === 'active') {
+			        filteredLinks = filteredLinks.filter(link => link.active);
+			        filteredLinks = filteredLinks.filter(link => {
+			            if (link.expiresAt && link.expiresAt < Date.now()) return false;
+			            if (link.usedCount >= link.maxUses) return false;
+			            return true;
+			        });
+			    } else if (filter === 'expired') {
+			        filteredLinks = filteredLinks.filter(link => {
+			            return link.expiresAt && link.expiresAt < Date.now();
+			        });
+			    } else if (filter === 'used') {
+			        filteredLinks = filteredLinks.filter(link => link.usedCount >= link.maxUses);
+			    } else if (filter === 'inactive') {
+			        filteredLinks = filteredLinks.filter(link => !link.active);
+			    }
+			    
+			    // 根据搜索词过滤
+			    if (searchTerm) {
+			        filteredLinks = filteredLinks.filter(link => {
+			            const meal = meals.find(m => m.id === link.mealId);
+			            const mealName = meal ? meal.name.toLowerCase() : '';
+			            return link.code.toLowerCase().includes(searchTerm) || 
+			                   mealName.includes(searchTerm);
+			        });
+			    }
+			    
+			    // 根据套餐筛选
+			    if (mealFilter) {
+			        filteredLinks = filteredLinks.filter(link => link.mealId === mealFilter);
+			    }
+			    
+			    if (filteredLinks.length === 0) {
+			        showNotification('没有可导出的分享链接', 'warning');
+			        return;
+			    }
+			    
+			    // 生成导出内容 - 只保留完整链接，每行一个
+			    let exportContent = '';
+			    
+			    filteredLinks.forEach(link => {
+			        const fullUrl = `${window.location.origin}${window.location.pathname}#share=${link.code}`;
+			        exportContent += fullUrl + '\n';
+			    });
+			    
+			    // 创建下载
+			    const blob = new Blob([exportContent], { type: 'text/plain;charset=utf-8' });
+			    const url = URL.createObjectURL(blob);
+			    const a = document.createElement('a');
+			    a.href = url;
+			    
+			    // 根据筛选条件设置文件名
+			    let fileName = '分享链接';
+			    if (filter !== 'all') {
+			        const filterNames = {
+			            'all': '全部',
+			            'active': '有效',
+			            'expired': '过期',
+			            'used': '已用完',
+			            'inactive': '已禁用'
+			        };
+			        fileName += `_${filterNames[filter] || filter}`;
+			    }
+			    if (mealFilter) {
+			        const meal = meals.find(m => m.id === mealFilter);
+			        if (meal) {
+			            fileName += `_${meal.name}`;
+			        }
+			    }
+			    fileName += `_${new Date().toISOString().split('T')[0]}.txt`;
+			    
+			    a.download = fileName;
+			    document.body.appendChild(a);
+			    a.click();
+			    document.body.removeChild(a);
+			    URL.revokeObjectURL(url);
+			    
+			    showNotification(`已导出 ${filteredLinks.length} 个分享链接`, 'success');
+			}
+			// 5. 辅助函数：获取分享链接状态文本
+			function getShareLinkStatusText(link) {
+			    if (!link.active) return '已禁用';
+			    if (link.expiresAt && link.expiresAt < Date.now()) return '已过期';
+			    if (link.usedCount >= link.maxUses) return '已用完';
+			    return '有效';
+			}
+			
+			// 6. 辅助函数：获取筛选条件描述
+			function getFilterDescription(filter, mealFilter, searchTerm) {
+			    let description = '';
+			    
+			    // 状态筛选
+			    const filterMap = {
+			        'all': '全部链接',
+			        'active': '有效链接',
+			        'expired': '已过期',
+			        'used': '已用完'
+			    };
+			    description += filterMap[filter] || '全部链接';
+			    
+			    // 套餐筛选
+			    if (mealFilter) {
+			        const meal = meals.find(m => m.id === mealFilter);
+			        if (meal) {
+			            description += ` | 套餐: ${meal.name}`;
+			        }
+			    }
+			    
+			    // 搜索词
+			    if (searchTerm) {
+			        description += ` | 搜索: ${searchTerm}`;
+			    }
+			    
+			    return description;
+			}
+			
+			// 7. 在页面加载时调用初始化函数
+			document.addEventListener('DOMContentLoaded', function() {
+			    // 检查是否在分享链接管理页面
+			    const shareLinksTab = document.getElementById('shareLinksTab');
+			    if (shareLinksTab) {
+			        // 延迟执行以确保其他资源已加载
+			        setTimeout(() => {
+			            initShareLinksManagement();
+			        }, 1000);
+			    }
+			});
+			// ==================== 渲染分享链接列表函数（完整版本） ====================
+			function renderShareLinkList(filter = 'all', searchTerm = '', mealFilter = '') {
+			    console.log('渲染分享链接列表，参数:', { filter, searchTerm, mealFilter });
+			    
+			    const shareLinkList = document.getElementById('shareLinkList');
+			    const noShareLinksMessage = document.getElementById('noShareLinksMessage');
+			    const shareLinkCount = document.getElementById('shareLinkCount');
+			    const deleteAllByMealBtn = document.getElementById('deleteAllByMealBtn');
+			    const shareLinkFilterByMeal = document.getElementById('shareLinkFilterByMeal');
+			    
+			    if (!shareLinkList || !noShareLinksMessage) return;
+			    
+			    // 清空列表
+			    shareLinkList.innerHTML = '';
+			    
+			    // 1. 首先获取所有链接
+			    let filteredLinks = [...shareLinks];
+			    
+			    console.log('原始链接数量:', filteredLinks.length);
+			    
+			    // 2. 根据状态筛选器过滤
+			    if (filter === 'active') {
+			        filteredLinks = filteredLinks.filter(link => {
+			            if (!link.active) return false;
+			            if (link.expiresAt && link.expiresAt < Date.now()) return false;
+			            if (link.usedCount >= link.maxUses) return false;
+			            return true;
+			        });
+			    } else if (filter === 'expired') {
+			        filteredLinks = filteredLinks.filter(link => {
+			            return link.expiresAt && link.expiresAt < Date.now();
+			        });
+			    } else if (filter === 'used') {
+			        filteredLinks = filteredLinks.filter(link => link.usedCount >= link.maxUses);
+			    } else if (filter === 'inactive') {
+			        filteredLinks = filteredLinks.filter(link => !link.active);
+			    }
+			    
+			    // 3. 根据搜索词过滤
+			    if (searchTerm) {
+			        const searchTermLower = searchTerm.toLowerCase();
+			        filteredLinks = filteredLinks.filter(link => {
+			            const meal = meals.find(m => m.id === link.mealId);
+			            const mealName = meal ? meal.name.toLowerCase() : '';
+			            return link.code.toLowerCase().includes(searchTermLower) || 
+			                   mealName.includes(searchTermLower);
+			        });
+			    }
+			    
+			    // 4. 根据套餐筛选器过滤
+			    if (mealFilter) {
+			        filteredLinks = filteredLinks.filter(link => link.mealId === mealFilter);
+			    }
+			    
+			    console.log('过滤后链接数量:', filteredLinks.length);
+			    
+			    // 5. 控制一键删除按钮的显示/隐藏
+			    if (deleteAllByMealBtn && shareLinkFilterByMeal) {
+			        if (mealFilter && filteredLinks.length > 0) {
+			            // 获取套餐名称
+			            const meal = meals.find(m => m.id === mealFilter);
+			            const mealName = meal ? meal.name : '未知套餐';
+			            deleteAllByMealBtn.innerHTML = `<i class="fas fa-trash-alt"></i> 删除【${mealName}】所有链接 (${filteredLinks.length}个)`;
+			            deleteAllByMealBtn.style.display = 'inline-block';
+			        } else {
+			            deleteAllByMealBtn.style.display = 'none';
+			        }
+			    }
+			    
+			    // 6. 更新链接数量显示
+			    if (shareLinkCount) {
+			        shareLinkCount.textContent = `共 ${filteredLinks.length} 个链接`;
+			    }
+			    
+			    // 7. 如果没有链接，显示提示信息
+			    if (filteredLinks.length === 0) {
+			        noShareLinksMessage.style.display = 'block';
+			        return;
+			    } else {
+			        noShareLinksMessage.style.display = 'none';
+			    }
+			    
+			    // 8. 按创建时间排序（最新的在前面）
+			    filteredLinks.sort((a, b) => b.createdAt - a.createdAt);
+			    
+			    // 9. 渲染每个分享链接项
+			    filteredLinks.forEach(link => {
+			        const meal = meals.find(m => m.id === link.mealId);
+			        const mealName = meal ? meal.name : '未知套餐';
+			        
+			        // 获取链接状态
+			        const status = getShareLinkStatus(link);
+			        const statusClass = getShareLinkStatusClass(link);
+			        
+			        // 格式化时间
+			        const createdAt = new Date(link.createdAt).toLocaleString('zh-CN');
+			        const expiresAt = link.expiresAt ? 
+			            new Date(link.expiresAt).toLocaleString('zh-CN') : '永久有效';
+			        
+			        // 使用情况
+			        const usesText = `${link.usedCount}/${link.maxUses}`;
+			        const remainingUses = link.maxUses - link.usedCount;
+			        
+			        // 完整链接
+			        const fullUrl = `${window.location.origin}${window.location.pathname}#share=${link.code}`;
+			        
+			        // 创建链接项HTML
+			        const linkItem = document.createElement('div');
+			        linkItem.className = 'share-link-item';
+			        linkItem.innerHTML = `
+			            <div class="share-link-header">
+			                <div class="share-link-code">${link.code}</div>
+			                <span class="share-link-stats ${statusClass}">${status}</span>
+			            </div>
+			            <div class="share-link-info">
+			                <p><strong>关联套餐:</strong> ${mealName}</p>
+			                <p><strong>使用情况:</strong> ${usesText}次 (剩余${remainingUses}次)</p>
+			                <p><strong>创建时间:</strong> ${createdAt}</p>
+			                <p><strong>过期时间:</strong> ${expiresAt}</p>
+			            </div>
+			            <div class="share-link-url">
+			                ${fullUrl}
+			            </div>
+			            <div class="share-link-actions">
+			                <button class="copy-link-btn" data-code="${link.code}" data-url="${fullUrl}">
+			                    <i class="fas fa-copy"></i> 复制链接
+			                </button>
+			                <button class="deactivate-link-btn" data-link-id="${link.id}" data-active="${link.active}">
+			                    <i class="fas fa-power-off"></i> ${link.active ? '禁用' : '启用'}
+			                </button>
+			                <button class="delete-link-btn" data-link-id="${link.id}">
+			                    <i class="fas fa-trash"></i> 删除
+			                </button>
+			            </div>
+			        `;
+			        
+			        shareLinkList.appendChild(linkItem);
+			    });
+			    
+			    // 10. 为按钮添加事件监听器
+			    setupShareLinkEventListeners();
+			}
+			
+			// ==================== 辅助函数：获取分享链接状态 ====================
+			function getShareLinkStatus(link) {
+			    if (!link.active) return '已禁用';
+			    if (link.expiresAt && link.expiresAt < Date.now()) return '已过期';
+			    if (link.usedCount >= link.maxUses) return '已用完';
+			    return '有效';
+			}
+			
+			// ==================== 辅助函数：获取分享链接状态样式类 ====================
+			function getShareLinkStatusClass(link) {
+			    if (!link.active) return 'expired';
+			    if (link.expiresAt && link.expiresAt < Date.now()) return 'expired';
+			    if (link.usedCount >= link.maxUses) return 'used-up';
+			    return '';
+			}
+			
+			// ==================== 辅助函数：设置分享链接事件监听器 ====================
+			function setupShareLinkEventListeners() {
+			    // 复制链接按钮
+			    document.querySelectorAll('.copy-link-btn').forEach(btn => {
+			        btn.addEventListener('click', function() {
+			            const url = this.dataset.url;
+			            const code = this.dataset.code;
+			            
+			            // 复制到剪贴板
+			            navigator.clipboard.writeText(url).then(() => {
+			                // 临时修改按钮文本
+			                const originalHTML = this.innerHTML;
+			                this.innerHTML = '<i class="fas fa-check"></i> 已复制';
+			                this.style.backgroundColor = '#4CAF50';
+			                
+			                setTimeout(() => {
+			                    this.innerHTML = originalHTML;
+			                    this.style.backgroundColor = '';
+			                }, 2000);
+			                
+			                showNotification(`已复制分享链接: ${code}`, 'success');
+			            }).catch(err => {
+			                console.error('复制失败:', err);
+			                showNotification('复制失败，请手动复制', 'error');
+			            });
+			        });
+			    });
+			    
+			    // 禁用/启用按钮
+			    document.querySelectorAll('.deactivate-link-btn').forEach(btn => {
+			        btn.addEventListener('click', async function() {
+			            const linkId = this.dataset.linkId;
+			            const isCurrentlyActive = this.dataset.active === 'true';
+			            
+			            showLoading('正在更新链接状态...');
+			            try {
+			                const link = shareLinks.find(l => l.id === linkId);
+			                if (!link) {
+			                    throw new Error('找不到该分享链接');
+			                }
+			                
+			                link.active = !isCurrentlyActive;
+			                link.updatedAt = Date.now();
+			                
+			                const updatedLink = await SupabaseData.saveShareLink(link);
+			                
+			                // 更新本地数组
+			                const index = shareLinks.findIndex(l => l.id === linkId);
+			                if (index !== -1) {
+			                    shareLinks[index] = updatedLink;
+			                }
+			                
+			                // 重新渲染列表
+			                const activeFilter = document.querySelector('.meal-filter-btn.active[data-share-filter]');
+			                const filter = activeFilter ? activeFilter.dataset.shareFilter : 'all';
+			                const searchTerm = document.getElementById('shareLinkSearchInput').value.trim();
+			                const mealFilter = document.getElementById('shareLinkFilterByMeal').value;
+			                
+			                renderShareLinkList(filter, searchTerm, mealFilter);
+			                
+			                showNotification(`已${isCurrentlyActive ? '禁用' : '启用'}分享链接`, 'success');
+			            } catch (error) {
+			                console.error('更新链接状态失败:', error);
+			                showNotification('更新链接状态失败', 'error');
+			            } finally {
+			                hideLoading();
+			            }
+			        });
+			    });
+			    
+			    // 删除按钮
+			    document.querySelectorAll('.delete-link-btn').forEach(btn => {
+			        btn.addEventListener('click', async function() {
+			            const linkId = this.dataset.linkId;
+			            const link = shareLinks.find(l => l.id === linkId);
+			            
+			            if (!link) return;
+			            
+			            if (!confirm(`确定要删除分享链接 "${link.code}" 吗？此操作不可撤销！`)) {
+			                return;
+			            }
+			            
+			            showLoading('正在删除链接...');
+			            try {
+			                await SupabaseData.deleteShareLink(linkId);
+			                
+			                // 从本地数组中删除
+			                shareLinks = shareLinks.filter(l => l.id !== linkId);
+			                
+			                // 重新渲染列表
+			                const activeFilter = document.querySelector('.meal-filter-btn.active[data-share-filter]');
+			                const filter = activeFilter ? activeFilter.dataset.shareFilter : 'all';
+			                const searchTerm = document.getElementById('shareLinkSearchInput').value.trim();
+			                const mealFilter = document.getElementById('shareLinkFilterByMeal').value;
+			                
+			                renderShareLinkList(filter, searchTerm, mealFilter);
+			                
+			                showNotification(`已删除分享链接: ${link.code}`, 'success');
+			            } catch (error) {
+			                console.error('删除分享链接失败:', error);
+			                showNotification('删除分享链接失败', 'error');
+			            } finally {
+			                hideLoading();
+			            }
+			        });
+			    });
+			}
+			
+			
+			
 		</script>
 	</body>
 </html>
