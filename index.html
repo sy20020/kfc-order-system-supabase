@@ -8775,6 +8775,7 @@ function showMealDetail(mealId) {
 				            (stores, userLocation) => {
 				                btn.disabled = false;
 				                btn.innerHTML = originalHtml;
+								
 				                
 				                if (stores.length === 0) {
 				                    storeListDiv.innerHTML = '<div style="padding:12px;color:#666;">附近5公里内未找到肯德基门店</div>';
@@ -8787,7 +8788,7 @@ function showMealDetail(mealId) {
 				                stores.forEach(store => {
 				                    const distanceKm = (store.distance / 1000).toFixed(1);
 				                    html += `
-				                        <div class="store-item" data-name="${store.name}" data-address="${store.address}" data-distance="${store.distance}">
+				                        <div class="store-item" data-name="${store.name}" data-address="${store.address}" data-distance="${store.distance}" data-city="${store.city || ''}">
 				                            <div>
 				                                <span class="store-name">${store.name}</span>
 				                                <span class="store-distance">${distanceKm}km</span>
@@ -8812,23 +8813,25 @@ function showMealDetail(mealId) {
 				                            pickupStoreInput.value = storeName;
 				                        }
 				                        
-				                       // ---------- 自动填充城市（优先使用逆地理编码结果）----------
-				                       let city = '';
-				                       // 优先使用逆地理编码返回的城市
-				                       if (userLocation && userLocation.city) {
-				                           city = userLocation.city;
-				                       } else {
-				                           // 备选：从门店地址中提取
-				                           if (storeAddress.includes('市')) {
-				                               const match = storeAddress.match(/(.*?[市])/);
-				                               if (match) city = match[1];
+				                       // ========== 使用高德返回的城市，100%准确 ==========
+				                       let city = this.dataset.city;   // 👈 直接从门店元素获取城市
+				                       if (!city) {
+				                           // 降级方案：从地址中提取（万一没取到）
+				                           if (storeAddress) {
+				                               const cityMatch = storeAddress.match(/([^市]+市)/);
+				                               if (cityMatch) {
+				                                   city = cityMatch[1];
+				                               } else {
+				                                   city = storeAddress.substring(0, 2) + '市';
+				                               }
 				                           }
 				                       }
 				                       const pickupCityInput = container.querySelector('#pickupCityInput');
 				                       if (pickupCityInput && city) {
 				                           pickupCityInput.value = city;
+				                           
 				                       }
-				                       // -----------------------------------------------------
+				                       // ================================================
 				                        
 				                        // 显示距离提示（可临时显示在按钮下方）
 				                        const distanceTip = document.createElement('div');
@@ -13893,7 +13896,8 @@ function searchNearbyKFC(successCallback, errorCallback) {
                         name: p.name,
                         address: p.address,
                         location: p.location,
-                        distance: Math.round(dist)
+                        distance: Math.round(dist),
+                        city: p.cityname || ''   // 👈 新增：城市名
                     };
                 });
                 stores = stores.filter(s => s.distance <= 5000);
@@ -13925,12 +13929,13 @@ function searchNearbyKFC(successCallback, errorCallback) {
         try {
             const data = await jsonpRequest(url, cb);
             if (data.status === '1' && data.pois?.length) {
-                return data.pois.map(p => ({
-                    name: p.name,
-                    address: p.address,
-                    location: p.location,
-                    distance: 9999
-                }));
+               return data.pois.map(p => ({
+                   name: p.name,
+                   address: p.address,
+                   location: p.location,
+                   distance: 9999,
+                   city: p.cityname || ''   // 👈 新增
+               }));
             }
         } catch (e) {}
         return [];
