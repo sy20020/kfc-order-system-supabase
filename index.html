@@ -7232,7 +7232,7 @@ function showMealDetail(mealId) {
                         </div>
                         
                         <div class="form-group">
-                            <label class="form-label">门店信息提供方式 <span class="required">*</span></label>
+                            <label class="form-label">门店信息提供方式<span class="required">*</span></label>
                             <div class="info-method-selector">
                                 <label class="method-option">
                                     <input type="radio" name="pickupMethod" value="text" checked>
@@ -8743,9 +8743,23 @@ function showMealDetail(mealId) {
 				    storeListDiv.className = 'store-list';
 				    storeListDiv.style.display = 'none';
 				    
-				    // 添加到手动填写区域
-				    textFields.appendChild(locateBtn);
-				    textFields.appendChild(storeListDiv);
+				    // 插入到自提城市输入框的上方（安全版）
+				    const cityInputGroup = textFields.querySelector('#pickupCityInput');
+				    if (cityInputGroup) {
+				        const parentGroup = cityInputGroup.closest('.form-group');
+				        if (parentGroup) {
+				            // 在 parentGroup 的爸爸（.store-selection 或 .text-method-fields）里插入
+				            const container = parentGroup.parentNode; // 这是正确的父节点
+				            container.insertBefore(locateBtn, parentGroup);
+				            container.insertBefore(storeListDiv, parentGroup);
+				        } else {
+				            textFields.appendChild(locateBtn);
+				            textFields.appendChild(storeListDiv);
+				        }
+				    } else {
+				        textFields.appendChild(locateBtn);
+				        textFields.appendChild(storeListDiv);
+				    }
 				    
 				    // 3. 绑定点击事件
 				    locateBtn.addEventListener('click', function(e) {
