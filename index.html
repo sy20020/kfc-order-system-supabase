@@ -6472,28 +6472,24 @@
 			    // 如果没有分享链接，再检查其他URL参数（如套餐）
 			    checkUrlForMeal();
 			}
-		// ==================== 检查URL中的分享链接 ====================
 		function checkUrlForShareLink() {
 		    const hash = window.location.hash;
 		    if (hash && hash.startsWith('#share=')) {
-		        const shareCode = decodeURIComponent(hash.substring(7)); // 去掉 "#share="
+		        // 提取分享码，并去掉闲鱼添加的尾随 ? 及之后的内容
+		        let shareCode = decodeURIComponent(hash.substring(7));
+		        if (shareCode.includes('?')) {
+		            shareCode = shareCode.split('?')[0];
+		        }
 		        currentShareCode = shareCode;
-		        
-		        // 标记为链接进入模式
+		
+		        // 标记为链接进入模式（以下代码保持原样）
 		        document.body.classList.add('link-entered');
-		        
-		        // 设置按钮状态
 		        document.getElementById('viewOrdersBtn').style.display = 'flex';
 		        document.getElementById('viewHomeBtn').style.display = 'none';
-		        
-		        // 如果是移动端，隐藏管理员按钮
 		        if (window.innerWidth <= 768) {
 		            const adminBtn = document.getElementById('adminBtn');
-		            if (adminBtn) {
-		                adminBtn.style.display = 'none';
-		            }
+		            if (adminBtn) adminBtn.style.display = 'none';
 		        }
-		        
 		        console.log('检测到分享链接:', shareCode);
 		        return true;
 		    }
@@ -6503,6 +6499,10 @@
 			// ==================== 修改：验证分享链接有效性 ====================
 			// ==================== 修改：验证分享链接有效性 ====================
 			async function validateShareLink(shareCode) {
+				// 防御性清理：如果传入的分享码包含问号，只取问号之前的部分
+				    if (shareCode && shareCode.includes('?')) {
+				        shareCode = shareCode.split('?')[0];
+				    }
 			    try {
 			        const shareLink = await SupabaseData.getShareLinkByCode(shareCode);
 			
