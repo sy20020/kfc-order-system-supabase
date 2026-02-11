@@ -13832,13 +13832,21 @@ function initAdminPanelTabs() {
 			        });
 			    });
 			}
-// ==================== 终极定位方案：浏览器优先 + 高德SDK降级（vivo完美兼容）====================
+// ==================== 高德SDK定位（Web端Key + 安全密钥，vivo完美定位）====================
 function searchNearbyKFC(successCallback, errorCallback) {
-    const AMAP_KEY = '6c936ae4108e694ea5ed0c6e5bbf3099';
+    // 使用【Web端(JS API)】Key 及其安全密钥
+    const AMAP_KEY = '54c4b54315dd4020467b2890a3d64e3f';
+    const AMAP_SECURITY_CODE = 'e531f5920f2485c7f4bed28092edc94d';
+    
     const container = document.querySelector('.store-list');
     if (!container) return errorCallback('系统错误，无法显示门店列表');
 
-    // ---------- 通用JSONP请求（所有浏览器兼容）----------
+    // ---------- 通用JSONP请求（Web服务API仍可使用此Key？不，Web服务只能用服务Key，所以这里仍需用原服务Key）----------
+    // 注意：周边搜索、IP定位等Web服务API仍需使用【Web服务Key】或单独申请服务Key。
+    // 为了简化，我们仍使用原服务Key 6c936a... 进行API请求（它仍然有效），
+    // 而定位则使用新的Web端Key。
+    const SERVICE_KEY = '6c936ae4108e694ea5ed0c6e5bbf3099'; // 您的Web服务Key，保持不变
+
     function jsonpRequest(url, callbackName) {
         return new Promise((resolve, reject) => {
             const script = document.createElement('script');
@@ -13858,7 +13866,7 @@ function searchNearbyKFC(successCallback, errorCallback) {
         });
     }
 
-    // ---------- 计算两点距离（米）----------
+    // ---------- 计算距离（米）----------
     function getDistance(lat1, lng1, lat2, lng2) {
         const rad = (d) => d * Math.PI / 180;
         const R = 6378137;
@@ -13871,44 +13879,10 @@ function searchNearbyKFC(successCallback, errorCallback) {
         return R * c;
     }
 
-    // ---------- IP定位（降级用）----------
-    let ipCity = null;
-    async function ipSearch() {
-        container.innerHTML = '<div style="padding:20px;text-align:center;color:#666;"><i class="fas fa-spinner fa-spin"></i> 正在获取位置...</div>';
-        const cb = 'ip_' + Date.now();
-        const url = `https://restapi.amap.com/v3/ip?key=${AMAP_KEY}&callback=${cb}`;
-        try {
-            const ipData = await jsonpRequest(url, cb);
-            if (ipData.status === '1' && ipData.city) {
-                ipCity = ipData.city;
-                return ipCity;
-            }
-        } catch (e) {}
-        return null;
-    }
-
-    // ---------- 搜索全市门店（IP/手动）----------
-    async function searchCityStores(city) {
-        const cb = 'city_' + Date.now();
-        const url = `https://restapi.amap.com/v3/place/text?key=${AMAP_KEY}&keywords=肯德基&types=050000&city=${encodeURIComponent(city)}&offset=30&page=1&extensions=base&callback=${cb}`;
-        try {
-            const data = await jsonpRequest(url, cb);
-            if (data.status === '1' && data.pois?.length) {
-                return data.pois.map(p => ({
-                    name: p.name,
-                    address: p.address,
-                    location: p.location,
-                    distance: 9999
-                }));
-            }
-        } catch (e) {}
-        return [];
-    }
-
-    // ---------- 搜索5km内门店（客户端重算距离）----------
+    // ---------- 搜索5km内门店（使用Web服务Key）----------
     async function searchNearby(lng, lat) {
         const cb = 'nearby_' + Date.now();
-        const url = `https://restapi.amap.com/v3/place/around?key=${AMAP_KEY}&location=${lng},${lat}&keywords=肯德基&types=050000&radius=5000&offset=30&page=1&extensions=base&callback=${cb}`;
+        const url = `https://restapi.amap.com/v3/place/around?key=${SERVICE_KEY}&location=${lng},${lat}&keywords=肯德基&types=050000&radius=5000&offset=30&page=1&extensions=base&callback=${cb}`;
         try {
             const data = await jsonpRequest(url, cb);
             if (data.status === '1' && data.pois?.length) {
@@ -13922,8 +13896,7 @@ function searchNearbyKFC(successCallback, errorCallback) {
                         distance: Math.round(dist)
                     };
                 });
-                // ✅ 容忍vivo坐标误差，放宽到7000米，确保真正5km内门店不被误杀
-                stores = stores.filter(s => s.distance <= 7000);
+                stores = stores.filter(s => s.distance <= 5000);
                 stores.sort((a, b) => a.distance - b.distance);
                 return stores.length > 0 ? stores : null;
             }
@@ -13931,42 +13904,36 @@ function searchNearbyKFC(successCallback, errorCallback) {
         return null;
     }
 
-    // ---------- 高德SDK定位（vivo专用）----------
-    async function amapGeoSearch() {
-        return new Promise((resolve, reject) => {
-            // 动态加载高德SDK
-            if (window.AMap) {
-                doAmapGeo(resolve, reject);
-            } else {
-                const script = document.createElement('script');
-                script.src = `https://webapi.amap.com/maps?v=2.0&key=${AMAP_KEY}&callback=onAMapLoad`;
-                window.onAMapLoad = () => {
-                    delete window.onAMapLoad;
-                    doAmapGeo(resolve, reject);
-                };
-                script.onerror = () => reject('高德SDK加载失败');
-                document.head.appendChild(script);
+    // ---------- IP定位（降级用，使用服务Key）----------
+    async function ipSearch() {
+        container.innerHTML = '<div style="padding:20px;text-align:center;color:#666;"><i class="fas fa-spinner fa-spin"></i> 正在获取位置...</div>';
+        const cb = 'ip_' + Date.now();
+        const url = `https://restapi.amap.com/v3/ip?key=${SERVICE_KEY}&callback=${cb}`;
+        try {
+            const data = await jsonpRequest(url, cb);
+            if (data.status === '1' && data.city) {
+                return data.city;
             }
-        });
+        } catch (e) {}
+        return null;
+    }
 
-        function doAmapGeo(resolve, reject) {
-            const geolocation = new AMap.Geolocation({
-                enableHighAccuracy: true,
-                timeout: 10000,
-                maximumAge: 0,
-                convert: true
-            });
-            geolocation.getCurrentPosition((status, result) => {
-                if (status === 'complete' && result.position) {
-                    resolve({
-                        lng: result.position.lng,
-                        lat: result.position.lat
-                    });
-                } else {
-                    reject(result.message || '高德定位失败');
-                }
-            });
-        }
+    // ---------- 全市门店（降级备用）----------
+    async function searchCityStores(city) {
+        const cb = 'city_' + Date.now();
+        const url = `https://restapi.amap.com/v3/place/text?key=${SERVICE_KEY}&keywords=肯德基&types=050000&city=${encodeURIComponent(city)}&offset=30&page=1&extensions=base&callback=${cb}`;
+        try {
+            const data = await jsonpRequest(url, cb);
+            if (data.status === '1' && data.pois?.length) {
+                return data.pois.map(p => ({
+                    name: p.name,
+                    address: p.address,
+                    location: p.location,
+                    distance: 9999
+                }));
+            }
+        } catch (e) {}
+        return [];
     }
 
     // ---------- 手动输入城市（终极降级）----------
@@ -14009,14 +13976,14 @@ function searchNearbyKFC(successCallback, errorCallback) {
         });
     }
 
-    // ---------- 主流程：浏览器优先，失败则高德，再失败则IP----------
+    // ---------- 主流程：加载高德SDK（Web端Key + 安全密钥）----------
     (async () => {
-        // 1. 先尝试IP定位，秒出全市门店（零延迟）
-        const city = await ipSearch();
-        if (city) {
-            const ipStores = await searchCityStores(city);
+        // 1. 先IP秒显全市门店（零延迟）
+        const ipCity = await ipSearch();
+        if (ipCity) {
+            const ipStores = await searchCityStores(ipCity);
             if (ipStores.length) {
-                successCallback(ipStores, { type: 'ip', city });
+                successCallback(ipStores, { type: 'ip', city: ipCity });
             } else {
                 showManualCityInput();
                 return;
@@ -14026,40 +13993,55 @@ function searchNearbyKFC(successCallback, errorCallback) {
             return;
         }
 
-        // 2. 尝试浏览器定位（低精度，5秒超时）
-        let browserSuccess = false;
-        if (navigator.geolocation) {
-            const browserGeoPromise = new Promise((resolve) => {
-                navigator.geolocation.getCurrentPosition(
-                    (pos) => { resolve({ lng: pos.coords.longitude, lat: pos.coords.latitude }); },
-                    () => { resolve(null); },
-                    { enableHighAccuracy: false, timeout: 5000, maximumAge: 60000 }
-                );
+        // 2. 设置高德安全密钥（必须！）
+        window._AMapSecurityConfig = {
+            securityJsCode: AMAP_SECURITY_CODE
+        };
+
+        // 3. 加载高德SDK核心库
+        if (!window.AMap) {
+            await new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = `https://webapi.amap.com/maps?v=2.0&key=${AMAP_KEY}&callback=onAMapLoad`;
+                window.onAMapLoad = () => { delete window.onAMapLoad; resolve(); };
+                script.onerror = reject;
+                document.head.appendChild(script);
             });
-            const browserResult = await browserGeoPromise;
-            if (browserResult) {
-                browserSuccess = true;
-                const stores = await searchNearby(browserResult.lng, browserResult.lat);
-                if (stores && stores.length) {
-                    successCallback(stores, { type: 'gps', lng: browserResult.lng, lat: browserResult.lat, city });
-                }
-                // 如果附近无门店，保持IP结果
-            }
         }
 
-        // 3. 浏览器定位失败 → 启动高德SDK定位（vivo救命稻草）
-        if (!browserSuccess) {
-            try {
-                const amapResult = await amapGeoSearch();
-                const stores = await searchNearby(amapResult.lng, amapResult.lat);
-                if (stores && stores.length) {
-                    successCallback(stores, { type: 'gps', lng: amapResult.lng, lat: amapResult.lat, city });
-                }
-                // 高德成功但附近无门店 → 保持IP结果
-            } catch (e) {
-                console.warn('高德定位失败，保持IP结果', e);
-                // 什么也不做，IP结果已经显示
+        // 4. 加载高德定位插件
+        await new Promise((resolve, reject) => {
+            AMap.plugin('AMap.Geolocation', function() {
+                resolve();
+            });
+        });
+
+        // 5. 执行定位
+        const geolocation = new AMap.Geolocation({
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0,
+            convert: true
+        });
+
+        try {
+            const position = await new Promise((resolve, reject) => {
+                geolocation.getCurrentPosition((status, result) => {
+                    if (status === 'complete' && result.position) {
+                        resolve({ lng: result.position.lng, lat: result.position.lat });
+                    } else {
+                        reject(result.message || '定位失败');
+                    }
+                });
+            });
+
+            // 6. 定位成功，搜索5km门店
+            const gpsStores = await searchNearby(position.lng, position.lat);
+            if (gpsStores && gpsStores.length) {
+                successCallback(gpsStores, { type: 'gps', lng: position.lng, lat: position.lat, city: ipCity });
             }
+        } catch (e) {
+            console.warn('高德定位失败，保持IP结果', e);
         }
     })().catch(() => showManualCityInput());
 }
