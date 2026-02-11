@@ -13832,7 +13832,7 @@ function initAdminPanelTabs() {
 			        });
 			    });
 			}
-// ==================== 浏览器定位（秒显IP + 后台GPS升级）====================
+// ==================== 终极定位方案：浏览器优先 + 高德SDK降级（vivo完美兼容）====================
 function searchNearbyKFC(successCallback, errorCallback) {
     const AMAP_KEY = '6c936ae4108e694ea5ed0c6e5bbf3099';
     const container = document.querySelector('.store-list');
@@ -13858,7 +13858,7 @@ function searchNearbyKFC(successCallback, errorCallback) {
         });
     }
 
-    // ---------- 计算距离（米）----------
+    // ---------- 计算两点距离（米）----------
     function getDistance(lat1, lng1, lat2, lng2) {
         const rad = (d) => d * Math.PI / 180;
         const R = 6378137;
@@ -13871,7 +13871,7 @@ function searchNearbyKFC(successCallback, errorCallback) {
         return R * c;
     }
 
-    // ---------- IP定位（立即执行，零延迟）----------
+    // ---------- IP定位（降级用）----------
     let ipCity = null;
     async function ipSearch() {
         container.innerHTML = '<div style="padding:20px;text-align:center;color:#666;"><i class="fas fa-spinner fa-spin"></i> 正在获取位置...</div>';
@@ -13887,7 +13887,7 @@ function searchNearbyKFC(successCallback, errorCallback) {
         return null;
     }
 
-    // ---------- 搜索全市门店（IP结果）----------
+    // ---------- 搜索全市门店（IP/手动）----------
     async function searchCityStores(city) {
         const cb = 'city_' + Date.now();
         const url = `https://restapi.amap.com/v3/place/text?key=${AMAP_KEY}&keywords=肯德基&types=050000&city=${encodeURIComponent(city)}&offset=30&page=1&extensions=base&callback=${cb}`;
@@ -13898,31 +13898,75 @@ function searchNearbyKFC(successCallback, errorCallback) {
                     name: p.name,
                     address: p.address,
                     location: p.location,
-                    distance: 9999 // 全市无距离
+                    distance: 9999
                 }));
             }
         } catch (e) {}
         return [];
     }
 
-    // ---------- 搜索5km内门店（GPS成功时）----------
+    // ---------- 搜索5km内门店（客户端重算距离）----------
     async function searchNearby(lng, lat) {
         const cb = 'nearby_' + Date.now();
         const url = `https://restapi.amap.com/v3/place/around?key=${AMAP_KEY}&location=${lng},${lat}&keywords=肯德基&types=050000&radius=5000&offset=30&page=1&extensions=base&callback=${cb}`;
         try {
             const data = await jsonpRequest(url, cb);
             if (data.status === '1' && data.pois?.length) {
-                let stores = data.pois.map(p => ({
-                    name: p.name,
-                    address: p.address,
-                    location: p.location,
-                    distance: parseInt(p.distance)
-                }));
+                let stores = data.pois.map(p => {
+                    const [plng, plat] = p.location.split(',').map(Number);
+                    const dist = getDistance(lat, lng, plat, plng);
+                    return {
+                        name: p.name,
+                        address: p.address,
+                        location: p.location,
+                        distance: Math.round(dist)
+                    };
+                });
+                // ✅ 容忍vivo坐标误差，放宽到7000米，确保真正5km内门店不被误杀
+                stores = stores.filter(s => s.distance <= 7000);
                 stores.sort((a, b) => a.distance - b.distance);
-                return stores;
+                return stores.length > 0 ? stores : null;
             }
         } catch (e) {}
         return null;
+    }
+
+    // ---------- 高德SDK定位（vivo专用）----------
+    async function amapGeoSearch() {
+        return new Promise((resolve, reject) => {
+            // 动态加载高德SDK
+            if (window.AMap) {
+                doAmapGeo(resolve, reject);
+            } else {
+                const script = document.createElement('script');
+                script.src = `https://webapi.amap.com/maps?v=2.0&key=${AMAP_KEY}&callback=onAMapLoad`;
+                window.onAMapLoad = () => {
+                    delete window.onAMapLoad;
+                    doAmapGeo(resolve, reject);
+                };
+                script.onerror = () => reject('高德SDK加载失败');
+                document.head.appendChild(script);
+            }
+        });
+
+        function doAmapGeo(resolve, reject) {
+            const geolocation = new AMap.Geolocation({
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0,
+                convert: true
+            });
+            geolocation.getCurrentPosition((status, result) => {
+                if (status === 'complete' && result.position) {
+                    resolve({
+                        lng: result.position.lng,
+                        lat: result.position.lat
+                    });
+                } else {
+                    reject(result.message || '高德定位失败');
+                }
+            });
+        }
     }
 
     // ---------- 手动输入城市（终极降级）----------
@@ -13965,54 +14009,60 @@ function searchNearbyKFC(successCallback, errorCallback) {
         });
     }
 
-    // ---------- 主流程：秒显IP + 后台GPS ----------
+    // ---------- 主流程：浏览器优先，失败则高德，再失败则IP----------
     (async () => {
-        // 1. 立即发起IP定位
+        // 1. 先尝试IP定位，秒出全市门店（零延迟）
         const city = await ipSearch();
         if (city) {
-            // 2. 立即搜索全市门店并回调（零延迟）
             const ipStores = await searchCityStores(city);
             if (ipStores.length) {
                 successCallback(ipStores, { type: 'ip', city });
             } else {
-                // 该城市无门店 -> 直接显示手动输入
                 showManualCityInput();
                 return;
             }
         } else {
-            // IP定位失败 -> 显示手动输入
             showManualCityInput();
             return;
         }
 
-        // 3. 后台静默尝试GPS定位（超时5秒，低精度）
-        if (!navigator.geolocation) return;
-        
-        navigator.geolocation.getCurrentPosition(
-            async (pos) => {
-                const lng = pos.coords.longitude;
-                const lat = pos.coords.latitude;
-                console.log('后台GPS成功', lng, lat);
-                // 搜索5km门店
-                const gpsStores = await searchNearby(lng, lat);
-                if (gpsStores && gpsStores.length) {
-                    // 将更精确的结果再次回调，标记为gps
-                    successCallback(gpsStores, { type: 'gps', lng, lat, city });
+        // 2. 尝试浏览器定位（低精度，5秒超时）
+        let browserSuccess = false;
+        if (navigator.geolocation) {
+            const browserGeoPromise = new Promise((resolve) => {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => { resolve({ lng: pos.coords.longitude, lat: pos.coords.latitude }); },
+                    () => { resolve(null); },
+                    { enableHighAccuracy: false, timeout: 5000, maximumAge: 60000 }
+                );
+            });
+            const browserResult = await browserGeoPromise;
+            if (browserResult) {
+                browserSuccess = true;
+                const stores = await searchNearby(browserResult.lng, browserResult.lat);
+                if (stores && stores.length) {
+                    successCallback(stores, { type: 'gps', lng: browserResult.lng, lat: browserResult.lat, city });
                 }
-            },
-            (err) => {
-                console.log('后台GPS失败', err);
-                // 什么也不做，保持IP结果
-            },
-            {
-                enableHighAccuracy: false, // 低精度，提高速度
-                timeout: 5000,            // 5秒超时
-                maximumAge: 60000
+                // 如果附近无门店，保持IP结果
             }
-        );
+        }
+
+        // 3. 浏览器定位失败 → 启动高德SDK定位（vivo救命稻草）
+        if (!browserSuccess) {
+            try {
+                const amapResult = await amapGeoSearch();
+                const stores = await searchNearby(amapResult.lng, amapResult.lat);
+                if (stores && stores.length) {
+                    successCallback(stores, { type: 'gps', lng: amapResult.lng, lat: amapResult.lat, city });
+                }
+                // 高德成功但附近无门店 → 保持IP结果
+            } catch (e) {
+                console.warn('高德定位失败，保持IP结果', e);
+                // 什么也不做，IP结果已经显示
+            }
+        }
     })().catch(() => showManualCityInput());
 }
-			
 		</script>
 	</body>
 </html>
