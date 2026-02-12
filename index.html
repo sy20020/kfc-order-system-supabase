@@ -5396,23 +5396,33 @@
 						return [];
 					}
 				}
-
-				static async checkNewOrdersCountOnly() {
-					const supabase = supabaseClient;
-					if (!supabase) {
-						console.error('Supabase 客户端未初始化');
-						return 0;
-					}
-
-					try {
-						const count = await this.loadNewOrdersCount();
-						return count;
-					} catch (error) {
-						console.error('检查新订单计数失败:', error);
-						return 0;
-					}
-				}
-
+static async checkNewOrdersCountOnly() {
+    if (!supabaseClient) { console.debug('Supabase未就绪，返回0'); return 0; }
+    const supabase = supabaseClient;
+    try {
+        const { data, error } = await supabase
+            .from('counters')
+            .select('count')
+            .eq('type', 'newOrdersCount')
+            .single();
+        if (error) {
+            if (error.code === 'PGRST116') {
+                const { data: newData, error: insertError } = await supabase
+                    .from('counters')
+                    .insert([{ type: 'newOrdersCount', count: 0 }])
+                    .select()
+                    .single();
+                if (insertError) throw insertError;
+                return newData.count || 0;
+            }
+            throw error;
+        }
+        return data.count || 0;
+    } catch (error) {
+        console.error('加载新订单计数失败:', error);
+        return 0;
+    }
+}
 				static async quickSaveOrder(order) {
 					const supabase = supabaseClient;
 					if (!supabase) {
@@ -5511,50 +5521,33 @@
 				}
 
 				static async checkForOrderUpdates(sinceTime, userId) {
-					const supabase = supabaseClient;
-					if (!supabase) {
-						console.error('Supabase 客户端未初始化');
-						return [];
-					}
-
-					try {
-						const {
-							data,
-							error
-						} = await supabase
-							.from('orders')
-							.select('*')
-							.gte('updated_at', new Date(sinceTime).toISOString())
-							.eq('user_id', userId)
-							.order('updated_at', {
-								ascending: false
-							});
-
-						if (error) throw error;
-
-						return data.map(item => ({
-							id: item.id,
-							timestamp: item.timestamp,
-							status: item.status || 'new',
-							cart: item.cart || [],
-							deliveryInfo: item.delivery_info,
-							orderNote: item.order_note || '',
-							deliveryType: item.delivery_type,
-							totalPrice: item.total_price,
-							hasScreenshot: item.has_screenshot || false,
-							screenshotData: item.screenshot_data,
-							feedbackScreenshotData: item.feedback_screenshot_data || null,
-							userId: item.user_id,
-							createdAt: item.created_at ? new Date(item.created_at).getTime() : Date.now(),
-							updatedAt: item.updated_at ? new Date(item.updated_at).getTime() : Date.now(),
-							objectId: item.id
-						}));
-					} catch (error) {
-						console.error('检查订单更新失败:', error);
-						return [];
-					}
+				    if (!supabaseClient) { console.debug('Supabase未就绪，返回[]'); return []; }
+				    const supabase = supabaseClient;
+				    try {
+				        const { data, error } = await supabase
+				            .from('orders')
+				            .select('*')
+				            .gte('updated_at', new Date(sinceTime).toISOString())
+				            .eq('user_id', userId)
+				            .order('updated_at', { ascending: false });
+				        if (error) throw error;
+				        return data.map(item => ({
+				            id: item.id, timestamp: item.timestamp, status: item.status || 'new',
+				            cart: item.cart || [], deliveryInfo: item.delivery_info,
+				            orderNote: item.order_note || '', deliveryType: item.delivery_type,
+				            totalPrice: item.total_price, hasScreenshot: item.has_screenshot || false,
+				            screenshotData: item.screenshot_data,
+				            feedbackScreenshotData: item.feedback_screenshot_data || null,
+				            userId: item.user_id, shareCode: item.share_code || null,
+				            createdAt: item.created_at ? new Date(item.created_at).getTime() : Date.now(),
+				            updatedAt: item.updated_at ? new Date(item.updated_at).getTime() : Date.now(),
+				            objectId: item.id
+				        }));
+				    } catch (error) {
+				        console.error('检查订单更新失败:', error);
+				        return [];
+				    }
 				}
-
 				static async clearAllOrders() {
 					const supabase = supabaseClient;
 					if (!supabase) {
@@ -6706,60 +6699,46 @@ function hideAllPagesAndContent() {
     }
 }
 
-
-			// ==================== 全局轮询函数 ====================
-			function startGlobalPolling() {
-				if (globalPollingInterval) {
-					clearInterval(globalPollingInterval);
-				}
-
-				globalPollingInterval = setInterval(async () => {
-					try {
-						const newCount = await SupabaseData.checkNewOrdersCountOnly();
-						if (newCount !== newOrdersCount) {
-							newOrdersCount = newCount;
-							updateOrderBadge();
-
-							showRealtimeIndicator('检测到新订单！');
-
-							console.log('全局轮询检测到新订单，数量：', newOrdersCount);
-
-							if (isAdminPanelOpen) {
-								const activeFilterBtn = document.querySelector('.filter-btn.active');
-								const activeFilter = activeFilterBtn ? activeFilterBtn.dataset.filter : 'all';
-								await renderOrders(activeFilter);
-							}
-						}
-
-						if (document.getElementById('myOrdersPage').classList.contains('active')) {
-							const updatedOrders = await SupabaseData.checkForOrderUpdates(lastUserOrderUpdateTime - 3000, currentUserId);
-							if (updatedOrders.length > 0) {
-								lastUserOrderUpdateTime = Date.now();
-
-								updatedOrders.forEach(updatedOrder => {
-									const existingIndex = orders.findIndex(o => o.id === updatedOrder.id);
-									if (existingIndex !== -1) {
-										orders[existingIndex].status = updatedOrder.status;
-										orders[existingIndex].feedbackScreenshotData = updatedOrder.feedbackScreenshotData;
-										orders[existingIndex].updatedAt = updatedOrder.updatedAt;
-									}
-								});
-
-								showRealtimeIndicator(`您的订单有更新`);
-
-								const activeFilterTab = document.querySelector('.order-filter-tab.active');
-								const activeFilter = activeFilterTab ? activeFilterTab.dataset.orderFilter : 'all';
-								renderUserOrders(activeFilter);
-							}
-						}
-
-						lastGlobalCheckTime = Date.now();
-					} catch (error) {
-						console.warn('全局轮询检查新订单失败:', error);
-					}
-				}, 3000);
-			}
-
+function startGlobalPolling() {
+    if (globalPollingInterval) clearInterval(globalPollingInterval);
+    globalPollingInterval = setInterval(async () => {
+        if (!supabaseClient) return;
+        try {
+            const newCount = await SupabaseData.checkNewOrdersCountOnly();
+            if (newCount !== newOrdersCount) {
+                newOrdersCount = newCount;
+                updateOrderBadge();
+                showRealtimeIndicator('检测到新订单！');
+                if (isAdminPanelOpen) {
+                    const activeFilterBtn = document.querySelector('.filter-btn.active');
+                    const activeFilter = activeFilterBtn ? activeFilterBtn.dataset.filter : 'all';
+                    await renderOrders(activeFilter);
+                }
+            }
+            if (document.getElementById('myOrdersPage').classList.contains('active')) {
+                const updatedOrders = await SupabaseData.checkForOrderUpdates(lastUserOrderUpdateTime - 3000, currentUserId);
+                if (updatedOrders.length > 0) {
+                    lastUserOrderUpdateTime = Date.now();
+                    updatedOrders.forEach(updatedOrder => {
+                        const idx = orders.findIndex(o => o.id === updatedOrder.id);
+                        if (idx !== -1) {
+                            orders[idx].status = updatedOrder.status;
+                            orders[idx].feedbackScreenshotData = updatedOrder.feedbackScreenshotData;
+                            orders[idx].updatedAt = updatedOrder.updatedAt;
+                        }
+                    });
+                    showRealtimeIndicator('您的订单有更新');
+                    const activeTab = document.querySelector('.order-filter-tab.active');
+                    const filter = activeTab ? activeTab.dataset.orderFilter : 'all';
+                    renderUserOrders(filter);
+                }
+            }
+            lastGlobalCheckTime = Date.now();
+        } catch (error) {
+            console.warn('轮询小问题，已忽略:', error);
+        }
+    }, 6000);
+}
 			function stopGlobalPolling() {
 				if (globalPollingInterval) {
 					clearInterval(globalPollingInterval);
@@ -7640,141 +7619,72 @@ function showMealDetail(mealId) {
 			}
 			// 修改：在header按钮的返回首页功能中添加清理
 			// ==================== 修改：DOMContentLoaded事件处理 ====================
+	document.addEventListener('DOMContentLoaded', async function() {
+	    // ---------- 1. 立刻显示界面 ----------
+	    initHomePage(); updateCartDisplay(); initImagePreview();
+	    initPasswordVerification(); initStatusToggle(); initHeaderButtons();
+	    initOrderConfirmModal();
+	    document.getElementById('currentUserIdDisplay').textContent = currentUserId.substring(0,12)+'...';
 	
-			document.addEventListener('DOMContentLoaded', async function() {
-			    try {
-			        showLoading('正在加载数据...');
-			        
-			        // 初始化supabase客户端
-			        if (!supabaseClient && window.supabase) {
-			            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-			            console.log('Supabase 客户端已初始化');
-			        }
-			
-			        if (supabaseClient) {
-			            await SupabaseData.initializeTables();
-			        }
-			
-			        // 先检查是否有分享链接参数
-			        const hasShareLink = checkUrlForShareLink();
-			        
-			        // 加载所有数据
-			        await loadAllDataFromSupabase();
-			        
-			        // 关键修复：数据加载后，如果有分享链接，验证并跳转
-			        if (hasShareLink && currentShareCode) {
-			            await validateShareLink(currentShareCode);
-			        } else if (!hasShareLink) {
-			            // 如果没有分享链接，再检查套餐参数
-			            checkUrlForMeal();
-			        }
-			
-			        // 设置hashchange事件监听
-			        window.addEventListener('hashchange', function() {
-			            // 先检查分享链接
-			            const hasNewShareLink = checkUrlForShareLink();
-			            if (hasNewShareLink && currentShareCode) {
-			                // 数据已经加载，可以直接验证
-			                validateShareLink(currentShareCode);
-			            } else if (!hasNewShareLink) {
-			                checkUrlForMeal();
-			            }
-			        });
-			
-			        // 初始化页面各部分
-			        initHomePage();
-			        initAdminPanel();
-					initAdminPanelTabs();
-			        initMealManagement();
-			        initNewMealManagement();
-			        updateCartDisplay();
-			        updateOrderBadge();
-			        initImagePreview();
-			        initPasswordVerification();
-			        initStatusToggle();
-			        initMyOrdersPage();
-			        initHeaderButtons();
-			        initSearchFunction();
-			        initOrderConfirmModal();
-			        
-			        // 加载所有数据后，初始化分享链接管理
-			        initShareLinkManagement();
-			
-			        document.getElementById('currentUserIdDisplay').textContent = currentUserId.substring(0, 12) + '...';
-			
-			        // 检查其他URL参数（如订单ID）
-			        checkUrlParams();
-			
-			        // 添加窗口大小变化监听器，处理移动端按钮显示
-			        window.addEventListener('resize', function() {
-			            const isMobile = window.innerWidth <= 768;
-			            const isFromShareLink = currentShareLink !== null || window.location.hash.includes('share=');
-			            const isOnMealDetail = document.getElementById('mealDetailPage').classList.contains('active');
-			            
-			            if (isMobile && isFromShareLink && isOnMealDetail) {
-			                // 隐藏按钮
-			                const backBtn = document.querySelector('.back-btn');
-			                if (backBtn) {
-			                    backBtn.style.display = 'none';
-			                }
-			                
-			                const adminBtn = document.getElementById('adminBtn');
-			                if (adminBtn) {
-			                    adminBtn.style.display = 'none';
-			                }
-			            } else if (isMobile && !isFromShareLink && isOnMealDetail) {
-			                // 显示按钮
-			                const backBtn = document.querySelector('.back-btn');
-			                if (backBtn) {
-			                    backBtn.style.display = 'block';
-			                }
-			                
-			                const adminBtn = document.getElementById('adminBtn');
-			                if (adminBtn) {
-			                    adminBtn.style.display = 'block';
-			                }
-			            }
-			        });
-			
-			        showNotification('页面加载完成', 'success');
-			        hideLoading();
-			
-			        console.log('页面初始化完成，数据已从Supabase加载');
-			
-			        startGlobalPolling();
-			    } catch (error) {
-			        console.error('页面初始化失败:', error);
-			        showNotification('页面初始化失败，使用本地缓存数据', 'error');
-			        hideLoading();
-			
-			        loadFromLocalCache();
-			        
-			        // 初始化页面各部分
-			        initHomePage();
-			        initAdminPanel();
-			        initMealManagement();
-			        
-			        updateCartDisplay();
-			        updateOrderBadge();
-			        initImagePreview();
-			        initPasswordVerification();
-			        initStatusToggle();
-			        initMyOrdersPage();
-			        initHeaderButtons();
-			        initSearchFunction();
-			        initOrderConfirmModal();
-			        
-			        // 检查分享链接
-			        const hasShareLink = checkUrlForShareLink();
-			        if (hasShareLink && currentShareCode) {
-			            // 使用本地缓存数据验证分享链接
-			            validateShareLinkWithLocalData(currentShareCode);
-			        }
-			
-			        startGlobalPolling();
-			    }
-			});
-
+	    // ---------- 2. 延迟加载数据，不卡白屏 ----------
+	    setTimeout(async () => {
+	        try {
+	            let waitCount = 0;
+	            while (!window.supabase && waitCount < 40) { await new Promise(r=>setTimeout(r,50)); waitCount++; }
+	            if (!supabaseClient && window.supabase) {
+	                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+	            }
+	            await loadAllDataFromSupabase();
+	            updateHomePage(); // 刷新真实数据
+	
+	            // 空闲时初始化重型功能
+	            if ('requestIdleCallback' in window) {
+	                requestIdleCallback(() => {
+	                    initMealManagement(); initNewMealManagement(); initMyOrdersPage();
+	                    initAdminPanel(); initAdminPanelTabs(); initSearchFunction();
+	                }, { timeout: 3000 });
+	                requestIdleCallback(() => initShareLinkManagement(), { timeout: 5000 });
+	            } else {
+	                setTimeout(() => {
+	                    initMealManagement(); initNewMealManagement(); initMyOrdersPage();
+	                    initAdminPanel(); initAdminPanelTabs(); initSearchFunction();
+	                    initShareLinkManagement();
+	                }, 500);
+	            }
+	
+	            const hasShareLink = checkUrlForShareLink();
+	            if (hasShareLink && currentShareCode) await validateShareLink(currentShareCode);
+	            else if (!hasShareLink) checkUrlForMeal();
+	
+	            startGlobalPolling();
+	            showNotification('页面加载完成','success');
+	        } catch (error) {
+	            console.error('数据加载失败，使用缓存', error);
+	            showNotification('部分数据加载失败，使用缓存','error');
+	            loadFromLocalCache(); updateHomePage(); startGlobalPolling();
+	        } finally { hideLoading(); }
+	    }, 50);
+	
+	    window.addEventListener('hashchange', function() {
+	        const hasNewShareLink = checkUrlForShareLink();
+	        if (hasNewShareLink && currentShareCode) validateShareLink(currentShareCode);
+	        else if (!hasNewShareLink) checkUrlForMeal();
+	    });
+	
+	    window.addEventListener('resize', function() {
+	        const isMobile = window.innerWidth <= 768;
+	        const isFromShareLink = currentShareLink !== null || window.location.hash.includes('share=');
+	        const isOnMealDetail = document.getElementById('mealDetailPage').classList.contains('active');
+	        if (isMobile && isFromShareLink && isOnMealDetail) {
+	            const backBtn = document.querySelector('.back-btn'); if(backBtn) backBtn.style.display = 'none';
+	            const adminBtn = document.getElementById('adminBtn'); if(adminBtn) adminBtn.style.display = 'none';
+	        } else if (isMobile && !isFromShareLink && isOnMealDetail) {
+	            const backBtn = document.querySelector('.back-btn'); if(backBtn) backBtn.style.display = 'block';
+	            const adminBtn = document.getElementById('adminBtn'); if(adminBtn) adminBtn.style.display = 'block';
+	        }
+	    });
+	    handleMobileButtonVisibility();
+	});
 			// 新增：初始化分享链接管理
 			function initShareLinkManagement() {
 				// 填充套餐选择下拉框
@@ -9796,136 +9706,99 @@ async function completeOrderSubmission(orderData) {
 				});
 			}
 
-			// ==================== 创建用户订单元素 ====================
 			function createUserOrderElement(order) {
-				const orderElement = document.createElement('div');
-				orderElement.className = 'user-order-item';
-
-				let statusText, statusClass;
-				switch (order.status) {
-					case 'new':
-						statusText = '新订单';
-						statusClass = 'user-status-new';
-						break;
-					case 'processing':
-						statusText = '处理中';
-						statusClass = 'user-status-processing';
-						break;
-					case 'completed':
-						statusText = '已完成';
-						statusClass = 'user-status-completed';
-						break;
-					default:
-						statusText = '新订单';
-						statusClass = 'user-status-new';
-				}
-
-				const deliveryTypeText = order.deliveryType === 'delivery' ? '宅急送' :
-					`到店自提${order.pickupType ? ` (${order.pickupType})` : ''}`;
-
-				let itemsHTML = '';
-				order.cart.forEach((item, index) => {
-					const optionCount = {};
-					item.options.forEach(option => {
-						optionCount[option] = (optionCount[option] || 0) + 1;
-					});
-
-					const optionText = Object.keys(optionCount).map(option => {
-						const count = optionCount[option];
-						return `${option}${count > 1 ? ` ×${count}` : ''}`;
-					}).join(', ');
-
-					itemsHTML +=
-						`<div class="user-order-item-detail">
-                    <div class="user-order-item-name">
-                        <div><strong>${item.name}</strong></div>
-                        <div style="font-size:0.8rem; color:#666;">${optionText}</div>
-                    </div>
-                    <div class="user-order-item-price">¥${item.totalPrice.toFixed(2)}</div>
-                </div>`;
-				});
-
-				const infoLines = order.deliveryInfo.split('\n');
-				let deliveryHTML = '';
-				infoLines.forEach(line => {
-					if (line.trim()) {
-						deliveryHTML += `<p>${line}</p>`;
-					}
-				});
-
-				let screenshotHTML = '';
-				if (order.hasScreenshot && order.screenshotData) {
-					screenshotHTML =
-						`
-                    <div class="screenshot-container">
-                        <p><strong>门店截图：</strong></p>
-                        <img src="${order.screenshotData}" alt="门店截图" class="screenshot-thumbnail" data-order-id="${order.id}">
-                    </div>
-                `;
-				}
-
-				let feedbackTopHTML = '';
-				if (order.feedbackScreenshotData) {
-					feedbackTopHTML =
-						`
-                    <div class="user-order-feedback-container">
-                        <h4><i class="fas fa-check-circle"></i> 订单反馈截图</h4>
-                        <img src="${order.feedbackScreenshotData}" alt="订单反馈截图" class="user-feedback-thumbnail" data-order-id="${order.id}">
-                        <p style="font-size:0.9rem; color:#2e7d32; margin-top: 8px; font-weight: bold; text-align: center;">
-                            <i class="fas fa-info-circle"></i> 商家已上传反馈信息，点击图片可查看大图
-                        </p>
-                    </div>
-                `;
-				}
-
-				orderElement.innerHTML =
-					`
-                <div class="user-order-header">
-                    <div>
-                        <div class="user-order-id">订单号：${order.id}</div>
-                        <div class="user-order-time">${order.timestamp} | ${deliveryTypeText}</div>
-                    </div>
-                    <div class="user-order-status ${statusClass}">${statusText}</div>
-                </div>
-                
-                ${feedbackTopHTML}
-                
-                <div class="user-order-items">
-                    ${itemsHTML}
-                </div>
-                
-                <div class="user-order-total">
-                    总计：¥${order.totalPrice.toFixed(2)}
-                </div>
-                
-                <div class="user-order-info">
-                    ${deliveryHTML}
-                    ${order.orderNote ? `<p><strong>备注：</strong>${order.orderNote}</p>` : ''}
-                    ${screenshotHTML}
-                </div>
-            `;
-
-				if (order.hasScreenshot && order.screenshotData) {
-					const screenshotImg = orderElement.querySelector('.screenshot-thumbnail');
-					if (screenshotImg) {
-						screenshotImg.addEventListener('click', function() {
-							showFullImage(order.screenshotData);
-						});
-					}
-				}
-
-				if (order.feedbackScreenshotData) {
-					const feedbackImg = orderElement.querySelector('.user-feedback-thumbnail');
-					if (feedbackImg) {
-						feedbackImg.addEventListener('click', function() {
-							showFullImage(order.feedbackScreenshotData);
-						});
-					}
-				}
-
-				return orderElement;
+			    const orderElement = document.createElement('div');
+			    orderElement.className = 'user-order-item';
+			
+			    let statusText, statusClass;
+			    switch (order.status) {
+			        case 'new': statusText = '新订单'; statusClass = 'user-status-new'; break;
+			        case 'processing': statusText = '处理中'; statusClass = 'user-status-processing'; break;
+			        case 'completed': statusText = '已完成'; statusClass = 'user-status-completed'; break;
+			        default: statusText = '新订单'; statusClass = 'user-status-new';
+			    }
+			
+			    const deliveryTypeText = order.deliveryType === 'delivery' ? '宅急送' :
+			        `到店自提${order.pickupType ? ` (${order.pickupType})` : ''}`;
+			
+			    let itemsHTML = '';
+			    order.cart.forEach(item => {
+			        const optionCount = {};
+			        item.options.forEach(option => { optionCount[option] = (optionCount[option] || 0) + 1; });
+			        const optionText = Object.keys(optionCount).map(option => {
+			            const count = optionCount[option];
+			            return `${option}${count > 1 ? ` ×${count}` : ''}`;
+			        }).join(', ');
+			
+			        itemsHTML += `<div class="user-order-item-detail">
+			            <div class="user-order-item-name">
+			                <div><strong>${item.name}</strong></div>
+			                <div style="font-size:0.8rem; color:#666;">${optionText}</div>
+			            </div>
+			            <div class="user-order-item-price">¥${item.totalPrice.toFixed(2)}</div>
+			        </div>`;
+			    });
+			
+			    const infoLines = order.deliveryInfo.split('\n');
+			    let deliveryHTML = '';
+			    infoLines.forEach(line => { if (line.trim()) deliveryHTML += `<p>${line}</p>`; });
+			
+			    let screenshotHTML = '';
+			    if (order.hasScreenshot && order.screenshotData) {
+			        screenshotHTML = `<div class="screenshot-container">
+			            <p><strong>门店截图：</strong></p>
+			            <img src="${order.screenshotData}" alt="门店截图" class="screenshot-thumbnail" data-order-id="${order.id}" loading="lazy">
+			        </div>`;
+			    }
+			
+			    let feedbackTopHTML = '';
+			    if (order.feedbackScreenshotData) {
+			        feedbackTopHTML = `<div class="user-order-feedback-container">
+			            <h4><i class="fas fa-check-circle"></i> 订单反馈截图</h4>
+			            <img src="${order.feedbackScreenshotData}" alt="订单反馈截图" class="user-feedback-thumbnail" data-order-id="${order.id}" loading="lazy">
+			            <p style="font-size:0.9rem; color:#2e7d32; margin-top: 8px; font-weight: bold; text-align: center;">
+			                <i class="fas fa-info-circle"></i> 商家已上传反馈信息，点击图片可查看大图
+			            </p>
+			        </div>`;
+			    }
+			
+			    orderElement.innerHTML = `
+			        <div class="user-order-header">
+			            <div>
+			                <div class="user-order-id">订单号：${order.id}</div>
+			                <div class="user-order-time">${order.timestamp} | ${deliveryTypeText}</div>
+			            </div>
+			            <div class="user-order-status ${statusClass}">${statusText}</div>
+			        </div>
+			        ${feedbackTopHTML}
+			        <div class="user-order-items">${itemsHTML}</div>
+			        <div class="user-order-total">总计：¥${order.totalPrice.toFixed(2)}</div>
+			        <div class="user-order-info">
+			            ${deliveryHTML}
+			            ${order.orderNote ? `<p><strong>备注：</strong>${order.orderNote}</p>` : ''}
+			            ${screenshotHTML}
+			        </div>
+			    `;
+			
+			    if (order.hasScreenshot && order.screenshotData) {
+			        const screenshotImg = orderElement.querySelector('.screenshot-thumbnail');
+			        if (screenshotImg) {
+			            screenshotImg.addEventListener('click', function() {
+			                showFullImage(order.screenshotData);
+			            });
+			        }
+			    }
+			    if (order.feedbackScreenshotData) {
+			        const feedbackImg = orderElement.querySelector('.user-feedback-thumbnail');
+			        if (feedbackImg) {
+			            feedbackImg.addEventListener('click', function() {
+			                showFullImage(order.feedbackScreenshotData);
+			            });
+			        }
+			    }
+			
+			    return orderElement;
 			}
-
 			function searchUserOrder(searchTerm) {
 				const myOrdersContainer = document.getElementById('myOrdersContainer');
 				const noUserOrdersMessage = document.getElementById('noUserOrdersMessage');
@@ -10337,203 +10210,152 @@ async function completeOrderSubmission(orderData) {
 				});
 			}
 
-			// ==================== 创建订单元素 ====================
 			function createOrderElement(order) {
-				const orderElement = document.createElement('div');
-				orderElement.className = 'admin-order-item';
-
-				let statusText, statusClass;
-				switch (order.status) {
-					case 'new':
-						statusText = '新订单';
-						statusClass = 'status-new';
-						break;
-					case 'processing':
-						statusText = '处理中';
-						statusClass = 'status-processing';
-						break;
-					case 'completed':
-						statusText = '已完成';
-						statusClass = 'status-completed';
-						break;
-					default:
-						statusText = '新订单';
-						statusClass = 'status-new';
-				}
-
-				const deliveryTypeText = order.deliveryType === 'delivery' ? '宅急送' :
-					`到店自提${order.pickupType ? ` (${order.pickupType})` : ''}`;
-
-				let itemsHTML = '';
-				order.cart.forEach(item => {
-					const optionCount = {};
-					item.options.forEach(option => {
-						optionCount[option] = (optionCount[option] || 0) + 1;
-					});
-
-					const optionText = Object.keys(optionCount).map(option => {
-						const count = optionCount[option];
-						return `${option}${count > 1 ? ` ×${count}` : ''}`;
-					}).join(', ');
-
-					itemsHTML +=
-						`<div class="order-item-detail">
-                    <div><strong>${item.name}</strong> - ¥${item.totalPrice.toFixed(2)}</div>
-                    <div style="font-size:0.8rem; color:#666;">${optionText}</div>
-                </div>`;
-				});
-
-				const infoLines = order.deliveryInfo.split('\n');
-				let deliveryHTML = '';
-				infoLines.forEach(line => {
-					if (line.trim()) {
-						deliveryHTML += `<p>${line}</p>`;
-					}
-				});
-				let shareCodeHTML = '';
-				if (order.shareCode) {
-					shareCodeHTML =
-						`<p><span style="font-size: 20px; font-weight: bold;">分享码：</span><span style="font-size: 20px; font-weight: bold; background-color: green; color: white; padding: 4px 10px; border-radius: 4px; display: inline-block; margin-left: 4px;">${order.shareCode}</span></p>`;
-				}
-				let screenshotHTML = '';
-				if (order.hasScreenshot && order.screenshotData) {
-					screenshotHTML =
-						`
-                    <div class="screenshot-container">
-                        <p><strong>门店截图：</strong></p>
-                        <img src="${order.screenshotData}" alt="门店截图" class="screenshot-thumbnail" data-order-id="${order.id}">
-                    </div>
-                `;
-				}
-
-				let feedbackHTML = '';
-				if (order.feedbackScreenshotData) {
-					feedbackHTML =
-						`
-                    <div class="feedback-screenshot-container">
-                        <h4><i class="fas fa-check-circle"></i> 订单反馈截图（顾客可见）</h4>
-                        <img src="${order.feedbackScreenshotData}" alt="订单反馈截图" class="feedback-thumbnail" data-order-id="${order.id}" style="max-height: 250px; object-fit: contain;">
-                        <p style="font-size:0.9rem; color:#2e7d32; margin-top: 8px; font-weight: bold; text-align: center;">
-                            <i class="fas fa-info-circle"></i> 已上传反馈给顾客，点击图片可查看大图
-                        </p>
-                    </div>
-                `;
-				}
-
-				const userInfo = order.userId ? `<p><strong>用户ID：</strong>${order.userId.substring(0, 12)}...</p>` : '';
-
-				const feedbackUploadHTML =
-					`
-                <div class="feedback-upload-area" id="feedbackUploadArea-${order.id}">
-                    <i class="fas fa-cloud-upload-alt"></i>
-                    <p>点击上传订单反馈截图</p>
-                    <p class="upload-hint">支持 JPG、PNG 格式，上传后顾客可以在"我的订单"页面查看</p>
-                    <input type="file" id="feedbackScreenshot-${order.id}" accept="image/*">
-                </div>
-                <div class="feedback-preview" id="feedbackPreview-${order.id}">
-                    <div class="screenshot-preview-container">
-                        <img id="feedbackPreviewImage-${order.id}" src="" alt="反馈截图预览" style="max-height: 200px; object-fit: contain;">
-                        <div class="image-info" id="feedbackImageInfo-${order.id}"></div>
-                    </div>
-                    <button type="button" class="remove-feedback" id="removeFeedback-${order.id}">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <button class="feedback-btn" id="uploadFeedbackBtn-${order.id}">
-                    <i class="fas fa-upload"></i>
-                    上传订单反馈截图
-                </button>
-            `;
-
-				orderElement.innerHTML =
-					`
-         <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 4px;">
-             <span style="font-size: 1.2rem; font-weight: 700; color: #1a1a1a; letter-spacing: 0.3px;">
-                 订单号：${order.id}
-             </span>
-             ${order.shareCode ? `
-                 <span style="
-                     background: #2e7d32;
-                     color: white;
-                     padding: 4px 14px;
-                     border-radius: 30px;
-                     font-size: 0.8rem;
-                     font-weight: 600;
-                     display: inline-flex;
-                     align-items: center;
-                     gap: 6px;
-                     box-shadow: 0 2px 6px rgba(46,125,50,0.2);
-                     border: 1px solid rgba(255,255,255,0.2);
-                 ">
-                     <i class="fas fa-link" style="font-size: 0.75rem;"></i>
-                     ${order.shareCode}
-                 </span>
-             ` : ''}
-         </div>
-                   
-                  
-               </div>
-                <div class="order-time">${order.timestamp} | ${deliveryTypeText}</div>
-                <div class="order-status ${statusClass}">${statusText}</div>
-                
-                <div class="order-details">
-                    <div class="order-items">
-                        ${itemsHTML}
-                    </div>
-                    
-                    <div class="order-total">
-                        总计：¥${order.totalPrice.toFixed(2)}
-                    </div>
-                </div>
-                
-                <div class="customer-info">
-                    ${deliveryHTML}
-                    ${userInfo}
-                    ${order.orderNote ? `<p><strong>备注：</strong>${order.orderNote}</p>` : ''}
-                    ${screenshotHTML}
-                    ${feedbackHTML}
-					${shareCodeHTML}
-                </div>
-                
-                <div class="form-group" style="margin-top: 12px;">
-                    <label class="form-label">上传订单反馈截图给顾客</label>
-                    ${feedbackUploadHTML}
-                </div>
-                
-                <div style="margin-top: 12px; display: flex; gap: 8px;">
-                    ${order.status === 'new' ? `<button class="filter-btn" style="padding: 5px 10px; font-size: 0.8rem;" data-action="process" data-order-id="${order.id}">标记为处理中</button>` : ''}
-                    ${order.status === 'processing' ? `<button class="filter-btn" style="padding: 5px 10px; font-size: 0.8rem;" data-action="complete" data-order-id="${order.id}">标记为已完成</button>` : ''}
-                    <button class="filter-btn" style="padding: 5px 10px; font-size: 0.8rem; background-color: #f44336; color: white;" data-action="delete" data-order-id="${order.id}">删除订单</button>
-                </div>
-            `;
-
-				orderElement.querySelectorAll('button[data-action]').forEach(btn => {
-					btn.addEventListener('click', function() {
-						const action = this.dataset.action;
-						const orderId = this.dataset.orderId;
-						handleOrderAction(action, orderId);
-					});
-				});
-
-				if (order.hasScreenshot && order.screenshotData) {
-					const screenshotImg = orderElement.querySelector('.screenshot-thumbnail');
-					if (screenshotImg) {
-						screenshotImg.addEventListener('click', function() {
-							showFullImage(order.screenshotData);
-						});
-					}
-				}
-
-				if (order.feedbackScreenshotData) {
-					const feedbackImg = orderElement.querySelector('.feedback-thumbnail');
-					if (feedbackImg) {
-						feedbackImg.addEventListener('click', function() {
-							showFullImage(order.feedbackScreenshotData);
-						});
-					}
-				}
-
-				return orderElement;
+			    const orderElement = document.createElement('div');
+			    orderElement.className = 'admin-order-item';
+			
+			    let statusText, statusClass;
+			    switch (order.status) {
+			        case 'new': statusText = '新订单'; statusClass = 'status-new'; break;
+			        case 'processing': statusText = '处理中'; statusClass = 'status-processing'; break;
+			        case 'completed': statusText = '已完成'; statusClass = 'status-completed'; break;
+			        default: statusText = '新订单'; statusClass = 'status-new';
+			    }
+			
+			    const deliveryTypeText = order.deliveryType === 'delivery' ? '宅急送' :
+			        `到店自提${order.pickupType ? ` (${order.pickupType})` : ''}`;
+			
+			    let itemsHTML = '';
+			    order.cart.forEach(item => {
+			        const optionCount = {};
+			        item.options.forEach(option => { optionCount[option] = (optionCount[option] || 0) + 1; });
+			        const optionText = Object.keys(optionCount).map(option => {
+			            const count = optionCount[option];
+			            return `${option}${count > 1 ? ` ×${count}` : ''}`;
+			        }).join(', ');
+			
+			        itemsHTML += `<div class="order-item-detail">
+			            <div><strong>${item.name}</strong> - ¥${item.totalPrice.toFixed(2)}</div>
+			            <div style="font-size:0.8rem; color:#666;">${optionText}</div>
+			        </div>`;
+			    });
+			
+			    const infoLines = order.deliveryInfo.split('\n');
+			    let deliveryHTML = '';
+			    infoLines.forEach(line => { if (line.trim()) deliveryHTML += `<p>${line}</p>`; });
+			
+			    let shareCodeHTML = '';
+			    if (order.shareCode) {
+			        shareCodeHTML = `<p><span style="font-size: 20px; font-weight: bold;">分享码：</span>
+			            <span style="font-size: 20px; font-weight: bold; background-color: green; color: white; padding: 4px 10px; border-radius: 4px; display: inline-block; margin-left: 4px;">${order.shareCode}</span></p>`;
+			    }
+			
+			    let screenshotHTML = '';
+			    if (order.hasScreenshot && order.screenshotData) {
+			        screenshotHTML = `<div class="screenshot-container">
+			            <p><strong>门店截图：</strong></p>
+			            <img src="${order.screenshotData}" alt="门店截图" class="screenshot-thumbnail" data-order-id="${order.id}" loading="lazy">
+			        </div>`;
+			    }
+			
+			    let feedbackHTML = '';
+			    if (order.feedbackScreenshotData) {
+			        feedbackHTML = `<div class="feedback-screenshot-container">
+			            <h4><i class="fas fa-check-circle"></i> 订单反馈截图（顾客可见）</h4>
+			            <img src="${order.feedbackScreenshotData}" alt="订单反馈截图" class="feedback-thumbnail" data-order-id="${order.id}" style="max-height: 250px; object-fit: contain;" loading="lazy">
+			            <p style="font-size:0.9rem; color:#2e7d32; margin-top: 8px; font-weight: bold; text-align: center;">
+			                <i class="fas fa-info-circle"></i> 已上传反馈给顾客，点击图片可查看大图
+			            </p>
+			        </div>`;
+			    }
+			
+			    const userInfo = order.userId ? `<p><strong>用户ID：</strong>${order.userId.substring(0, 12)}...</p>` : '';
+			
+			    const feedbackUploadHTML = `<div class="feedback-upload-area" id="feedbackUploadArea-${order.id}">
+			        <i class="fas fa-cloud-upload-alt"></i>
+			        <p>点击上传订单反馈截图</p>
+			        <p class="upload-hint">支持 JPG、PNG 格式，上传后顾客可以在"我的订单"页面查看</p>
+			        <input type="file" id="feedbackScreenshot-${order.id}" accept="image/*">
+			    </div>
+			    <div class="feedback-preview" id="feedbackPreview-${order.id}" style="display:none;">
+			        <div class="screenshot-preview-container">
+			            <img id="feedbackPreviewImage-${order.id}" src="" alt="反馈截图预览" style="max-height: 200px; object-fit: contain;" loading="lazy">
+			            <div class="image-info" id="feedbackImageInfo-${order.id}"></div>
+			        </div>
+			        <button type="button" class="remove-feedback" id="removeFeedback-${order.id}">
+			            <i class="fas fa-times"></i>
+			        </button>
+			    </div>
+			    <button class="feedback-btn" id="uploadFeedbackBtn-${order.id}" style="display:none;">
+			        <i class="fas fa-upload"></i> 上传订单反馈截图
+			    </button>`;
+			
+			    orderElement.innerHTML = `
+			        <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 4px;">
+			            <span style="font-size: 1.2rem; font-weight: 700; color: #1a1a1a; letter-spacing: 0.3px;">
+			                订单号：${order.id}
+			            </span>
+			            ${order.shareCode ? `<span style="background: #2e7d32; color: white; padding: 4px 14px; border-radius: 30px; font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 6px rgba(46,125,50,0.2); border: 1px solid rgba(255,255,255,0.2);">
+			                <i class="fas fa-link" style="font-size: 0.75rem;"></i> ${order.shareCode}
+			            </span>` : ''}
+			        </div>
+			        <div class="order-time">${order.timestamp} | ${deliveryTypeText}</div>
+			        <div class="order-status ${statusClass}">${statusText}</div>
+			        
+			        <div class="order-details">
+			            <div class="order-items">${itemsHTML}</div>
+			            <div class="order-total">总计：¥${order.totalPrice.toFixed(2)}</div>
+			        </div>
+			        
+			        <div class="customer-info">
+			            ${deliveryHTML}
+			            ${userInfo}
+			            ${order.orderNote ? `<p><strong>备注：</strong>${order.orderNote}</p>` : ''}
+			            ${screenshotHTML}
+			            ${feedbackHTML}
+			            ${shareCodeHTML}
+			        </div>
+			        
+			        <div class="form-group" style="margin-top: 12px;">
+			            <label class="form-label">上传订单反馈截图给顾客</label>
+			            ${feedbackUploadHTML}
+			        </div>
+			        
+			        <div style="margin-top: 12px; display: flex; gap: 8px;">
+			            ${order.status === 'new' ? `<button class="filter-btn" style="padding: 5px 10px; font-size: 0.8rem;" data-action="process" data-order-id="${order.id}">标记为处理中</button>` : ''}
+			            ${order.status === 'processing' ? `<button class="filter-btn" style="padding: 5px 10px; font-size: 0.8rem;" data-action="complete" data-order-id="${order.id}">标记为已完成</button>` : ''}
+			            <button class="filter-btn" style="padding: 5px 10px; font-size: 0.8rem; background-color: #f44336; color: white;" data-action="delete" data-order-id="${order.id}">删除订单</button>
+			        </div>
+			    `;
+			
+			    // 绑定操作按钮事件
+			    orderElement.querySelectorAll('button[data-action]').forEach(btn => {
+			        btn.addEventListener('click', function() {
+			            const action = this.dataset.action;
+			            const orderId = this.dataset.orderId;
+			            handleOrderAction(action, orderId);
+			        });
+			    });
+			
+			    // 截图点击放大
+			    if (order.hasScreenshot && order.screenshotData) {
+			        const screenshotImg = orderElement.querySelector('.screenshot-thumbnail');
+			        if (screenshotImg) {
+			            screenshotImg.addEventListener('click', function() {
+			                showFullImage(order.screenshotData);
+			            });
+			        }
+			    }
+			    if (order.feedbackScreenshotData) {
+			        const feedbackImg = orderElement.querySelector('.feedback-thumbnail');
+			        if (feedbackImg) {
+			            feedbackImg.addEventListener('click', function() {
+			                showFullImage(order.feedbackScreenshotData);
+			            });
+			        }
+			    }
+			
+			    return orderElement;
 			}
 
 			// ==================== 优化的反馈截图上传功能 ====================
@@ -12840,37 +12662,18 @@ function resetNewMealForm() {
 			    initShareLinkEvents();
 			}
 			
-			// 初始化分享链接事件
 			function initShareLinkEvents() {
-			    // 复制链接按钮
-			    document.querySelectorAll('.copy-link-btn').forEach(btn => {
-			        btn.addEventListener('click', function() {
-			            const linkCode = this.dataset.linkCode;
-			            const shareUrl = `${window.location.origin}${window.location.pathname}#share=${encodeURIComponent(linkCode)}`;
-			            
-			            navigator.clipboard.writeText(shareUrl).then(() => {
-			                showNotification('链接已复制到剪贴板', 'success');
-			            }).catch(() => {
-			                // 降级方案
-			                const tempInput = document.createElement('input');
-			                tempInput.value = shareUrl;
-			                document.body.appendChild(tempInput);
-			                tempInput.select();
-			                document.execCommand('copy');
-			                document.body.removeChild(tempInput);
-			                showNotification('链接已复制到剪贴板', 'success');
-			            });
-			        });
-			    });
-			    
-			    // 启用/禁用按钮
+			    // 复制链接按钮已由 setupShareLinkEventListeners 统一处理，此处不再重复绑定
+			    // 仅保留禁用/启用、删除、开关切换监听器
+			
+			    // 禁用/启用按钮
 			    document.querySelectorAll('.deactivate-link-btn').forEach(btn => {
 			        btn.addEventListener('click', async function() {
 			            const linkId = this.dataset.linkId;
 			            await toggleShareLinkStatus(linkId);
 			        });
 			    });
-			    
+			
 			    // 删除按钮
 			    document.querySelectorAll('.delete-link-btn').forEach(btn => {
 			        btn.addEventListener('click', async function() {
@@ -12880,7 +12683,7 @@ function resetNewMealForm() {
 			            }
 			        });
 			    });
-			    
+			
 			    // 切换开关
 			    document.querySelectorAll('.share-link-toggle').forEach(toggle => {
 			        toggle.addEventListener('change', async function() {
@@ -13730,31 +13533,62 @@ function initAdminPanelTabs() {
 			
 			// ==================== 辅助函数：设置分享链接事件监听器 ====================
 			function setupShareLinkEventListeners() {
-			    // 复制链接按钮
-			    document.querySelectorAll('.copy-link-btn').forEach(btn => {
-			        btn.addEventListener('click', function() {
-			            const url = this.dataset.url;
-			            const code = this.dataset.code;
-			            
-			            // 复制到剪贴板
-			            navigator.clipboard.writeText(url).then(() => {
-			                // 临时修改按钮文本
-			                const originalHTML = this.innerHTML;
-			                this.innerHTML = '<i class="fas fa-check"></i> 已复制';
-			                this.style.backgroundColor = '#4CAF50';
-			                
-			                setTimeout(() => {
-			                    this.innerHTML = originalHTML;
-			                    this.style.backgroundColor = '';
-			                }, 2000);
-			                
-			                showNotification(`已复制分享链接: ${code}`, 'success');
-			            }).catch(err => {
-			                console.error('复制失败:', err);
-			                showNotification('复制失败，请手动复制', 'error');
-			            });
-			        });
-			    });
+			   // 复制链接按钮（已在 setupShareLinkEventListeners 中）
+			   document.querySelectorAll('.copy-link-btn').forEach(btn => {
+			       // 移除可能存在的旧监听器，避免重复绑定
+			       const newBtn = btn.cloneNode(true);
+			       btn.parentNode.replaceChild(newBtn, btn);
+			   });
+			   
+			   document.querySelectorAll('.copy-link-btn').forEach(btn => {
+			       btn.addEventListener('click', function() {
+			           const url = this.dataset.url;
+			           const code = this.dataset.code;
+			           // 优先使用 data-url，若不存在则通过 code 构建
+			           let shareUrl = url;
+			           if (!shareUrl && code) {
+			               shareUrl = `${window.location.origin}${window.location.pathname}#share=${encodeURIComponent(code)}`;
+			           }
+			           if (!shareUrl) {
+			               showNotification('无法获取链接', 'error');
+			               return;
+			           }
+			   
+			           // 尝试现代 Clipboard API
+			           navigator.clipboard.writeText(shareUrl).then(() => {
+			               // 成功反馈
+			               const originalHTML = this.innerHTML;
+			               this.innerHTML = '<i class="fas fa-check"></i> 已复制';
+			               this.style.backgroundColor = '#4CAF50';
+			               setTimeout(() => {
+			                   this.innerHTML = originalHTML;
+			                   this.style.backgroundColor = '';
+			               }, 2000);
+			               showNotification(`已复制分享链接: ${code}`, 'success');
+			           }).catch(() => {
+			               // 降级方案：使用 document.execCommand('copy')
+			               try {
+			                   const tempInput = document.createElement('input');
+			                   tempInput.value = shareUrl;
+			                   document.body.appendChild(tempInput);
+			                   tempInput.select();
+			                   document.execCommand('copy');
+			                   document.body.removeChild(tempInput);
+			   
+			                   const originalHTML = this.innerHTML;
+			                   this.innerHTML = '<i class="fas fa-check"></i> 已复制';
+			                   this.style.backgroundColor = '#4CAF50';
+			                   setTimeout(() => {
+			                       this.innerHTML = originalHTML;
+			                       this.style.backgroundColor = '';
+			                   }, 2000);
+			                   showNotification(`已复制分享链接: ${code}`, 'success');
+			               } catch (e) {
+			                   showNotification('复制失败，请手动复制', 'error');
+			               }
+			           });
+			       });
+			   });
 			    
 			    // 禁用/启用按钮
 			    document.querySelectorAll('.deactivate-link-btn').forEach(btn => {
