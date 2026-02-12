@@ -7426,73 +7426,91 @@ function showMealDetail(mealId) {
 					document.getElementById('viewHomeBtn').style.display = 'flex';
 				}
 			}
-			function showSuccessPopup(orderId) {
-			    const popup = document.createElement('div');
-			    popup.id = 'successPopup';
-			    popup.className = 'success-popup';
-			
-			    popup.innerHTML = `
-			        <div class="success-popup-overlay"></div>
-			        <div class="success-popup-content">
-			            <button class="close-popup-btn">
-			                <i class="fas fa-times"></i>
-			            </button>
-			            
-			            <div class="success-icon">
-			                <i class="fas fa-check-circle"></i>
-			            </div>
-			            
-			            <h2>订单提交成功！</h2>
-			            <p class="success-subtitle">美食正在准备中，稍后即可享用</p>
-			            
-			            <div class="order-info-card">
-			                <div class="order-id-row">
-			                    <span class="label">订单号</span>
-			                    <div class="id-wrapper">
-			                        <span class="order-id">${orderId}</span>
-			                        <button class="copy-btn" onclick="copyOrderId('${orderId}')">
-			                            <i class="fas fa-copy"></i>
-			                        </button>
-			                    </div>
-			                </div>
-			                <div class="order-time-row">
-			                    <i class="fas fa-clock"></i>
-			                    <span>${new Date().toLocaleString('zh-CN', { hour12: false })}</span>
-			                </div>
-			            </div>
-			            
-			            <div class="delivery-tip">
-			                <i class="fas fa-bicycle"></i>
-							<span>堂食预计取餐时间：3-5分钟</span>
-			                <span>宅急送预计送达时间：30-45分钟</span>	
-			            </div>
-			            <span>取餐码/宅急送截图请点击查看订单详情按钮</span>
-			            <button class="view-order-btn" id="viewOrderNow">
-			                <i class="fas fa-clipboard-list"></i> 查看订单详情
-			            </button>
-			            
-			            <div class="footer-note">
-			                <i class="fas fa-heart"></i> 感谢您的信任
-			            </div>
-			        </div>
-			    `;
-			
-			    document.body.appendChild(popup);
-			
-			    // 绑定事件
-			    setTimeout(() => {
-			        const closeBtn = popup.querySelector('.close-popup-btn');
-			        const overlay = popup.querySelector('.success-popup-overlay');
-			        const viewBtn = popup.querySelector('#viewOrderNow');
-			
-			        closeBtn?.addEventListener('click', closeSuccessPopup);
-			        overlay?.addEventListener('click', closeSuccessPopup);
-			        viewBtn?.addEventListener('click', () => {
-			            showMyOrdersPage();  // 👈 改为调用完整的订单页显示函数
-			            closeSuccessPopup();
-			        });
-			    }, 50);
-			}
+		// ==================== 订单成功弹窗（完整修复版）====================
+		function showSuccessPopup(orderId) {
+		    // 防止传入 undefined
+		    if (!orderId) {
+		        console.error('订单号不能为空');
+		        return;
+		    }
+		
+		    const popup = document.createElement('div');
+		    popup.id = 'successPopup';
+		    popup.className = 'success-popup';
+		    popup.innerHTML = `
+		        <div class="success-popup-overlay"></div>
+		        <div class="success-popup-content">
+		            <button class="close-popup-btn"><i class="fas fa-times"></i></button>
+		            <div class="success-icon"><i class="fas fa-check-circle"></i></div>
+		            <h2>订单提交成功！</h2>
+		            <p class="success-subtitle">美食正在准备中，稍后即可享用</p>
+		            <div class="order-info-card">
+		                <div class="order-id-row">
+		                    <span class="label">订单号</span>
+		                    <div class="id-wrapper">
+		                        <span class="order-id">${orderId}</span>
+		                        <button class="copy-btn" onclick="copyOrderId('${orderId}')">
+		                            <i class="fas fa-copy"></i>
+		                        </button>
+		                    </div>
+		                </div>
+		                <div class="order-time-row">
+		                    <i class="fas fa-clock"></i>
+		                    <span>${new Date().toLocaleString('zh-CN', { hour12: false })}</span>
+		                </div>
+		            </div>
+		            <div class="delivery-tip">
+		                <i class="fas fa-bicycle"></i>
+		                <span>堂食预计取餐时间：3-5分钟</span>
+		                <span>宅急送预计送达时间：30-45分钟</span>
+		            </div>
+		            <span>取餐码/宅急送截图请点击查看订单详情按钮</span>
+		            <button class="view-order-btn" id="viewOrderNow">
+		                <i class="fas fa-clipboard-list"></i> 查看订单详情
+		            </button>
+		            <div class="footer-note">
+		                <i class="fas fa-heart"></i> 感谢您的信任
+		            </div>
+		        </div>
+		    `;
+		    document.body.appendChild(popup);
+		
+		    setTimeout(() => {
+		        const closeBtn = popup.querySelector('.close-popup-btn');
+		        const overlay = popup.querySelector('.success-popup-overlay');
+		        const viewBtn = popup.querySelector('#viewOrderNow');
+		
+		        closeBtn?.addEventListener('click', () => {
+		            popup.classList.add('closing');
+		            setTimeout(() => popup.remove(), 300);
+		        });
+		        overlay?.addEventListener('click', () => {
+		            popup.classList.add('closing');
+		            setTimeout(() => popup.remove(), 300);
+		        });
+		        viewBtn?.addEventListener('click', () => {
+		            showMyOrdersPage();
+		            popup.classList.add('closing');
+		            setTimeout(() => popup.remove(), 300);
+		        });
+		    }, 50);
+		}
+		
+		// ==================== 复制订单号 ====================
+		function copyOrderId(orderId) {
+		    navigator.clipboard.writeText(orderId).then(() => {
+		        const btn = document.querySelector('.copy-btn');
+		        if (!btn) return;
+		        const icon = btn.querySelector('i');
+		        const originalClass = icon.className;
+		        icon.className = 'fas fa-check';
+		        btn.style.background = '#4CAF50';
+		        setTimeout(() => {
+		            icon.className = originalClass;
+		            btn.style.background = '';
+		        }, 1500);
+		    });
+		}
 			
 			function closeSuccessPopup() {
 			    const popup = document.getElementById('successPopup');
@@ -9245,46 +9263,53 @@ function showMealDetail(mealId) {
 
 				showOrderConfirm(orderData);
 			}
-		// ==================== 修改：订单提交函数 ====================
+// ==================== 完整修复版：订单提交函数 ====================
 async function completeOrderSubmission(orderData) {
-	// 👇 新增这两行：优先使用弹窗传过来的分享码，如果没有再用全局变量
-	    const shareCode = orderData.shareCode || currentShareCode;
-	    // 保存到全局变量，方便后面使用（可选）
-	    currentShareCode = shareCode;
+    // 👇 优先使用弹窗传过来的分享码，如果没有再用全局变量
+    const shareCode = orderData.shareCode || currentShareCode;
+    currentShareCode = shareCode;
+
     try {
         showLoading('正在提交订单...');
-        
+
+        // ---------- 生成订单号和时间戳（放在最前面，确保有值）----------
+        const orderId = 'KFC' + Date.now().toString().slice(-6);
+        const timestamp = new Date().toLocaleString('zh-CN', {
+            year: 'numeric', month: '2-digit', day: '2-digit',
+            hour: '2-digit', minute: '2-digit', second: '2-digit',
+            hour12: false
+        });
+
         // 获取配送类型
         const deliveryTypeRadio = document.querySelector('input[name="deliveryType"]:checked');
         const deliveryType = deliveryTypeRadio ? deliveryTypeRadio.value : 'pickup';
-        
+
         let deliveryInfo = orderData.deliveryInfo;
         let screenshotData = null;
         let pickupScreenshotData = null;
         let hasScreenshot = false;
-        
-        // 处理宅急送信息
+
+        // ---------- 处理宅急送信息 ----------
         if (deliveryType === 'delivery') {
             // 检查宅急送字段是否存在
             const customerNameElement = document.getElementById('customerName');
             const customerPhoneElement = document.getElementById('customerPhone');
             const deliveryAddressElement = document.getElementById('deliveryAddress');
-            
+
             if (customerNameElement && customerPhoneElement && deliveryAddressElement) {
                 const customerName = customerNameElement.value;
                 const customerPhone = customerPhoneElement.value;
                 const deliveryAddress = deliveryAddressElement.value;
-                
+
                 if (!customerName || !customerPhone || !deliveryAddress) {
                     hideLoading();
                     showNotification('请填写完整的配送信息', 'error');
                     return;
                 }
-                
+
                 deliveryInfo = `收货人：${customerName}\n联系电话：${customerPhone}\n配送地址：${deliveryAddress}`;
             } else {
                 // 如果宅急送字段不存在，可能是通过截图上传模式
-                // 检查是否有截图数据
                 const screenshotUploadArea = document.getElementById('screenshotUploadArea');
                 if (screenshotUploadArea && screenshotUploadArea.dataset.imageData) {
                     screenshotData = screenshotUploadArea.dataset.imageData;
@@ -9297,31 +9322,31 @@ async function completeOrderSubmission(orderData) {
                 }
             }
         }
-        // 处理到店自提信息
+        // ---------- 处理到店自提信息 ----------
         else {
             // 获取自提方式
             const pickupTypeElement = document.querySelector('input[name="pickupType"]:checked');
             const pickupType = pickupTypeElement ? pickupTypeElement.value : '堂食';
-            
+
             // 获取门店信息提供方式
             const pickupMethodElement = document.querySelector('input[name="pickupMethod"]:checked');
             const pickupMethod = pickupMethodElement ? pickupMethodElement.value : 'text';
-            
+
             // 如果是手动填写
             if (pickupMethod === 'text') {
                 const pickupCityElement = document.getElementById('pickupCityInput');
                 const pickupStoreElement = document.getElementById('pickupStoreInput');
-                
+
                 if (pickupCityElement && pickupStoreElement) {
                     const pickupCity = pickupCityElement.value;
                     const pickupStore = pickupStoreElement.value;
-                    
+
                     if (!pickupCity || !pickupStore) {
                         hideLoading();
                         showNotification('请填写完整的自提门店信息', 'error');
                         return;
                     }
-                    
+
                     deliveryInfo = `自提方式：${pickupType}\n自提城市：${pickupCity}\n自提门店：${pickupStore}`;
                 } else {
                     hideLoading();
@@ -9343,30 +9368,16 @@ async function completeOrderSubmission(orderData) {
                 }
             }
         }
-        
-        // 获取订单备注
+
+        // ---------- 获取订单备注 ----------
         const orderNoteElement = document.getElementById('orderNote');
         const orderNote = orderNoteElement ? orderNoteElement.value : '';
-        
-        // 计算总价
+
+        // ---------- 计算总价 ----------
         let totalPrice = 0;
-        cart.forEach(item => {
-            totalPrice += item.totalPrice;
-        });
-        
-        // 生成订单ID
-         const orderId = 'KFC' + Date.now().toString().slice(-6);
-        const timestamp = new Date().toLocaleString('zh-CN', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: false
-        });
-        
-        // 创建订单对象
+        cart.forEach(item => { totalPrice += item.totalPrice; });
+
+        // ---------- 创建订单对象 ----------
         const order = {
             id: orderId,
             timestamp: timestamp,
@@ -9380,122 +9391,101 @@ async function completeOrderSubmission(orderData) {
             screenshotData: screenshotData,
             feedbackScreenshotData: null,
             userId: currentUserId,
-            shareCode: shareCode // 添加分享码
+            shareCode: shareCode
         };
-        
+
         // 如果有自提截图，添加到订单中
         if (pickupScreenshotData) {
             order.hasScreenshot = true;
             order.screenshotData = pickupScreenshotData;
         }
-        
-        // 如果通过分享链接进入，增加使用计数
+
+        // ---------- 如果通过分享链接进入，增加使用计数 ----------
         if (currentShareLink) {
             try {
                 const success = await SupabaseData.incrementShareLinkUse(currentShareCode);
                 if (!success) {
                     showNotification('更新分享链接使用计数失败，但订单已提交', 'warning');
                 }
-                
                 // 更新本地计数
                 currentShareLink.usedCount = (currentShareLink.usedCount || 0) + 1;
-                
+
                 // 检查是否达到最大使用次数
                 const remainingUses = currentShareLink.maxUses - currentShareLink.usedCount;
                 if (remainingUses <= 0) {
-                    // 禁用提交按钮
                     const checkoutBtn = document.querySelector('.checkout-btn');
                     if (checkoutBtn) {
                         checkoutBtn.disabled = true;
                         checkoutBtn.innerHTML = '<i class="fas fa-times"></i> 使用次数已用完';
                     }
-                    
-                    // 显示提示
                     const highlightDiv = document.querySelector('.highlight');
                     if (highlightDiv) {
-                        highlightDiv.innerHTML =
-                            `
-                            <i class="fas fa-exclamation-triangle"></i>
-                            此分享链接使用次数已用完，您已成功提交订单
-                        `;
+                        highlightDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> 此分享链接使用次数已用完，您已成功提交订单`;
                     }
                 }
             } catch (error) {
                 console.error('更新分享链接使用计数失败:', error);
             }
         }
-        
-        // 保存订单
+
+        // ---------- 保存订单 ----------
         try {
-            // 使用快速保存
             const savedOrder = await SupabaseData.quickSaveOrder(order);
-            
-            // 更新本地订单列表
             orders.push(savedOrder);
-            
-            // 如果是新订单，更新新订单计数
+
             if (savedOrder.status === 'new') {
                 newOrdersCount++;
                 await SupabaseData.updateNewOrdersCount(newOrdersCount);
                 updateOrderBadge();
             }
-            
+
             // 清空购物车
             cart = [];
             updateCartDisplay();
-            
+
             hideLoading();
-            showSuccessPopup(orderId); // 调用美化弹窗
-            
-            // 可选：如果需要同时显示通知
+
+            // ✅ 调用成功弹窗，传入订单号
+            showSuccessPopup(orderId);
             showNotification('订单提交成功！', 'success', 3000);
-            
+
             // 显示订单确认信息
             setTimeout(() => {
-                const confirmHTML =
-                    `
-                <div style="text-align: center; padding: 20px; background-color: #e8f5e9; border-radius: 10px; margin: 20px 0;">
-                    <div style="font-size: 48px; color: #4CAF50; margin-bottom: 15px;">
-                        <i class="fas fa-check-circle"></i>
+                const confirmHTML = `
+                    <div style="text-align: center; padding: 20px; background-color: #e8f5e9; border-radius: 10px; margin: 20px 0;">
+                        <div style="font-size: 48px; color: #4CAF50; margin-bottom: 15px;">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <h3 style="color: #2e7d32; margin-bottom: 10px;">订单提交成功！</h3>
+                        <p style="margin-bottom: 8px;"><strong>订单号：</strong>${orderId}</p>
+                        <p style="margin-bottom: 8px;"><strong>提交时间：</strong>${timestamp}</p>
+                        <p style="margin-bottom: 15px;"><strong>订单状态：</strong>已提交，等待处理</p>
+                        ${currentShareLink ? `<div style="background-color: #fff3e0; padding: 10px; border-radius: 6px; margin-bottom: 15px;">
+                            <i class="fas fa-link"></i> <strong>分享链接剩余次数：</strong>${currentShareLink.maxUses - currentShareLink.usedCount} / ${currentShareLink.maxUses}
+                        </div>` : ''}
+                        <div style="margin-top: 20px;">
+                            <button class="header-btn" onclick="showMyOrdersPage()" style="margin: 5px;">
+                                <i class="fas fa-clipboard-list"></i> 查看我的订单
+                            </button>
+                            ${!currentShareLink ? `<button class="header-btn" onclick="showPage('homePage')" style="margin: 5px;">
+                                <i class="fas fa-home"></i> 返回首页
+                            </button>` : ''}
+                        </div>
                     </div>
-                    <h3 style="color: #2e7d32; margin-bottom: 10px;">订单提交成功！</h3>
-                    <p style="margin-bottom: 8px;"><strong>订单号：</strong>${orderId}</p>
-                    <p style="margin-bottom: 8px;"><strong>提交时间：</strong>${timestamp}</p>
-                    <p style="margin-bottom: 15px;"><strong>订单状态：</strong>已提交，等待处理</p>
-                    
-                    ${currentShareLink ? `
-                    <div style="background-color: #fff3e0; padding: 10px; border-radius: 6px; margin-bottom: 15px;">
-                        <i class="fas fa-link"></i> 
-                        <strong>分享链接剩余次数：</strong>${currentShareLink.maxUses - currentShareLink.usedCount} / ${currentShareLink.maxUses}
-                    </div>
-                    ` : ''}
-                    
-                    <div style="margin-top: 20px;">
-                        <button class="header-btn" onclick="showMyOrdersPage()" style="margin: 5px;">
-                            <i class="fas fa-clipboard-list"></i> 查看我的订单
-                        </button>
-                        ${!currentShareLink ? `
-                        <button class="header-btn" onclick="showPage('homePage')" style="margin: 5px;">
-                            <i class="fas fa-home"></i> 返回首页
-                        </button>
-                        ` : ''}
-                    </div>
-                </div>
-            `;
-                
+                `;
                 const mealDetailPage = document.getElementById('mealDetailPage');
                 const mainContent = mealDetailPage.querySelector('.main-content');
                 if (mainContent) {
                     mainContent.innerHTML = confirmHTML;
                 }
             }, 500);
-            
+
         } catch (error) {
             hideLoading();
             console.error('保存订单失败:', error);
             showNotification('订单提交失败：' + error.message, 'error');
         }
-        
+
     } catch (error) {
         hideLoading();
         console.error('订单提交过程出错:', error);
@@ -13883,6 +13873,24 @@ function searchNearbyKFC(successCallback, errorCallback) {
             console.warn('高德定位失败，保持IP结果', e);
         }
     })().catch(() => showManualCityInput());
+}
+// ==================== 移动端按钮显示控制 ====================
+function handleMobileButtonVisibility() {
+    const isMobile = window.innerWidth <= 768;
+    const isFromShareLink = currentShareLink !== null || window.location.hash.includes('share=');
+    const isOnMealDetail = document.getElementById('mealDetailPage').classList.contains('active');
+
+    if (isMobile && isFromShareLink && isOnMealDetail) {
+        const backBtn = document.querySelector('.back-btn');
+        if (backBtn) backBtn.style.display = 'none';
+        const adminBtn = document.getElementById('adminBtn');
+        if (adminBtn) adminBtn.style.display = 'none';
+    } else if (isMobile && !isFromShareLink && isOnMealDetail) {
+        const backBtn = document.querySelector('.back-btn');
+        if (backBtn) backBtn.style.display = 'block';
+        const adminBtn = document.getElementById('adminBtn');
+        if (adminBtn) adminBtn.style.display = 'block';
+    }
 }
 		</script>
 	</body>
