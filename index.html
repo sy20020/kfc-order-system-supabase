@@ -12840,37 +12840,18 @@ function resetNewMealForm() {
 			    initShareLinkEvents();
 			}
 			
-			// 初始化分享链接事件
 			function initShareLinkEvents() {
-			    // 复制链接按钮
-			    document.querySelectorAll('.copy-link-btn').forEach(btn => {
-			        btn.addEventListener('click', function() {
-			            const linkCode = this.dataset.linkCode;
-			            const shareUrl = `${window.location.origin}${window.location.pathname}#share=${encodeURIComponent(linkCode)}`;
-			            
-			            navigator.clipboard.writeText(shareUrl).then(() => {
-			                showNotification('链接已复制到剪贴板', 'success');
-			            }).catch(() => {
-			                // 降级方案
-			                const tempInput = document.createElement('input');
-			                tempInput.value = shareUrl;
-			                document.body.appendChild(tempInput);
-			                tempInput.select();
-			                document.execCommand('copy');
-			                document.body.removeChild(tempInput);
-			                showNotification('链接已复制到剪贴板', 'success');
-			            });
-			        });
-			    });
-			    
-			    // 启用/禁用按钮
+			    // 复制链接按钮已由 setupShareLinkEventListeners 统一处理，此处不再重复绑定
+			    // 仅保留禁用/启用、删除、开关切换监听器
+			
+			    // 禁用/启用按钮
 			    document.querySelectorAll('.deactivate-link-btn').forEach(btn => {
 			        btn.addEventListener('click', async function() {
 			            const linkId = this.dataset.linkId;
 			            await toggleShareLinkStatus(linkId);
 			        });
 			    });
-			    
+			
 			    // 删除按钮
 			    document.querySelectorAll('.delete-link-btn').forEach(btn => {
 			        btn.addEventListener('click', async function() {
@@ -12880,7 +12861,7 @@ function resetNewMealForm() {
 			            }
 			        });
 			    });
-			    
+			
 			    // 切换开关
 			    document.querySelectorAll('.share-link-toggle').forEach(toggle => {
 			        toggle.addEventListener('change', async function() {
@@ -13730,31 +13711,62 @@ function initAdminPanelTabs() {
 			
 			// ==================== 辅助函数：设置分享链接事件监听器 ====================
 			function setupShareLinkEventListeners() {
-			    // 复制链接按钮
-			    document.querySelectorAll('.copy-link-btn').forEach(btn => {
-			        btn.addEventListener('click', function() {
-			            const url = this.dataset.url;
-			            const code = this.dataset.code;
-			            
-			            // 复制到剪贴板
-			            navigator.clipboard.writeText(url).then(() => {
-			                // 临时修改按钮文本
-			                const originalHTML = this.innerHTML;
-			                this.innerHTML = '<i class="fas fa-check"></i> 已复制';
-			                this.style.backgroundColor = '#4CAF50';
-			                
-			                setTimeout(() => {
-			                    this.innerHTML = originalHTML;
-			                    this.style.backgroundColor = '';
-			                }, 2000);
-			                
-			                showNotification(`已复制分享链接: ${code}`, 'success');
-			            }).catch(err => {
-			                console.error('复制失败:', err);
-			                showNotification('复制失败，请手动复制', 'error');
-			            });
-			        });
-			    });
+			   // 复制链接按钮（已在 setupShareLinkEventListeners 中）
+			   document.querySelectorAll('.copy-link-btn').forEach(btn => {
+			       // 移除可能存在的旧监听器，避免重复绑定
+			       const newBtn = btn.cloneNode(true);
+			       btn.parentNode.replaceChild(newBtn, btn);
+			   });
+			   
+			   document.querySelectorAll('.copy-link-btn').forEach(btn => {
+			       btn.addEventListener('click', function() {
+			           const url = this.dataset.url;
+			           const code = this.dataset.code;
+			           // 优先使用 data-url，若不存在则通过 code 构建
+			           let shareUrl = url;
+			           if (!shareUrl && code) {
+			               shareUrl = `${window.location.origin}${window.location.pathname}#share=${encodeURIComponent(code)}`;
+			           }
+			           if (!shareUrl) {
+			               showNotification('无法获取链接', 'error');
+			               return;
+			           }
+			   
+			           // 尝试现代 Clipboard API
+			           navigator.clipboard.writeText(shareUrl).then(() => {
+			               // 成功反馈
+			               const originalHTML = this.innerHTML;
+			               this.innerHTML = '<i class="fas fa-check"></i> 已复制';
+			               this.style.backgroundColor = '#4CAF50';
+			               setTimeout(() => {
+			                   this.innerHTML = originalHTML;
+			                   this.style.backgroundColor = '';
+			               }, 2000);
+			               showNotification(`已复制分享链接: ${code}`, 'success');
+			           }).catch(() => {
+			               // 降级方案：使用 document.execCommand('copy')
+			               try {
+			                   const tempInput = document.createElement('input');
+			                   tempInput.value = shareUrl;
+			                   document.body.appendChild(tempInput);
+			                   tempInput.select();
+			                   document.execCommand('copy');
+			                   document.body.removeChild(tempInput);
+			   
+			                   const originalHTML = this.innerHTML;
+			                   this.innerHTML = '<i class="fas fa-check"></i> 已复制';
+			                   this.style.backgroundColor = '#4CAF50';
+			                   setTimeout(() => {
+			                       this.innerHTML = originalHTML;
+			                       this.style.backgroundColor = '';
+			                   }, 2000);
+			                   showNotification(`已复制分享链接: ${code}`, 'success');
+			               } catch (e) {
+			                   showNotification('复制失败，请手动复制', 'error');
+			               }
+			           });
+			       });
+			   });
 			    
 			    // 禁用/启用按钮
 			    document.querySelectorAll('.deactivate-link-btn').forEach(btn => {
